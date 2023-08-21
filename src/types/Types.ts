@@ -14,5 +14,19 @@ interface UserInfo {
   createTime: number
 }
 
+export enum SessionType {
+  Personal,
+  Group
+}
 
-export type { GlobalResult, UserInfo }
+interface Session {
+  id: number,
+  type: SessionType,
+  unreadCount: number,
+  avatar: string,
+  name: string,
+  lastMessageTime: number,
+  lastContent?: string
+}
+
+export type { GlobalResult, UserInfo, Session }
