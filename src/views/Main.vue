@@ -1,13 +1,16 @@
 <template>
   <el-container class="main">
-    <el-header>
-
-    </el-header>
+    <!-- <el-header>
+    </el-header> -->
     <el-container>
       <el-aside style="width: auto; background-color: var(--nav-bar-background-color);">
         <div
           style="display: flex; height: 100%; flex-direction: column; align-items: center; justify-content: space-between;">
-          <nav-menu></nav-menu>
+          <div>
+            <el-image style="width: 40px;height: 40px;margin: 20px 0; border-radius: 50%;"
+              :src="userStore.userInfo?.avatar" fit="cover" :lazy="true"></el-image>
+            <nav-menu></nav-menu>
+          </div>
           <el-space alignment="stretch" direction="vertical" style="width: 100%; outline: none;">
             <button @click="userStore.logout">登出</button>
             <button @click="isCollapse = !isCollapse">{{ isCollapse ? '展开' : '收起' }}</button>

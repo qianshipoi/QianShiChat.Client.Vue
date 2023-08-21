@@ -76,7 +76,7 @@ const timeFormat = (time?: number) => {
 }
 
 .session-item.selected {
-  background-color: #0099FF;
+  background-color: var(--primary);
   color: white;
 }
 
