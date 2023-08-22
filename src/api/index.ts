@@ -52,7 +52,7 @@ instance.interceptors.response.use(response => {
   const token = response.headers['x-access-token']
   if (token) {
     const userStore = useCurrentUserStore()
-    userStore.token = token;
+    userStore.changeToken(token);
   }
 
   return response.data

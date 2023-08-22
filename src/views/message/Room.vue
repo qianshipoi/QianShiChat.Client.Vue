@@ -13,15 +13,16 @@
         <div id="container">
           <div id="sidebar">
             <el-scrollbar>
-              <div v-for="message in messages" :key="message.id">
-                <el-image style="width: 40px; height: 40px; border-radius: 50%;" :src="message.fromUser?.avatar"
-                  fit="fill" :lazy="true"></el-image>
-                {{ message.content }}
+              <div v-for="message in messages" :key="message.id" style="margin-bottom: 8px;">
+                <ChatMessage :model-value="message" :is-self="isSelf(message.fromId)" />
               </div>
             </el-scrollbar>
           </div>
           <div id="resizer"></div>
           <div id="main">
+            <el-input v-model="messageContent"></el-input>
+            <el-button style="position: absolute; bottom: 20px; right: 20px;" type="primary" size="default" @click="send"
+              :disabled="!messageContent">发送</el-button>
           </div>
         </div>
       </div>
@@ -33,6 +34,9 @@
 import { MoreFilled } from '@element-plus/icons-vue'
 import { useLocalStorage } from '@vueuse/core';
 import { useChatMessage } from "./useChatMessage";
+import ChatMessage from "../../components/ChatMessage/index.vue"
+import { useCurrentUserStore } from '../../store/useCurrentUserStore';
+import { Session } from '../../types/Types';
 const currentSplitPosition = useLocalStorage('message_content_split_position', '72%')
 const MESSAGE_CONTENT_MIN_HEIGHT = 300
 
@@ -64,10 +68,27 @@ onMounted(() => {
   sidebar.style.flexBasis = currentSplitPosition.value;
 })
 
-const { getRoomMessage } = useChatMessage()
-const { loadData, messages } = getRoomMessage(1)
+const props = defineProps<{
+  session: Session
+}>()
 
+const messageContent = ref<string>("")
+
+const { getRoomMessage } = useChatMessage()
+const { loadData, messages, sendText } = getRoomMessage(props.session.id)
 loadData()
+
+const currentUserStore = useCurrentUserStore();
+
+const isSelf = (formId: number): boolean => {
+  return formId === currentUserStore.userInfo?.id
+}
+
+const send = async () => {
+  if (await sendText(messageContent.value)) {
+    messageContent.value = ''
+  }
+}
 
 </script>
 

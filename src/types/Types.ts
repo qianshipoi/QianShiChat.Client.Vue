@@ -16,7 +16,7 @@ interface PagedList<T> {
 }
 
 export enum ChatMessageSendType {
-  Personal,
+  Personal = 1,
   Group
 }
 
@@ -31,6 +31,7 @@ type ChatMessage = {
   id: number
   fromId: number
   toId: number
+  sessionId: string
   sendType: ChatMessageSendType
   messageType: ChatMessageType
   content: string
@@ -46,14 +47,10 @@ interface UserInfo {
   createTime: number
 }
 
-export enum SessionType {
-  Personal,
-  Group
-}
-
 interface Session {
-  id: number,
-  type: SessionType,
+  id: string,
+  toId: number,
+  type: ChatMessageSendType,
   unreadCount: number,
   avatar: string,
   name: string,
@@ -61,4 +58,26 @@ interface Session {
   lastContent?: string
 }
 
-export type { GlobalResult, UserInfo, Session, ChatMessage, PagedList }
+
+interface PrivateChatMessageRequest {
+  toId: number
+  message: string
+  sendType: ChatMessageSendType
+}
+
+interface SendFileMessageRequest {
+  toId: number
+  attachmentId: number
+  sendType: ChatMessageSendType
+}
+
+
+export type {
+  GlobalResult,
+  UserInfo,
+  Session,
+  ChatMessage,
+  PagedList,
+  PrivateChatMessageRequest,
+  SendFileMessageRequest
+}

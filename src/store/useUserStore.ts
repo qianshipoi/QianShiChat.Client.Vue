@@ -18,10 +18,11 @@ export const useUserStore = defineStore("user", () => {
       const result = await getUserById(id);
       if (result.succeeded) {
         user = result.data!
+        users.push(user)
         return user
       }
     } catch (err) {
-
+      console.log(err);
     } finally {
       loading.value = false
     }

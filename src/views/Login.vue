@@ -16,8 +16,8 @@
 <script setup lang='ts'>
 import { ElMessage, FormInstance, FormRules } from 'element-plus';
 import { reactive, ref } from 'vue';
-import { useUserStore } from '../store/useUserStore';
 import { useRoute, useRouter } from "vue-router";
+import { useCurrentUserStore } from '../store/useCurrentUserStore';
 
 interface BaseInfo {
   account: string
@@ -44,7 +44,7 @@ const rules: FormRules<BaseInfo> = {
 }
 
 const formInstance = ref<FormInstance>()
-const userStore = useUserStore();
+const userStore = useCurrentUserStore();
 
 const onSubmit = async () => {
   if (!formInstance.value) return;

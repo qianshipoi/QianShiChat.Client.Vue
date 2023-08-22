@@ -3,15 +3,12 @@
     <div class="sessions">
       <div class="search">
         <el-input v-model="searchText" size="small" placeholder="搜索"></el-input>
-
         <button style="padding: 8px; font-weight: 600;">
           <el-icon>
             <Plus />
           </el-icon>
         </button>
-
       </div>
-
       <ul>
         <li v-for="session in sessions" :key="session.id">
           <SessionItem :model-value="session" @selected="selectedHandle" :is-selected="isSelected(session)" />
@@ -19,7 +16,7 @@
       </ul>
     </div>
     <div class="content">
-      <room></room>
+      <room v-if="currentSelectedSession" :session="currentSelectedSession"></room>
     </div>
   </div>
 </template>

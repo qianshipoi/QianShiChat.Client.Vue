@@ -7,6 +7,8 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    ChatMessage: typeof import('./components/ChatMessage/index.vue')['default']
+    ChatMessageItem: typeof import('./components/ChatMessageItem.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElContainer: typeof import('element-plus/es')['ElContainer']
@@ -20,9 +22,14 @@ declare module 'vue' {
     ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
     ElScrollbar: typeof import('element-plus/es')['ElScrollbar']
     ElSpace: typeof import('element-plus/es')['ElSpace']
+    FileMessage: typeof import('./components/ChatMessage/FileMessage.vue')['default']
+    ImageMessage: typeof import('./components/ChatMessage/ImageMessage.vue')['default']
     NavMenu: typeof import('./components/NavMenu.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SessionItem: typeof import('./components/SessionItem.vue')['default']
+    TextChatMessage: typeof import('./components/TextChatMessage.vue')['default']
+    TextMessage: typeof import('./components/ChatMessage/TextMessage.vue')['default']
+    VideoMessage: typeof import('./components/ChatMessage/VideoMessage.vue')['default']
   }
 }

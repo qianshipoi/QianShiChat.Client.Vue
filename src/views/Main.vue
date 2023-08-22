@@ -28,12 +28,16 @@
 import { storeToRefs } from 'pinia';
 import NavMenu from '../components/NavMenu.vue';
 import { useMenuStore } from '../store/useMenuStore'
-import { useUserStore } from '../store/useUserStore'
+import { useCurrentUserStore } from '../store/useCurrentUserStore';
+import { useChatStore } from '../store/useChatStore';
 
 const menuStore = useMenuStore();
 const { isCollapse } = storeToRefs(menuStore)
 
-const userStore = useUserStore();
+const userStore = useCurrentUserStore();
+const chatStore = useChatStore();
+
+chatStore.start();
 
 </script>
 
