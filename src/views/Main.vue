@@ -48,3 +48,4 @@ const userStore = useUserStore();
   height: 80vh;
 }
 </style>
+../store/useCurrentUserStore

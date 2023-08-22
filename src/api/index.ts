@@ -1,7 +1,7 @@
 import axios from "axios";
 import { ElMessage, ElLoading } from "element-plus";
 import router from "../router";
-import { useUserStore } from "../store/useUserStore";
+import { useCurrentUserStore } from "../store/useCurrentUserStore";
 
 const BASE_URL = import.meta.env.VITE_APP_BASE_URL
 
@@ -38,7 +38,7 @@ const hideLoading = () => {
 instance.interceptors.request.use(config => {
   showLoading();
 
-  const userStore = useUserStore()
+  const userStore = useCurrentUserStore()
   if (userStore.token) {
     config.headers.Authorization = `Bearer ${userStore.token}`;
   }
@@ -51,7 +51,7 @@ instance.interceptors.response.use(response => {
 
   const token = response.headers['x-access-token']
   if (token) {
-    const userStore = useUserStore()
+    const userStore = useCurrentUserStore()
     userStore.token = token;
   }
 

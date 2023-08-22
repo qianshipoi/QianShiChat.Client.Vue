@@ -72,3 +72,4 @@ const onSubmit = async () => {
 
 <style>
 </style>
+../store/useCurrentUserStore

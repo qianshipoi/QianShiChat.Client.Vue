@@ -3,7 +3,7 @@ import {
   createWebHistory,
   RouteRecordRaw
 } from "vue-router";
-import { useUserStore } from "../store/useUserStore";
+import { useCurrentUserStore } from "../store/useCurrentUserStore";
 
 const routes: RouteRecordRaw[] = [
   {
@@ -54,7 +54,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const useStore = useUserStore()
+  const useStore = useCurrentUserStore()
   if (to.meta.authorization && !useStore.isAuthenticated && to.name !== "Login") {
     next(`/login?redirect=${from.path}`)
   }

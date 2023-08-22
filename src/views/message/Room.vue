@@ -12,7 +12,13 @@
       <div id="wrapper">
         <div id="container">
           <div id="sidebar">
-            <p>Sidebar content</p>
+            <el-scrollbar>
+              <div v-for="message in messages" :key="message.id">
+                <el-image style="width: 40px; height: 40px; border-radius: 50%;" :src="message.fromUser?.avatar"
+                  fit="fill" :lazy="true"></el-image>
+                {{ message.content }}
+              </div>
+            </el-scrollbar>
           </div>
           <div id="resizer"></div>
           <div id="main">
@@ -26,6 +32,7 @@
 <script setup lang='ts'>
 import { MoreFilled } from '@element-plus/icons-vue'
 import { useLocalStorage } from '@vueuse/core';
+import { useChatMessage } from "./useChatMessage";
 const currentSplitPosition = useLocalStorage('message_content_split_position', '72%')
 const MESSAGE_CONTENT_MIN_HEIGHT = 300
 
@@ -57,6 +64,10 @@ onMounted(() => {
   sidebar.style.flexBasis = currentSplitPosition.value;
 })
 
+const { getRoomMessage } = useChatMessage()
+const { loadData, messages } = getRoomMessage(1)
+
+loadData()
 
 </script>
 
@@ -140,3 +151,4 @@ header {
   padding: 0;
 }
 </style>
+./useChatMessage.ts
