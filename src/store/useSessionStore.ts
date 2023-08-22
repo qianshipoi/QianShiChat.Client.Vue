@@ -6,7 +6,6 @@ import { ElMessage } from "element-plus";
 import { useChatStore } from "./useChatStore";
 import { useCurrentUserStore } from "./useCurrentUserStore";
 import { useUserStore } from "./useUserStore";
-import { el } from "element-plus/es/locale";
 
 export const useSessionStore = defineStore('session', () => {
   const sessions = useSessionStorage<Session[]>('sessions', [])
