@@ -30,11 +30,9 @@ import { Plus } from '@element-plus/icons-vue'
 
 const sessionStore = useSessionStore();
 const { sessions, } = storeToRefs(sessionStore);
-
 const searchText = ref<string>('')
-
-onMounted(async () => {
-  await sessionStore.loadSesions();
+onMounted(() => {
+  sessionStore.loadSesions();
 })
 
 const currentSelectedSession = ref<Session>()

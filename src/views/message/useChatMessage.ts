@@ -45,7 +45,7 @@ export const useChatMessage = () => {
         if (paged.data?.items) {
           paged.data?.items.forEach(async item => {
             item.fromUser = await userStore.getUser(item.fromId)
-            roomMessage?.messages.push(item)
+            roomMessage?.messages.unshift(item)
           })
         }
       } catch (err) {

@@ -1,72 +1,51 @@
 <template>
   <div class="room">
     <header>
-      <span>张三</span>
+      <span>{{ session.name }}</span>
       <div class="menu">
         <el-icon>
           <MoreFilled />
         </el-icon>
       </div>
     </header>
-    <div style="position: relative; flex: 1;">
-      <div id="wrapper">
-        <div id="container">
-          <div id="sidebar">
-            <el-scrollbar>
+    <div style="flex: 1;">
+      <SplitterPanel storage-key="room-chat-message" @end="moveEnd">
+        <template #start>
+          <el-scrollbar ref="messageListBox">
+            <div ref="messageBox">
               <div v-for="message in messages" :key="message.id" style="margin-bottom: 8px;">
                 <ChatMessage :model-value="message" :is-self="isSelf(message.fromId)" />
               </div>
-            </el-scrollbar>
-          </div>
-          <div id="resizer"></div>
-          <div id="main">
-            <el-input v-model="messageContent"></el-input>
+            </div>
+          </el-scrollbar>
+        </template>
+        <template #end>
+          <div style="position: relative; height: 100%; text-align: left;">
+            <!-- <el-scrollbar class="message-editor-scrollbar">
+              <div class="message-editor" contenteditable>
+                asdsad
+                <img src="http://localhost:5224/Raw/DefaultAvatar/1.jpg">
+              </div>
+            </el-scrollbar> -->
+            <el-input style="height: 100%;" resize="none" type="textarea" v-model="messageContent"></el-input>
             <el-button style="position: absolute; bottom: 20px; right: 20px;" type="primary" size="default" @click="send"
               :disabled="!messageContent">发送</el-button>
           </div>
-        </div>
-      </div>
+        </template>
+      </SplitterPanel>
     </div>
   </div>
 </template>
 
 <script setup lang='ts'>
 import { MoreFilled } from '@element-plus/icons-vue'
-import { useLocalStorage } from '@vueuse/core';
+import { useElementSize } from '@vueuse/core';
 import { useChatMessage } from "./useChatMessage";
 import ChatMessage from "../../components/ChatMessage/index.vue"
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
 import { Session } from '../../types/Types';
-const currentSplitPosition = useLocalStorage('message_content_split_position', '72%')
-const MESSAGE_CONTENT_MIN_HEIGHT = 300
-
-onMounted(() => {
-  const wrapper = document.querySelector("#wrapper") as HTMLElement;
-  const resizer = document.querySelector("#resizer") as HTMLElement;
-  const sidebar = document.querySelector("#sidebar") as HTMLElement;
-
-  const offsetTop = wrapper.getBoundingClientRect().top;
-
-  resizer.addEventListener("mousedown", () => {
-    document.addEventListener("mousemove", resize, false);
-    document.addEventListener("mouseup", () => {
-      document.removeEventListener("mousemove", resize, false);
-    }, false);
-  });
-
-  function resize(e: MouseEvent) {
-    let offset = e.y - offsetTop
-    if (offset < MESSAGE_CONTENT_MIN_HEIGHT) {
-      offset = MESSAGE_CONTENT_MIN_HEIGHT;
-    }
-
-    const size = `${offset}px`;
-    sidebar.style.flexBasis = size;
-    currentSplitPosition.value = size;
-  }
-
-  sidebar.style.flexBasis = currentSplitPosition.value;
-})
+import { ElScrollbar } from 'element-plus';
+import SplitterPanel from '../../components/SplitterPanel.vue';
 
 const props = defineProps<{
   session: Session
@@ -74,9 +53,30 @@ const props = defineProps<{
 
 const messageContent = ref<string>("")
 
+const messageListBox = ref<InstanceType<typeof ElScrollbar> | null>(null)
+const messageBox = ref<HTMLDivElement | null>(null)
+const { height: messageBoxHeight } = useElementSize(messageBox)
+
 const { getRoomMessage } = useChatMessage()
 const { loadData, messages, sendText } = getRoomMessage(props.session.id)
-loadData()
+
+const messageBoxScrollDown = () => {
+  messageListBox.value?.scrollTo({
+    top: messageBoxHeight.value,
+    behavior: "smooth",
+  })
+}
+
+const moveEnd = () => {
+  messageListBox.value?.update()
+}
+
+onMounted(async () => {
+  await loadData()
+  await nextTick(() => {
+    messageBoxScrollDown();
+  })
+})
 
 const currentUserStore = useCurrentUserStore();
 
@@ -87,6 +87,7 @@ const isSelf = (formId: number): boolean => {
 const send = async () => {
   if (await sendText(messageContent.value)) {
     messageContent.value = ''
+    messageBoxScrollDown();
   }
 }
 
@@ -118,58 +119,34 @@ header {
   color: var(--primary);
 }
 
-#wrapper {
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  flex-direction: column;
-  overflow: hidden;
+.message-editor-scrollbar {
   position: absolute;
-  height: 100%;
-  width: 100%;
-  display: flex;
-  margin: 0;
-  padding: 0;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
 }
 
-#container {
-  width: 100%;
-  height: 100%;
-  flex-shrink: 0;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+.message-editor {
+  padding: 1rem;
 }
 
-#sidebar {
-  height: 100%;
-  position: relative;
-  min-height: 0;
+.message-editor:focus {
+  outline: none;
 }
 
-#resizer {
-  flex-basis: 2px;
-  background-color: #E9E9E9;
-  position: relative;
-  z-index: 2;
-  cursor: row-resize;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+.message-editor>img {
+  max-width: 100px;
+  max-height: 60px;
 }
 
-#main {
-  flex-basis: 0;
-  flex-grow: 1;
-  min-height: 140px;
-
-  background: lightblue;
+:deep(.el-textarea__inner) {
   height: 100%;
-  flex-direction: row;
-  position: relative;
-  display: flex;
-  margin: 0;
-  padding: 0;
+}
+
+:deep(.el-textarea__inner),
+:deep(.el-textarea__inner:focus) {
+  box-shadow: none;
+  background-color: transparent;
 }
 </style>
-./useChatMessage.ts

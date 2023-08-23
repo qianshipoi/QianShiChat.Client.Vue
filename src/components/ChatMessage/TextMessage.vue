@@ -15,5 +15,7 @@ defineProps<{
 <style scoped>
 .text-message {
   padding: 8px;
+  text-align: left;
+  white-space: pre-line;
 }
 </style>
