@@ -4,20 +4,40 @@
       <el-image :src="message?.fromUser?.avatar" fit="fill" :lazy="true"></el-image>
     </div>
     <div class="content">
-      <TextMessage :content="message?.content" />
+      <component :is="content" :content="message?.content" />
     </div>
   </div>
 </template>
 
 <script setup lang='ts'>
-import { ChatMessage } from '../../types/Types';
+import { ChatMessage, ChatMessageType } from '../../types/Types';
+import FileMessage from './FileMessage.vue';
+import ImageMessage from './ImageMessage.vue';
 import TextMessage from './TextMessage.vue';
+import VideoMessage from './VideoMessage.vue';
+import NotSupportedMessage from './NotSupportedMessage.vue'
 const message = defineModel<ChatMessage>()
 
 const props = withDefaults(defineProps<{
   isSelf?: boolean
 }>(), {
   isSelf: false
+})
+
+const content = computed(() => {
+  switch (message.value?.messageType) {
+    case ChatMessageType.Text:
+      return TextMessage
+    case ChatMessageType.Image:
+      return ImageMessage
+    case ChatMessageType.Video:
+      return VideoMessage
+    case ChatMessageType.OtherFile:
+      return FileMessage
+    default:
+      return NotSupportedMessage;
+      break;
+  }
 })
 
 </script>
@@ -38,6 +58,7 @@ const props = withDefaults(defineProps<{
 
 .content {
   border-radius: 12px;
+  background-color: white;
   overflow: hidden;
 }
 </style>

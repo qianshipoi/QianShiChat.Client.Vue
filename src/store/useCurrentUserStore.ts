@@ -14,7 +14,7 @@ export const useCurrentUserStore = defineStore('current_user', () => {
   const title = useTitle()
 
   watchEffect(() => {
-    title.value = userInfo.value?.nickName
+    title.value = userInfo.value?.nickName ?? "QianShiChat - Vue"
   })
 
   const login = async (account: string, password: string): Promise<boolean> => {
@@ -36,7 +36,6 @@ export const useCurrentUserStore = defineStore('current_user', () => {
 
   const logout = () => {
     token.value = ''
-    userInfo.value = undefined
     router.push({ name: "Login" })
   }
 

@@ -80,6 +80,7 @@ button:focus-visible {
   padding: 2rem;
   text-align: center;
   min-height: 100vh;
+  height: 100vh;
 }
 
 @media (prefers-color-scheme: light) {

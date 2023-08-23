@@ -13,6 +13,7 @@
     "@element-plus/icons-vue": "^2.1.0",
     "@microsoft/signalr": "^7.0.10",
     "@types/node": "^20.5.1",
+    "@vueuse/components": "^10.3.0",
     "@vueuse/core": "^10.3.0",
     "axios": "^1.4.0",
     "dayjs": "^1.11.9",

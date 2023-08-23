@@ -34,7 +34,7 @@ type ChatMessage = {
   sessionId: string
   sendType: ChatMessageSendType
   messageType: ChatMessageType
-  content: string
+  content: string | Attachment
   createTime: number
   fromUser?: UserInfo
 }
@@ -58,6 +58,16 @@ interface Session {
   lastContent?: string
 }
 
+interface Attachment {
+  id: number
+  name: string,
+  rawPath: string,
+  previewPath?: string,
+  hash: string,
+  contentType: string,
+  size: number
+}
+
 
 interface PrivateChatMessageRequest {
   toId: number
@@ -79,5 +89,6 @@ export type {
   ChatMessage,
   PagedList,
   PrivateChatMessageRequest,
-  SendFileMessageRequest
+  SendFileMessageRequest,
+  Attachment
 }

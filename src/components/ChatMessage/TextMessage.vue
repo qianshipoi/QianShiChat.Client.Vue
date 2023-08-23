@@ -14,7 +14,6 @@ defineProps<{
 
 <style scoped>
 .text-message {
-  background-color: white;
   padding: 8px;
 }
 </style>
