@@ -2,7 +2,7 @@
   <div class="login-input" ref="loginInput" tabindex="-1" @click="focusHandle">
     <span></span>
     <div class="input-box">
-      <input :type="type" ref="input" :value="value" :placeholder="placeholder">
+      <input :type="type" ref="input" v-model="value" :placeholder="placeholder">
     </div>
     <div class="icons">
       <el-icon v-if="showClear" @click="clearHandle">
@@ -26,7 +26,6 @@ const props = withDefaults(defineProps<{
   clearable: false
 })
 
-
 const input = ref<HTMLInputElement | null>(null)
 const loginInput = ref<HTMLElement | null>(null)
 const { focused } = useFocusWithin(loginInput)
@@ -42,7 +41,6 @@ const clearHandle = () => {
 const focusHandle = () => {
   input.value?.focus();
 }
-
 </script>
 
 <style scoped>

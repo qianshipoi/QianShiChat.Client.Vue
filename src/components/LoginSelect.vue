@@ -2,7 +2,7 @@
   <div class="login-select" ref="loginInput" tabindex="-1" @click="focusHandle">
     <span></span>
     <div class="input-box">
-      <input :type="type" ref="input" :value="value" :placeholder="placeholder">
+      <input :type="type" ref="input" v-model="value" :placeholder="placeholder">
     </div>
     <div class="icons">
       <el-icon v-if="showClear" @click="clearHandle">
@@ -17,7 +17,6 @@
     </div>
 
     <Teleport to="body">
-
       <div class="select-option-box" v-if="showOptions" ref="optionsBox">
         <slot />
       </div>
@@ -50,9 +49,9 @@ const { focused } = useFocusWithin(loginInput)
 const { width } = useElementSize(loginInput)
 
 const { height, top, left } = useElementBounding(loginInput)
-
-const popupTop = computed(() => height.value + top.value);
-
+const popupTop = computed(() => (height.value + top.value) + "px");
+const popupWidth = computed(() => width.value + "px");
+const popupLeft = computed(() => left.value + "px");
 
 const showClear = computed(() => props.clearable && focused.value && value.value)
 const value = defineModel<string>();
@@ -124,9 +123,9 @@ input[type="password"]::-ms-reveal {
 <style>
 .select-option-box {
   position: absolute;
-  width: v-bind(width + 'px');
-  left: v-bind(left + 'px');
-  top: v-bind(popupTop + 'px');
+  width: v-bind(popupWidth);
+  left: v-bind(popupLeft);
+  top: v-bind(popupTop);
   z-index: 9999;
   padding: 20px;
   background-color: white;

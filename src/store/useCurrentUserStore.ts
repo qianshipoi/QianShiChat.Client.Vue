@@ -4,6 +4,7 @@ import { UserInfo } from "../types/Types";
 import { login as loginApi } from "../api/auth";
 import { useRouter } from "vue-router";
 import { useSessionStorage, useTitle } from "@vueuse/core";
+import { useChatStore } from "./useChatStore";
 
 export const useCurrentUserStore = defineStore('current_user', () => {
   const token = useSessionStorage('token', '')
@@ -12,6 +13,7 @@ export const useCurrentUserStore = defineStore('current_user', () => {
   const loading = ref<boolean>(false)
   const router = useRouter()
   const title = useTitle()
+  const chatStore = useChatStore()
 
   watchEffect(() => {
     title.value = userInfo.value?.nickName ?? "QianShiChat - Vue"
@@ -36,6 +38,7 @@ export const useCurrentUserStore = defineStore('current_user', () => {
 
   const logout = () => {
     token.value = ''
+    chatStore.close();
     router.push({ name: "Login" })
   }
 

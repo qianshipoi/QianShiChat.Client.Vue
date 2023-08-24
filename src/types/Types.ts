@@ -6,7 +6,7 @@ export type GlobalResult<T> = {
   timestamp: number
 }
 
-export interface PagedList<T> {
+export type PagedList<T> = {
   items: T[]
   total: number
   currentPage: number
@@ -33,7 +33,7 @@ export enum ChatMessageStatus {
   failed
 }
 
-export type ChatMessage = {
+export interface ChatMessage {
   id: number
   fromId: number
   toId: number
@@ -62,7 +62,12 @@ export interface Session {
   avatar: string,
   name: string,
   lastMessageTime: number,
-  lastContent?: string
+  lastContent?: string,
+  from: Group | UserInfo
+}
+
+export interface Group {
+
 }
 
 export interface Attachment {

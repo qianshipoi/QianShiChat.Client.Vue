@@ -2,24 +2,20 @@ import { defineStore } from "pinia";
 import { UserInfo } from "../types/Types";
 import { getUserById } from "../api/user";
 
-
 export const useUserStore = defineStore("user", () => {
   const users = reactive<UserInfo[]>([]);
   const loading = ref<boolean>(false)
 
   const getUser = async (id: number): Promise<UserInfo> => {
     let user = users.find(x => x.id === id);
-    if (user) {
-      return user;
-    }
+    if (user) return user;
 
     try {
       loading.value = true
-      const result = await getUserById(id);
-      if (result.succeeded) {
-        user = result.data!
-        users.push(user)
-        return user
+      const { succeeded, data } = await getUserById(id);
+      if (succeeded) {
+        users.push(data!)
+        return data!
       }
     } catch (err) {
       console.log(err);
@@ -30,8 +26,15 @@ export const useUserStore = defineStore("user", () => {
     return Promise.reject()
   }
 
+  const getUsers = async (ids: number[]): Promise<UserInfo[]> => {
+    const unionids = Array.from(new Set<number>(ids))
+    const results = await Promise.all(unionids.map(id => getUserById(id)))
+    return results.filter(result => result.succeeded).map(result => result.data!);
+  }
+
   return {
     loading: computed(() => loading.value),
-    getUser
+    getUser,
+    getUsers
   }
 })

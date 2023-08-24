@@ -2,7 +2,7 @@ import { history } from "../../api/chat"
 import { useChatStore } from "../../store/useChatStore"
 import { useSessionStore } from "../../store/useSessionStore"
 import { useUserStore } from "../../store/useUserStore"
-import { Attachment, ChatMessage, ChatMessageSendType, ChatMessageStatus, ChatMessageType, Session } from "../../types/Types"
+import { Attachment, ChatMessage, ChatMessageSendType, ChatMessageStatus, ChatMessageType, Session, UserInfo } from "../../types/Types"
 import { ElMessage, ElNotification } from "element-plus"
 import { sendText as sendTextApi, sendFile as sendFileApi } from '../../api/chat';
 import { useCurrentUserStore } from "../../store/useCurrentUserStore"
@@ -48,9 +48,25 @@ export const useChatMessage = () => {
       roomMessages.push(roomMessage)
     }
 
+    const isPersonalSession = (): boolean => roomMessage?.session.type === ChatMessageSendType.Personal;
+
+    const getUser = async (fromId: number): Promise<UserInfo> => {
+      if (fromId === currentUserStore.userInfo?.id) {
+        return currentUserStore.userInfo;
+      }
+
+      if (isPersonalSession()) {
+        return roomMessage!.session.from as UserInfo
+      } else if (roomMessage!.session.type === ChatMessageSendType.Group) {
+        return await userStore.getUser(fromId)
+      } else {
+        throw new Error("not supported.")
+      }
+    }
+
     chatStore.onPrivateChat(async (message: ChatMessage) => {
       if (message.sessionId === roomMessage?.id) {
-        message.fromUser = await userStore.getUser(message.fromId)
+        message.fromUser = await getUser(message.fromId)
         roomMessage?.messages.push(message)
       }
     })
@@ -61,7 +77,7 @@ export const useChatMessage = () => {
         const paged = await history(roomMessage?.session.toId!, 1)
         if (paged.data?.items) {
           paged.data?.items.forEach(async item => {
-            item.fromUser = await userStore.getUser(item.fromId)
+            item.fromUser = await getUser(item.fromId)
             roomMessage?.messages.unshift(item)
           })
         }

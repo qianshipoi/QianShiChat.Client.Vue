@@ -7,12 +7,11 @@ import { useChatStore } from "./useChatStore";
 import { useCurrentUserStore } from "./useCurrentUserStore";
 import { useUserStore } from "./useUserStore";
 
-export const useSessionStore = defineStore('session', () => {
-  const sessions = useSessionStorage<Session[]>('sessions', [])
+export const useSessionStore = defineStore("session", () => {
+  const sessions = useSessionStorage<Session[]>("sessions", [])
 
   const currentUserStore = useCurrentUserStore()
   const userStore = useUserStore();
-
   const chatStore = useChatStore();
 
   function moveSessionTop(session: Session) {
@@ -37,6 +36,15 @@ export const useSessionStore = defineStore('session', () => {
     }
   }
 
+  function getSessionId(userId: number): string {
+    const currentUserId = currentUserStore.userInfo?.id!
+    if (currentUserId > userId) {
+      return `${userId}-${currentUserId}`
+    } else {
+      return `${currentUserId}-${userId}`
+    }
+  }
+
   chatStore.onPrivateChat(async message => {
     let session = sessions.value.find(s => s.id === message.sessionId)
     if (!session) {
@@ -49,6 +57,7 @@ export const useSessionStore = defineStore('session', () => {
         avatar: user.avatar,
         name: user.nickName!,
         lastMessageTime: new Date().getTime(),
+        from: user
       }
     }
     moveSessionTop(session)
@@ -62,15 +71,6 @@ export const useSessionStore = defineStore('session', () => {
     const index = sessions.value.findIndex(s => s.id === session.id);
     if (index !== -1) {
       sessions.value.splice(index, 1);
-    }
-  }
-
-  function getSessionId(userId: number): string {
-    const currentUserId = currentUserStore.userInfo?.id!
-    if (currentUserId > userId) {
-      return `${userId}-${currentUserId}`
-    } else {
-      return `${currentUserId}-${userId}`
     }
   }
 
@@ -90,6 +90,7 @@ export const useSessionStore = defineStore('session', () => {
         avatar: user.avatar,
         name: user.nickName!,
         lastMessageTime: new Date().getTime(),
+        from: user
       })
     });
   }

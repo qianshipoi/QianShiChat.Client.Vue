@@ -5,7 +5,6 @@
       <div style="position: absolute; left: 28px; top: 40px; right: 28px; bottom: 28px; z-index: 2; ">
         <el-form :model="baseInfo" ref="formInstance" :rules="rules" :inline="false">
           <el-form-item prop="account">
-            <!-- <login-input v-model="baseInfo.account" placeholder="请输入账号" clearable></login-input> -->
             <login-select v-model="baseInfo.account" placeholder="请输入账号" clearable>
               asdasda
             </login-select>
@@ -79,6 +78,10 @@ const windowResize = useThrottleFn(() => {
 }, 1000)
 
 useEventListener(window, "resize", windowResize)
+
+useEventListener(window, "keydown", (e: KeyboardEvent) => {
+  e.key === "Enter" && onSubmit()
+})
 
 const baseInfo = reactive<BaseInfo>({
   account: 'admin',
