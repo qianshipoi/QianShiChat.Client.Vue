@@ -11,7 +11,7 @@
 
 <script setup lang='ts'>
 import ChatMessage from '../components/ChatMessage/index.vue'
-import { UserInfo } from '../types/Types';
+import { ChatMessageStatus, UserInfo } from '../types/Types';
 import { ChatMessageSendType, ChatMessage as ChatMessageClass, ChatMessageType } from '../types/Types';
 
 const userinfo: UserInfo = {
@@ -31,7 +31,8 @@ const textMessage: ChatMessageClass = {
   messageType: ChatMessageType.Text,
   content: "文字消息",
   createTime: new Date().getTime(),
-  fromUser: userinfo
+  fromUser: userinfo,
+  status: ChatMessageStatus.succeeded
 }
 
 const imageMessage: ChatMessageClass = {
@@ -54,6 +55,3 @@ const otherFileMessage: ChatMessageClass = {
 }
 
 </script>
-
-<style>
-</style>

@@ -20,7 +20,12 @@
           </el-scrollbar>
         </template>
         <template #end>
-          <div style="position: relative; height: 100%; text-align: left;">
+          <div class="send-box">
+            <div class="options">
+              <el-icon @click="open">
+                <FolderAdd />
+              </el-icon>
+            </div>
             <!-- <el-scrollbar class="message-editor-scrollbar">
               <div class="message-editor" contenteditable>
                 asdsad
@@ -38,8 +43,8 @@
 </template>
 
 <script setup lang='ts'>
-import { MoreFilled } from '@element-plus/icons-vue'
-import { useElementSize } from '@vueuse/core';
+import { MoreFilled, FolderAdd } from '@element-plus/icons-vue'
+import { useElementSize, useFileDialog } from '@vueuse/core';
 import { useChatMessage } from "./useChatMessage";
 import ChatMessage from "../../components/ChatMessage/index.vue"
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
@@ -58,7 +63,7 @@ const messageBox = ref<HTMLDivElement | null>(null)
 const { height: messageBoxHeight } = useElementSize(messageBox)
 
 const { getRoomMessage } = useChatMessage()
-const { loadData, messages, sendText } = getRoomMessage(props.session.id)
+const { loadData, messages, sendText, sendFile } = getRoomMessage(props.session.id)
 
 const messageBoxScrollDown = () => {
   messageListBox.value?.scrollTo({
@@ -85,12 +90,18 @@ const isSelf = (formId: number): boolean => {
 }
 
 const send = async () => {
-  if (await sendText(messageContent.value)) {
-    messageContent.value = ''
-    messageBoxScrollDown();
-  }
+  await sendText(messageContent.value)
+  messageContent.value = ''
+  messageBoxScrollDown();
 }
 
+const { open, onChange } = useFileDialog({
+
+})
+onChange(async (files) => {
+  if (!files || files.length === 0) return;
+  await sendFile(files[0])
+})
 </script>
 
 <style scoped>
@@ -109,13 +120,13 @@ header {
   border-bottom: 1px solid #E9E9E9;
 }
 
-.menu>.el-icon {
+.el-icon {
   cursor: pointer;
   font-size: 26px;
   padding: 4px;
 }
 
-.menu>.el-icon:hover {
+.el-icon:hover {
   color: var(--primary);
 }
 
@@ -148,5 +159,18 @@ header {
 :deep(.el-textarea__inner:focus) {
   box-shadow: none;
   background-color: transparent;
+}
+
+.send-box {
+  position: relative;
+  height: 100%;
+  text-align: left;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  padding: .4rem 1rem;
+}
+
+.send-box :deep(.el-textarea__inner) {
+  padding: 0;
 }
 </style>

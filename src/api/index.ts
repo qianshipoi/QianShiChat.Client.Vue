@@ -13,30 +13,30 @@ const instance = axios.create({
   }
 })
 
-let loading: any;
+// let loading: any;
 
-let requestCount: number = 0;
+// let requestCount: number = 0;
 
-const showLoading = () => {
-  if (requestCount === 0) {
-    loading = ElLoading.service({
-      fullscreen: true,
-      text: 'Loading  ',
-      background: 'rgba(0, 0, 0, 0.7)'
-    })
-  }
-  requestCount++;
-}
+// const showLoading = () => {
+//   if (requestCount === 0) {
+//     loading = ElLoading.service({
+//       fullscreen: true,
+//       text: 'Loading  ',
+//       background: 'rgba(0, 0, 0, 0.7)'
+//     })
+//   }
+//   requestCount++;
+// }
 
-const hideLoading = () => {
-  requestCount--;
-  if (requestCount === 0) {
-    loading.close();
-  }
-}
+// const hideLoading = () => {
+//   requestCount--;
+//   if (requestCount === 0) {
+//     loading.close();
+//   }
+// }
 
 instance.interceptors.request.use(config => {
-  showLoading();
+  // showLoading();
 
   const userStore = useCurrentUserStore()
   if (userStore.token) {
@@ -47,7 +47,7 @@ instance.interceptors.request.use(config => {
 });
 
 instance.interceptors.response.use(response => {
-  hideLoading()
+  // hideLoading()
 
   const token = response.headers['x-access-token']
   if (token) {
@@ -57,7 +57,7 @@ instance.interceptors.response.use(response => {
 
   return response.data
 }, error => {
-  hideLoading()
+  // hideLoading()
   let message = ""
   if (error.response && error.response.status) {
     const status = error.response.status

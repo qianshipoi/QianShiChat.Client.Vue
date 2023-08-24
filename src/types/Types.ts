@@ -1,4 +1,4 @@
-type GlobalResult<T> = {
+export type GlobalResult<T> = {
   statusCode: number
   data?: T
   succeeded: boolean,
@@ -6,7 +6,7 @@ type GlobalResult<T> = {
   timestamp: number
 }
 
-interface PagedList<T> {
+export interface PagedList<T> {
   items: T[]
   total: number
   currentPage: number
@@ -27,7 +27,13 @@ export enum ChatMessageType {
   OtherFile
 }
 
-type ChatMessage = {
+export enum ChatMessageStatus {
+  sending,
+  succeeded,
+  failed
+}
+
+export type ChatMessage = {
   id: number
   fromId: number
   toId: number
@@ -37,9 +43,10 @@ type ChatMessage = {
   content: string | Attachment
   createTime: number
   fromUser?: UserInfo
+  status: ChatMessageStatus
 }
 
-interface UserInfo {
+export interface UserInfo {
   id: number
   account: string
   nickName?: string
@@ -47,7 +54,7 @@ interface UserInfo {
   createTime: number
 }
 
-interface Session {
+export interface Session {
   id: string,
   toId: number,
   type: ChatMessageSendType,
@@ -58,37 +65,25 @@ interface Session {
   lastContent?: string
 }
 
-interface Attachment {
-  id: number
+export interface Attachment {
+  id: number,
   name: string,
   rawPath: string,
   previewPath?: string,
   hash: string,
   contentType: string,
-  size: number
+  size: number,
+  progress?: number
 }
 
-
-interface PrivateChatMessageRequest {
+export interface PrivateChatMessageRequest {
   toId: number
   message: string
   sendType: ChatMessageSendType
 }
 
-interface SendFileMessageRequest {
+export interface SendFileMessageRequest {
   toId: number
   attachmentId: number
   sendType: ChatMessageSendType
-}
-
-
-export type {
-  GlobalResult,
-  UserInfo,
-  Session,
-  ChatMessage,
-  PagedList,
-  PrivateChatMessageRequest,
-  SendFileMessageRequest,
-  Attachment
 }

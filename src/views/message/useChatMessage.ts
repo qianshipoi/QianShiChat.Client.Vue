@@ -2,9 +2,11 @@ import { history } from "../../api/chat"
 import { useChatStore } from "../../store/useChatStore"
 import { useSessionStore } from "../../store/useSessionStore"
 import { useUserStore } from "../../store/useUserStore"
-import { ChatMessage, ChatMessageSendType, Session } from "../../types/Types"
-import { ElMessage } from "element-plus"
-import { sendText } from '../../api/chat';
+import { Attachment, ChatMessage, ChatMessageSendType, ChatMessageStatus, ChatMessageType, Session } from "../../types/Types"
+import { ElMessage, ElNotification } from "element-plus"
+import { sendText as sendTextApi, sendFile as sendFileApi } from '../../api/chat';
+import { useCurrentUserStore } from "../../store/useCurrentUserStore"
+import { upload } from "../../api/attachment"
 
 type RoomMessages = {
   id: string
@@ -18,6 +20,21 @@ export const useChatMessage = () => {
   const userStore = useUserStore()
   const sessionStore = useSessionStore()
   const chatStore = useChatStore()
+  const currentUserStore = useCurrentUserStore()
+
+  function getNextId(): number {
+    return new Date().getTime()
+  }
+
+  function fileTypeToMessageType(fileType: string): ChatMessageType {
+    if (["image/png", "image/jpeg", "image/gif", "image/x-icon"].includes(fileType)) {
+      return ChatMessageType.Image;
+    } else if (["video/mpeg4"].includes(fileType)) {
+      return ChatMessageType.Video;
+    } else {
+      return ChatMessageType.OtherFile;
+    }
+  }
 
   const getRoomMessage = (id: string) => {
     const loading = ref<boolean>(false)
@@ -55,38 +72,107 @@ export const useChatMessage = () => {
       }
     }
 
-    const send = async (content: string): Promise<boolean> => {
-      try {
-        loading.value = true
-        const result = await sendText({
-          toId: roomMessage?.session.toId!,
-          sendType: ChatMessageSendType.Personal,
-          message: content
-        })
+    const sendFile = (file: File): void => {
+      const image: string = URL.createObjectURL(file);
 
-        if (!result.succeeded) {
-          ElMessage.error(result.errors)
-          return false
-        }
-        result.data!.fromUser = await userStore.getUser(result.data!.fromId)
-        roomMessage?.messages.push(result.data!)
-        return true;
-      } catch (err) {
-        console.log(err);
-        return false
-      } finally {
-        loading.value = false
+      const attachment: Attachment = {
+        id: getNextId(),
+        name: file.name,
+        rawPath: image,
+        previewPath: image,
+        hash: "",
+        contentType: file.type,
+        size: file.size
       }
+
+      const message: ChatMessage = {
+        id: getNextId(),
+        fromId: currentUserStore.userInfo?.id!,
+        toId: roomMessage!.session.toId!,
+        sessionId: roomMessage!.session.id,
+        sendType: ChatMessageSendType.Personal,
+        messageType: fileTypeToMessageType(file.type),
+        content: attachment,
+        createTime: getNextId(),
+        fromUser: currentUserStore.userInfo,
+        status: ChatMessageStatus.sending
+      }
+
+      upload(file, {
+        onUploadProgress: ({ loaded, total }) => {
+          attachment.progress = loaded / (total ?? file.size)
+        }
+      }).then(uploadResult => {
+        if (!uploadResult.succeeded) {
+          message.status = ChatMessageStatus.failed
+          return
+        }
+
+        message.content = uploadResult.data!
+
+        sendFileApi({
+          toId: roomMessage!.session.toId,
+          attachmentId: message.content.id,
+          sendType: ChatMessageSendType.Personal
+        }).then(({ succeeded, data }) => {
+          if (!succeeded) {
+            message.status = ChatMessageStatus.failed;
+            return
+          }
+
+          message.id = data!.id
+          message.createTime = data!.createTime
+          message.status = ChatMessageStatus.succeeded
+        }).catch(err => {
+          ElNotification.error(err)
+        })
+      }).catch(err => {
+        ElNotification.error(err)
+      })
+
+      roomMessage!.messages.push(message);
+    }
+
+    const sendText = (content: string) => {
+      const message: ChatMessage = {
+        id: getNextId(),
+        fromId: currentUserStore.userInfo?.id!,
+        toId: roomMessage!.session.toId!,
+        sessionId: roomMessage!.session.id,
+        sendType: ChatMessageSendType.Personal,
+        messageType: ChatMessageType.Text,
+        content: content,
+        createTime: getNextId(),
+        fromUser: currentUserStore.userInfo,
+        status: ChatMessageStatus.sending
+      }
+
+      sendTextApi({
+        toId: roomMessage?.session.toId!,
+        sendType: ChatMessageSendType.Personal,
+        message: content
+      }).then(({ succeeded, data }) => {
+        if (!succeeded) {
+          message.status = ChatMessageStatus.failed;
+          return
+        }
+
+        message.id = data!.id
+        message.createTime = data!.createTime
+        message.status = ChatMessageStatus.succeeded
+      }).catch(err => {
+        ElNotification.error(err)
+      })
     }
 
     return {
       loading: computed(() => loading.value),
       messages: readonly(roomMessage.messages),
       loadData,
-      sendText: send
+      sendText,
+      sendFile
     }
   }
-
 
   return {
     getRoomMessage

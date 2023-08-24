@@ -19,7 +19,6 @@ declare module 'vue' {
     ElMain: typeof import('element-plus/es')['ElMain']
     ElMenu: typeof import('element-plus/es')['ElMenu']
     ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
-    ElScrollbar: typeof import('element-plus/es')['ElScrollbar']
     ElSpace: typeof import('element-plus/es')['ElSpace']
     FileMessage: typeof import('./components/ChatMessage/FileMessage.vue')['default']
     ImageMessage: typeof import('./components/ChatMessage/ImageMessage.vue')['default']
