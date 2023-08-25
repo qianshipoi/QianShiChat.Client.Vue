@@ -37,12 +37,8 @@ import { useChatStore } from '../store/useChatStore';
 
 const menuStore = useMenuStore();
 const { isCollapse } = storeToRefs(menuStore)
-
 const userStore = useCurrentUserStore();
-const chatStore = useChatStore();
-
-chatStore.start();
-
+useChatStore().start();
 </script>
 
 <style scoped>

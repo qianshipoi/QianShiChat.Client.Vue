@@ -1,8 +1,6 @@
 import { defineStore } from "pinia";
 import { ChatMessageSendType, Session } from "../types/Types";
 import { useSessionStorage } from "@vueuse/core";
-import { getFriends } from "../api/friend";
-import { ElMessage } from "element-plus";
 import { useChatStore } from "./useChatStore";
 import { useCurrentUserStore } from "./useCurrentUserStore";
 import { useUserStore } from "./useUserStore";
@@ -22,14 +20,14 @@ export const useSessionStore = defineStore("session", () => {
       const oldSession = sessions.value[index];
       oldSession.avatar = session.avatar
       oldSession.unreadCount = session.unreadCount
-      oldSession.lastContent = session.lastContent
+      oldSession.lastMessageContent = session.lastMessageContent
       oldSession.lastMessageTime = session.lastMessageTime
       oldSession.name = session.name
     } else {
       const oldSession = sessions.value.splice(index, 1)[0];
       oldSession.avatar = session.avatar
       oldSession.unreadCount = session.unreadCount
-      oldSession.lastContent = session.lastContent
+      oldSession.lastMessageContent = session.lastMessageContent
       oldSession.lastMessageTime = session.lastMessageTime
       oldSession.name = session.name
       sessions.value.unshift(oldSession);
@@ -57,6 +55,7 @@ export const useSessionStore = defineStore("session", () => {
         avatar: user.avatar,
         name: user.nickName!,
         lastMessageTime: new Date().getTime(),
+        lastMessageContent: message.content,
         from: user
       }
     }
@@ -74,31 +73,27 @@ export const useSessionStore = defineStore("session", () => {
     }
   }
 
-  const loadSesions = async () => {
-    const result = await getFriends()
-    if (!result.succeeded) {
-      ElMessage.error(result.errors)
-      return
-    }
-
-    result.data!.forEach(user => {
-      addSession({
-        id: getSessionId(user.id),
-        toId: user.id,
-        type: ChatMessageSendType.Personal,
-        unreadCount: 99,
-        avatar: user.avatar,
-        name: user.nickName!,
-        lastMessageTime: new Date().getTime(),
-        from: user
+  watch(() => chatStore.isReady, async (isReady: boolean) => {
+    if (isReady) {
+      const data = await chatStore.getSessions();
+      const ids: number[] = data.filter(s => s.type === ChatMessageSendType.Personal)
+        .map(x => x.toId);
+      const users = await userStore.getUsers(ids);
+      sessions.value = []
+      data.map(item => {
+        const user = users.find(x => x.id === item.toId)!
+        item.fromUser = currentUserStore.userInfo
+        item.avatar = user.avatar
+        item.name = user.nickName ?? user.account
+        item.toObject = user;
+        addSession(item)
       })
-    });
-  }
+    }
+  })
 
   return {
     sessions: computed(() => readonly(sessions.value)),
     addSession,
     removeSession,
-    loadSesions
   }
 })

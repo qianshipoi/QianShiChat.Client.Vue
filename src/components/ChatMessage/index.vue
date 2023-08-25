@@ -36,7 +36,6 @@ const content = computed(() => {
       return FileMessage
     default:
       return NotSupportedMessage;
-      break;
   }
 })
 

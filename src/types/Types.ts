@@ -62,7 +62,9 @@ export interface Session {
   avatar: string,
   name: string,
   lastMessageTime: number,
-  lastContent?: string,
+  lastMessageContent?: string | Attachment,
+  fromUser?: UserInfo,
+  toObject?: Group | UserInfo,
   from: Group | UserInfo
 }
 

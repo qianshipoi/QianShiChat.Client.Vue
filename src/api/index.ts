@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ElMessage, ElLoading } from "element-plus";
+import { ElMessage } from "element-plus";
 import router from "../router";
 import { useCurrentUserStore } from "../store/useCurrentUserStore";
 

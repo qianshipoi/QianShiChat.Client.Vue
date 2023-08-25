@@ -9,7 +9,7 @@
         <span class="time">{{ timeFormat(session?.lastMessageTime) }}</span>
       </div>
       <div class="down">
-        <span class="message">{{ session?.lastContent }}</span>
+        <span class="message">{{ session?.lastMessageContent }}</span>
         <span class="unread">{{ session?.unreadCount }}</span>
       </div>
     </div>

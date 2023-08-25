@@ -56,7 +56,7 @@ export const useChatMessage = () => {
       }
 
       if (isPersonalSession()) {
-        return roomMessage!.session.from as UserInfo
+        return roomMessage!.session.toObject as UserInfo
       } else if (roomMessage!.session.type === ChatMessageSendType.Group) {
         return await userStore.getUser(fromId)
       } else {

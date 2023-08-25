@@ -1,12 +1,13 @@
 import { defineStore } from "pinia";
 import * as signalr from "@microsoft/signalr"
 import { useCurrentUserStore } from "./useCurrentUserStore";
-import { ChatMessage } from "../types/Types";
+import { ChatMessage, Session } from "../types/Types";
 
 export const useChatStore = defineStore("chat", () => {
   const BASE_URL = import.meta.env.VITE_APP_BASE_URL + "/Hubs/Chat"
 
   const currentUserStore = useCurrentUserStore()
+  const isReady = ref<boolean>(false)
 
   const connection = new signalr.HubConnectionBuilder()
     .withUrl(BASE_URL, { accessTokenFactory: () => currentUserStore.token })
@@ -21,21 +22,29 @@ export const useChatStore = defineStore("chat", () => {
     })
   })
 
+  const getSessions = async (): Promise<Session[]> => {
+    return await connection.invoke<Session[]>("GetSessionsAsync")
+  }
+
   const onPrivateChat = (callback: (message: ChatMessage) => void) => {
     privateChatEventHandler.push(callback)
   }
 
   const start = async () => {
     await connection.start();
+    isReady.value = true;
   }
 
   const close = async () => {
     await connection.stop()
+    isReady.value = false
   }
 
   return {
     start,
     close,
-    onPrivateChat
+    onPrivateChat,
+    getSessions,
+    isReady: computed(() => isReady.value)
   }
 })
