@@ -34,30 +34,25 @@ export const useSessionStore = defineStore("session", () => {
     }
   }
 
-  function getSessionId(userId: number): string {
-    const currentUserId = currentUserStore.userInfo?.id!
-    if (currentUserId > userId) {
-      return `${userId}-${currentUserId}`
-    } else {
-      return `${currentUserId}-${userId}`
-    }
-  }
-
   chatStore.onPrivateChat(async message => {
     let session = sessions.value.find(s => s.id === message.sessionId)
     if (!session) {
       const user = await userStore.getUser(message.fromId)
       session = {
-        id: getSessionId(message.fromId),
+        id: message.sessionId,
         toId: message.fromId,
         type: message.sendType,
-        unreadCount: 99,
+        unreadCount: 1,
         avatar: user.avatar,
         name: user.nickName!,
-        lastMessageTime: new Date().getTime(),
+        lastMessageTime: message.createTime,
         lastMessageContent: message.content,
+        toObject: user,
+        fromUser: currentUserStore.userInfo,
         from: user
       }
+    } else {
+      session.unreadCount++;
     }
     moveSessionTop(session)
   });
@@ -79,7 +74,6 @@ export const useSessionStore = defineStore("session", () => {
       const ids: number[] = data.filter(s => s.type === ChatMessageSendType.Personal)
         .map(x => x.toId);
       const users = await userStore.getUsers(ids);
-      sessions.value = []
       data.map(item => {
         const user = users.find(x => x.id === item.toId)!
         item.fromUser = currentUserStore.userInfo
@@ -91,9 +85,15 @@ export const useSessionStore = defineStore("session", () => {
     }
   })
 
+  const clearUnreadCount = (sessionId: string) => {
+    const session = sessions.value.find(x => x.id === sessionId)
+    session && (session.unreadCount = 0)
+  }
+
   return {
     sessions: computed(() => readonly(sessions.value)),
     addSession,
     removeSession,
+    clearUnreadCount
   }
 })

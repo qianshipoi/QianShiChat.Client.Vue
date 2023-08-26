@@ -16,7 +16,7 @@ export const useChatStore = defineStore("chat", () => {
 
   const privateChatEventHandler: ((message: ChatMessage) => void)[] = []
 
-  connection.on("PrivateChat", function (message: ChatMessage) {
+  connection.on("PrivateChat", (message: ChatMessage) => {
     privateChatEventHandler.map(item => {
       item(message)
     })
@@ -24,6 +24,10 @@ export const useChatStore = defineStore("chat", () => {
 
   const getSessions = async (): Promise<Session[]> => {
     return await connection.invoke<Session[]>("GetSessionsAsync")
+  }
+
+  const updateReadPosition = async (roomId: string, position: number): Promise<any> => {
+    return await connection.invoke("ReadPositionAsync", roomId, position);
   }
 
   const onPrivateChat = (callback: (message: ChatMessage) => void) => {
@@ -41,10 +45,11 @@ export const useChatStore = defineStore("chat", () => {
   }
 
   return {
+    isReady: computed(() => isReady.value),
     start,
     close,
     onPrivateChat,
     getSessions,
-    isReady: computed(() => isReady.value)
+    updateReadPosition
   }
 })

@@ -11,7 +11,7 @@
     <div style="flex: 1;">
       <SplitterPanel storage-key="room-chat-message" @end="moveEnd">
         <template #start>
-          <el-scrollbar ref="messageListBox">
+          <el-scrollbar @scroll="messageListScrollHandle" ref="messageListBox">
             <div ref="messageBox">
               <div v-for="message in messages" :key="message.id" style="margin-bottom: 8px;">
                 <ChatMessage :model-value="message" :is-self="isSelf(message.fromId)" />
@@ -55,15 +55,15 @@ import SplitterPanel from '../../components/SplitterPanel.vue';
 const props = defineProps<{
   session: Session
 }>()
+const currentUserStore = useCurrentUserStore();
+const { getRoomMessage } = useChatMessage()
 
 const messageContent = ref<string>("")
-
 const messageListBox = ref<InstanceType<typeof ElScrollbar> | null>(null)
 const messageBox = ref<HTMLDivElement | null>(null)
 const { height: messageBoxHeight } = useElementSize(messageBox)
 
-const { getRoomMessage } = useChatMessage()
-const { loadData, messages, sendText, sendFile } = getRoomMessage(props.session.id)
+const { loadData, messages, sendText, sendFile, clearUnread } = getRoomMessage(props.session.id)
 
 const messageBoxScrollDown = () => {
   messageListBox.value?.scrollTo({
@@ -83,8 +83,6 @@ onMounted(async () => {
   })
 })
 
-const currentUserStore = useCurrentUserStore();
-
 const isSelf = (formId: number): boolean => {
   return formId === currentUserStore.userInfo?.id
 }
@@ -98,10 +96,19 @@ const send = async () => {
 const { open, onChange } = useFileDialog({
 
 })
+
 onChange(async (files) => {
   if (!files || files.length === 0) return;
   await sendFile(files[0])
+  messageBoxScrollDown();
 })
+
+const messageListScrollHandle = (e: { scrollLeft: number, scrollTop: number }) => {
+  if (props.session.unreadCount > 0 && e.scrollTop + (messageListBox.value?.wrapRef?.clientHeight ?? 0) + 40 > messageBoxHeight.value) {
+    clearUnread()
+  }
+}
+
 </script>
 
 <style scoped>

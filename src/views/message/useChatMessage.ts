@@ -9,8 +9,8 @@ import { useCurrentUserStore } from "../../store/useCurrentUserStore"
 import { upload } from "../../api/attachment"
 
 type RoomMessages = {
-  id: string
-  session: Session
+  id: String,
+  session: Session,
   messages: ChatMessage[]
 }
 
@@ -38,7 +38,7 @@ export const useChatMessage = () => {
 
   const getRoomMessage = (id: string) => {
     const loading = ref<boolean>(false)
-    let roomMessage = roomMessages.find(x => x.id === id)
+    let roomMessage = roomMessages.find(x => x.id === id)!
     if (!roomMessage) {
       roomMessage = {
         id: id,
@@ -71,7 +71,7 @@ export const useChatMessage = () => {
       }
     })
 
-    const loadData = async () => {
+    const loadData = async (isFrst: boolean = false) => {
       try {
         loading.value = true
         const paged = await history(roomMessage?.session.toId!, 1)
@@ -80,12 +80,24 @@ export const useChatMessage = () => {
             item.fromUser = await getUser(item.fromId)
             roomMessage?.messages.unshift(item)
           })
+
+          const maxId = Math.max(...paged.data?.items.map(item => item.id));
+
+          sessionStore.clearUnreadCount(roomMessage!.session.id)
+          if (isFrst && maxId > 0) {
+            chatStore.updateReadPosition(roomMessage!.session.id, maxId)
+          }
         }
       } catch (err) {
         ElMessage.error(err as string)
       } finally {
         loading.value = false
       }
+    }
+
+    const addMessage = (message: ChatMessage) => {
+      roomMessage!.messages.push(message)
+      sessionStore.clearUnreadCount(roomMessage!.session.id)
     }
 
     const sendFile = (file: File): void => {
@@ -145,8 +157,7 @@ export const useChatMessage = () => {
       }).catch(err => {
         ElNotification.error(err)
       })
-
-      roomMessage!.messages.push(message);
+      addMessage(message);
     }
 
     const sendText = (content: string) => {
@@ -164,7 +175,7 @@ export const useChatMessage = () => {
       }
 
       sendTextApi({
-        toId: roomMessage?.session.toId!,
+        toId: roomMessage.session.toId,
         sendType: ChatMessageSendType.Personal,
         message: content
       }).then(({ succeeded, data }) => {
@@ -179,6 +190,8 @@ export const useChatMessage = () => {
       }).catch(err => {
         ElNotification.error(err)
       })
+
+      addMessage(message);
     }
 
     return {
@@ -186,7 +199,11 @@ export const useChatMessage = () => {
       messages: readonly(roomMessage.messages),
       loadData,
       sendText,
-      sendFile
+      sendFile,
+      clearUnread: () => {
+        sessionStore.clearUnreadCount(roomMessage.session.id)
+        chatStore.updateReadPosition(roomMessage.session.id, roomMessage.messages[roomMessage.messages.length - 1].id)
+      }
     }
   }
 

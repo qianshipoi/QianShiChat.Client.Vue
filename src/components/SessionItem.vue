@@ -9,8 +9,8 @@
         <span class="time">{{ timeFormat(session?.lastMessageTime) }}</span>
       </div>
       <div class="down">
-        <span class="message">{{ session?.lastMessageContent }}</span>
-        <span class="unread">{{ session?.unreadCount }}</span>
+        <span class="message">{{ content }}</span>
+        <span class="unread" v-if="(session?.unreadCount ?? 0) > 0">{{ session?.unreadCount }}</span>
       </div>
     </div>
   </div>
@@ -36,6 +36,14 @@ dayjs.extend(isToday);
 const selected = () => {
   emits('selected', session.value!);
 }
+
+const content = computed(() => {
+  if (typeof session.value?.lastMessageContent === 'string') {
+    return session.value.lastMessageContent
+  } else {
+    return session.value?.lastMessageContent?.name
+  }
+})
 
 const isLessThenOneWeek = (date: dayjs.Dayjs): boolean => {
   const aWeekAge = dayjs(new Date()).subtract(1, "week")
@@ -80,6 +88,10 @@ const timeFormat = (time?: number) => {
   color: white;
 }
 
+.session-item.selected .message,
+.session-item.selected .time {
+  color: white;
+}
 
 .avatar {
   height: 40px;
@@ -99,6 +111,7 @@ const timeFormat = (time?: number) => {
 .down {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 .name,
@@ -108,14 +121,25 @@ const timeFormat = (time?: number) => {
   white-space: nowrap;
 }
 
+.message {
+  color: #999999;
+}
+
+.time {
+  font-size: 10px;
+  color: #CCCCCC;
+}
+
 .unread {
   display: flex;
   justify-content: center;
-  padding: 2px 4px;
-  border-radius: 12px;
+  padding: 2px 6px;
+  border-radius: 50%;
   align-items: center;
+  height: 20px;
   font-weight: 600;
-  font-size: 10px;
+  font-size: 12px;
+  transform: scale(.8);
   color: white;
   background-color: #C4C4C4;
   overflow: hidden;
