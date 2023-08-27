@@ -32,12 +32,13 @@ const textMessage: ChatMessageClass = {
   content: "文字消息",
   createTime: new Date().getTime(),
   fromUser: userinfo,
-  status: ChatMessageStatus.succeeded
+  status: ChatMessageStatus.Succeeded
 }
 
 const imageMessage: ChatMessageClass = {
   ...textMessage,
   messageType: ChatMessageType.Image,
+  status: ChatMessageStatus.Sending,
   content: {
     id: 1,
     name: "1.jpg",
@@ -51,7 +52,8 @@ const imageMessage: ChatMessageClass = {
 
 const otherFileMessage: ChatMessageClass = {
   ...imageMessage,
-  messageType: ChatMessageType.OtherFile
+  messageType: ChatMessageType.OtherFile,
+  status: ChatMessageStatus.Failed
 }
 
 </script>

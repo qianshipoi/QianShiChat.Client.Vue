@@ -43,14 +43,15 @@
 </template>
 
 <script setup lang='ts'>
-import { MoreFilled, FolderAdd } from '@element-plus/icons-vue'
+import { MoreFilled, FolderAdd } from '@element-plus/icons-vue';
 import { useElementSize, useFileDialog } from '@vueuse/core';
-import { useChatMessage } from "./useChatMessage";
-import ChatMessage from "../../components/ChatMessage/index.vue"
+import { useChatMessage } from './useChatMessage';
+import ChatMessage from '../../components/ChatMessage/index.vue';
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
 import { Session } from '../../types/Types';
-import { ElScrollbar } from 'element-plus';
+import { ElNotification, ElScrollbar } from 'element-plus';
 import SplitterPanel from '../../components/SplitterPanel.vue';
+const FILE_MAX_SIZE = 1024 * 1024 * 30;
 
 const props = defineProps<{
   session: Session
@@ -99,6 +100,11 @@ const { open, onChange } = useFileDialog({
 
 onChange(async (files) => {
   if (!files || files.length === 0) return;
+  const file = files[0];
+  if (file.size > FILE_MAX_SIZE) {
+    ElNotification.warning(`The uploaded file size cannot be larger than ${FILE_MAX_SIZE / 1024 / 1024}`)
+    return;
+  }
   await sendFile(files[0])
   messageBoxScrollDown();
 })

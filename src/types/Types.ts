@@ -28,9 +28,9 @@ export enum ChatMessageType {
 }
 
 export enum ChatMessageStatus {
-  sending,
-  succeeded,
-  failed
+  Sending,
+  Succeeded,
+  Failed
 }
 
 export interface ChatMessage {

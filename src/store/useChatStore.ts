@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import * as signalr from "@microsoft/signalr"
 import { useCurrentUserStore } from "./useCurrentUserStore";
 import { ChatMessage, Session } from "../types/Types";
+import { ElNotification } from "element-plus";
 
 export const useChatStore = defineStore("chat", () => {
   const BASE_URL = import.meta.env.VITE_APP_BASE_URL + "/Hubs/Chat"
@@ -22,6 +23,36 @@ export const useChatStore = defineStore("chat", () => {
     })
   })
 
+  const getCounter = () => connection.stream("Counter", 10, 2000)
+    .subscribe({
+      next: (item) => {
+        ElNotification.info("next: " + item);
+      },
+      complete: () => {
+        ElNotification.success("complete");
+      },
+      error: (err) => ElNotification.error(err)
+    })
+
+  type SubscribeCallback<T> = {
+    next: (item: T) => void,
+    complate?: () => void,
+    error?: (err: any) => void
+  }
+
+  const subscribeSessions = (callback: SubscribeCallback<Session>) => connection.stream("GetSessionsAsync")
+    .subscribe({
+      next: callback.next,
+      complete: () => callback.complate && callback.complate(),
+      error: (err) => {
+        if (callback.error) {
+          callback.error(err);
+        } else {
+          ElNotification.error(err)
+        }
+      }
+    })
+
   const getSessions = async (): Promise<Session[]> => {
     return await connection.invoke<Session[]>("GetSessionsAsync")
   }
@@ -37,6 +68,7 @@ export const useChatStore = defineStore("chat", () => {
   const start = async () => {
     await connection.start();
     isReady.value = true;
+    getCounter()
   }
 
   const close = async () => {
@@ -50,6 +82,7 @@ export const useChatStore = defineStore("chat", () => {
     close,
     onPrivateChat,
     getSessions,
-    updateReadPosition
+    updateReadPosition,
+    subscribeSessions
   }
 })

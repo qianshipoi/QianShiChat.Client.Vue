@@ -123,7 +123,7 @@ export const useChatMessage = () => {
         content: attachment,
         createTime: getNextId(),
         fromUser: currentUserStore.userInfo,
-        status: ChatMessageStatus.sending
+        status: ChatMessageStatus.Sending
       }
 
       upload(file, {
@@ -132,7 +132,7 @@ export const useChatMessage = () => {
         }
       }).then(uploadResult => {
         if (!uploadResult.succeeded) {
-          message.status = ChatMessageStatus.failed
+          message.status = ChatMessageStatus.Failed
           return
         }
 
@@ -144,13 +144,13 @@ export const useChatMessage = () => {
           sendType: ChatMessageSendType.Personal
         }).then(({ succeeded, data }) => {
           if (!succeeded) {
-            message.status = ChatMessageStatus.failed;
+            message.status = ChatMessageStatus.Failed;
             return
           }
 
           message.id = data!.id
           message.createTime = data!.createTime
-          message.status = ChatMessageStatus.succeeded
+          message.status = ChatMessageStatus.Succeeded
         }).catch(err => {
           ElNotification.error(err)
         })
@@ -171,7 +171,7 @@ export const useChatMessage = () => {
         content: content,
         createTime: getNextId(),
         fromUser: currentUserStore.userInfo,
-        status: ChatMessageStatus.sending
+        status: ChatMessageStatus.Sending
       }
 
       sendTextApi({
@@ -180,13 +180,13 @@ export const useChatMessage = () => {
         message: content
       }).then(({ succeeded, data }) => {
         if (!succeeded) {
-          message.status = ChatMessageStatus.failed;
+          message.status = ChatMessageStatus.Failed;
           return
         }
 
         message.id = data!.id
         message.createTime = data!.createTime
-        message.status = ChatMessageStatus.succeeded
+        message.status = ChatMessageStatus.Succeeded
       }).catch(err => {
         ElNotification.error(err)
       })

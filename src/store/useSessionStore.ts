@@ -68,19 +68,17 @@ export const useSessionStore = defineStore("session", () => {
     }
   }
 
-  watch(() => chatStore.isReady, async (isReady: boolean) => {
+  watch(() => chatStore.isReady, (isReady: boolean) => {
     if (isReady) {
-      const data = await chatStore.getSessions();
-      const ids: number[] = data.filter(s => s.type === ChatMessageSendType.Personal)
-        .map(x => x.toId);
-      const users = await userStore.getUsers(ids);
-      data.map(item => {
-        const user = users.find(x => x.id === item.toId)!
-        item.fromUser = currentUserStore.userInfo
-        item.avatar = user.avatar
-        item.name = user.nickName ?? user.account
-        item.toObject = user;
-        addSession(item)
+      chatStore.subscribeSessions({
+        next: async (item) => {
+          const user = await userStore.getUser(item.toId)
+          item.fromUser = currentUserStore.userInfo
+          item.avatar = user.avatar
+          item.name = user.nickName ?? user.account
+          item.toObject = user;
+          addSession(item)
+        }
       })
     }
   })
