@@ -5,16 +5,17 @@
       <div style="position: absolute; left: 28px; top: 40px; right: 28px; bottom: 28px; z-index: 2; ">
         <el-form :model="baseInfo" ref="formInstance" :rules="rules" :inline="false">
           <el-form-item prop="account">
-            <login-select v-model="baseInfo.account" placeholder="请输入账号" clearable>
+            <login-select v-model="baseInfo.account" :placeholder="t('login.accountPlaceholder')" clearable>
               asdasda
             </login-select>
           </el-form-item>
           <el-form-item prop="password">
-            <login-input v-model="baseInfo.password" type="password" placeholder="请输入密码" clearable></login-input>
+            <login-input v-model="baseInfo.password" type="password" :placeholder="t('login.passwordPlaceholder')"
+              clearable></login-input>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" style="width: 100%; height: 40px;" @click="onSubmit"
-              :loading="userStore.loading">登录</el-button>
+              :loading="userStore.loading">{{ t("login.login") }}</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -30,11 +31,14 @@ import { useCurrentUserStore } from '../store/useCurrentUserStore';
 import { Position, useEventListener, useSessionStorage, useThrottleFn, useWindowSize } from '@vueuse/core';
 import LoginInput from '../components/LoginInput.vue';
 import { UseDraggable as Draggable } from "@vueuse/components"
+import { useI18n } from 'vue-i18n';
 
 interface BaseInfo {
   account: string
   password: string
 }
+
+const { t } = useI18n()
 
 const route = useRoute()
 const router = useRouter()
