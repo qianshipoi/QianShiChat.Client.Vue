@@ -1,7 +1,7 @@
 <template>
   <div class="splash-screen" ref="splashScreen">
     <h1>{{ t('select_your_preferences') }}</h1>
-    <el-select v-model="settings.lang" filterable @change="langChangeHandle">
+    <el-select v-model="settings.lang" class="lang-options" size="large" filterable @change="langChangeHandle">
       <el-option v-for="item in langOptions" :key="item.value" :label="item.name" :value="item.value">
       </el-option>
     </el-select>
@@ -106,11 +106,32 @@ const getStart = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 2rem;
-  padding-top: 20%;
   background-color: saddlebrown;
   transform-origin: center;
   transition: all v-bind(closeTime + 'ms') ease-out;
+}
+
+.lang-options {
+  background-color: transparent;
+  border: 4px solid var(--primary);
+  border-radius: 6px;
+}
+
+:deep(.lang-options .el-input),
+:deep(.lang-options .el-input__wrapper) {
+  background-color: var(--primary);
+}
+
+:deep(.lang-options .el-input__inner) {
+  color: white;
+  font-weight: 600;
+  box-shadow: none !important;
+}
+
+:deep(.lang-options .el-input__inner:hover) {
+  box-shadow: none !important;
 }
 
 .theme-options {
@@ -147,3 +168,4 @@ const getStart = () => {
   letter-spacing: 2px;
 }
 </style>
+

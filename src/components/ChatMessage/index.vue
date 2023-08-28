@@ -3,7 +3,8 @@
     <div class="avatar">
       <el-image :src="message?.fromUser?.avatar" fit="fill" :lazy="true"></el-image>
     </div>
-    <div style="display: flex; align-items: end; gap: 8px;">
+    <div style="display: flex; align-items: end; gap: 8px;"
+      :style="{ flexDirection: props.isSelf ? 'row-reverse' : 'row' }">
       <div class="content">
         <component :is="content" :content="message?.content" />
       </div>

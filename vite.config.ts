@@ -5,7 +5,7 @@ import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import IconsResolver from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
-import vueI18n from '@intlify/vite-plugin-vue-i18n'
+import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 import path from 'path'
 
 
@@ -40,9 +40,9 @@ export default defineConfig({
     Icons({
       autoInstall: true,
     }),
-    vueI18n({
+    VueI18nPlugin({
       include: path.resolve(__dirname, "./path/to/src/locales/**")
-    }),
+    })
   ],
   server: {
     https: false,

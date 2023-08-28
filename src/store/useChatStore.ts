@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import * as signalr from "@microsoft/signalr"
 import { useCurrentUserStore } from "./useCurrentUserStore";
-import { ChatMessage, Session } from "../types/Types";
+import { ChatMessage, ChatMessageSendType, Session } from "../types/Types";
 import { ElNotification } from "element-plus";
 
 export const useChatStore = defineStore("chat", () => {
@@ -65,6 +65,10 @@ export const useChatStore = defineStore("chat", () => {
     privateChatEventHandler.push(callback)
   }
 
+  const getRoom = async (toId: number, type: ChatMessageSendType) => {
+    return await connection.invoke<Session | null>("GetRoomAsync", toId, type)
+  }
+
   const start = async () => {
     await connection.start();
     isReady.value = true;
@@ -83,6 +87,7 @@ export const useChatStore = defineStore("chat", () => {
     onPrivateChat,
     getSessions,
     updateReadPosition,
-    subscribeSessions
+    subscribeSessions,
+    getRoom
   }
 })

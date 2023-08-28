@@ -11,12 +11,12 @@
       </div>
       <ul>
         <li v-for="session in sessions" :key="session.id">
-          <SessionItem :model-value="session" @selected="selectedHandle" :is-selected="isSelected(session)" />
+          <SessionItem :model-value="session" @selected="selectedHandle" :is-selected="openedRoomId === session.id" />
         </li>
       </ul>
     </div>
     <div class="content">
-      <room v-if="currentSelectedSession" :session="currentSelectedSession"></room>
+      <router-view :key="openedRoomId"></router-view>
     </div>
   </div>
 </template>
@@ -25,19 +25,35 @@
 import { storeToRefs } from 'pinia';
 import { useSessionStore } from '../store/useSessionStore';
 import { Session } from '../types/Types';
-import Room from './message/Room.vue'
 import { Plus } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 const sessionStore = useSessionStore();
 const { sessions, } = storeToRefs(sessionStore);
 const searchText = ref<string>('')
+const route = useRoute()
+const router = useRouter()
 
-const currentSelectedSession = ref<Session>()
+const openedRoomId = ref<string>("")
 
-const isSelected = computed(() => (session: Session) => currentSelectedSession.value === session)
+watch(() => route.fullPath, () => {
+  if (route.name === "Room") {
+    openedRoomId.value = route.params["id"] as string
+  } else {
+    openedRoomId.value = ''
+  }
+}, {
+  immediate: true
+})
 
 const selectedHandle = (session: Session) => {
-  currentSelectedSession.value = session
+  router.replace({
+    name: "Room",
+    params: {
+      id: session.id
+    }
+  })
 }
 
 </script>

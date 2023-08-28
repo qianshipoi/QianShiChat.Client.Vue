@@ -16,6 +16,7 @@
       </ul>
     </div>
     <div class="content">
+      <UserProfile v-if="currentSelectedUser" :user="currentSelectedUser" />
     </div>
   </div>
 </template>
@@ -25,13 +26,14 @@ import { Plus } from '@element-plus/icons-vue'
 import { useFriendStore } from '../store/useFriendStore';
 import { storeToRefs } from 'pinia';
 import { UserInfo } from '../types/Types';
+import UserProfile from './friend/UserProfile.vue'
+
 const searchText = ref<string>('')
 
 const friendStore = useFriendStore()
 const { friends } = storeToRefs(friendStore)
 
 friendStore.loadData()
-
 
 const currentSelectedUser = ref<UserInfo>()
 

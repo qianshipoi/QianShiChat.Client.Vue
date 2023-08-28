@@ -48,14 +48,18 @@ import { useElementSize, useFileDialog } from '@vueuse/core';
 import { useChatMessage } from './useChatMessage';
 import ChatMessage from '../../components/ChatMessage/index.vue';
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
-import { Session } from '../../types/Types';
 import { ElNotification, ElScrollbar } from 'element-plus';
 import SplitterPanel from '../../components/SplitterPanel.vue';
+import { useRoute } from 'vue-router';
+import { useSessionStore } from '../../store/useSessionStore';
 const FILE_MAX_SIZE = 1024 * 1024 * 30;
 
-const props = defineProps<{
-  session: Session
-}>()
+const route = useRoute()
+
+const sessionsStore = useSessionStore()
+
+const session = readonly(sessionsStore.getSession(route.params["id"].toString())!)
+
 const currentUserStore = useCurrentUserStore();
 const { getRoomMessage } = useChatMessage()
 
@@ -64,7 +68,7 @@ const messageListBox = ref<InstanceType<typeof ElScrollbar> | null>(null)
 const messageBox = ref<HTMLDivElement | null>(null)
 const { height: messageBoxHeight } = useElementSize(messageBox)
 
-const { loadData, messages, sendText, sendFile, clearUnread } = getRoomMessage(props.session.id)
+const { loadData, messages, sendText, sendFile, clearUnread } = getRoomMessage(route.params["id"].toString())
 
 const messageBoxScrollDown = () => {
   messageListBox.value?.scrollTo({
@@ -110,7 +114,7 @@ onChange(async (files) => {
 })
 
 const messageListScrollHandle = (e: { scrollLeft: number, scrollTop: number }) => {
-  if (props.session.unreadCount > 0 && e.scrollTop + (messageListBox.value?.wrapRef?.clientHeight ?? 0) + 40 > messageBoxHeight.value) {
+  if (session.unreadCount > 0 && e.scrollTop + (messageListBox.value?.wrapRef?.clientHeight ?? 0) + 40 > messageBoxHeight.value) {
     clearUnread()
   }
 }

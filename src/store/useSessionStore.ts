@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ChatMessageSendType, Session } from "../types/Types";
+import { Session } from "../types/Types";
 import { useSessionStorage } from "@vueuse/core";
 import { useChatStore } from "./useChatStore";
 import { useCurrentUserStore } from "./useCurrentUserStore";
@@ -88,10 +88,15 @@ export const useSessionStore = defineStore("session", () => {
     session && (session.unreadCount = 0)
   }
 
+  const getSession = (id: string) => {
+    return sessions.value.find(x => x.id === id)
+  }
+
   return {
     sessions: computed(() => readonly(sessions.value)),
     addSession,
     removeSession,
-    clearUnreadCount
+    clearUnreadCount,
+    getSession
   }
 })
