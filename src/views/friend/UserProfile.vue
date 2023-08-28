@@ -102,7 +102,5 @@ const sendMessage = async () => {
   background-color: var(--primary);
   cursor: pointer;
 }
-
-.actions .el-icon:hover {}
 </style>
 
