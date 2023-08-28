@@ -3,19 +3,19 @@
     :collapse="isCollapse">
     <el-menu-item index="/">
       <el-icon><icon-menu /></el-icon>
-      <template #title>mesages</template>
+      <template #title>{{ t('nav.messages') }}</template>
     </el-menu-item>
     <el-menu-item index="/friend">
       <el-icon>
         <document />
       </el-icon>
-      <template #title>friends</template>
+      <template #title>{{ t('nav.firends') }}</template>
     </el-menu-item>
     <el-menu-item index="/settings">
       <el-icon>
         <setting />
       </el-icon>
-      <template #title>settings</template>
+      <template #title>{{ t('nav.settings') }}</template>
     </el-menu-item>
   </el-menu>
 </template>
@@ -30,22 +30,20 @@ import { useCssVar } from '@vueuse/core'
 import { useMenuStore } from '../store/useMenuStore';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n()
 const route = useRoute();
 const menuStore = useMenuStore();
 const { isCollapse } = storeToRefs(menuStore)
 const defaultActive = ref<string>('/')
 
 const el = ref<any>()
-
 const navBackGroundColor = useCssVar('--nav-bar-background-color', el);
-
 
 onMounted(() => {
   defaultActive.value = route.path
 })
-
-
 </script>
 
 <style scoped>

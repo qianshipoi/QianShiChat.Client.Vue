@@ -2,25 +2,25 @@ import { createI18n } from 'vue-i18n'
 import enUs from './en-us'
 import zhCn from './zh-cn'
 
-enum LocalLang {
-  ZH,
-  EN
+export enum LocaleLang {
+  ZH = 'zh-cn',
+  EN = 'en-us'
 }
 
 const messages = {
-  [LocalLang.ZH]: zhCn,
-  [LocalLang.EN]: enUs,
+  [LocaleLang.ZH]: zhCn,
+  [LocaleLang.EN]: enUs,
 }
 
 function getLanguage(): string {
-  return localStorage.getItem('language') ? localStorage.getItem('language')! : LocalLang.ZH.toString()
+  return localStorage.getItem('lang') ? localStorage.getItem('lang')! : LocaleLang.ZH.toString()
 }
 
 const i18n: any = createI18n({
   legacy: false,
   globalInjection: true,
-  locale: getLanguage().toString(),
-  fallbackLocale: LocalLang.ZH.toString(),
+  locale: getLanguage(),
+  fallbackLocale: LocaleLang.ZH.toString(),
   messages
 })
 

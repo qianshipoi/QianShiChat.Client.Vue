@@ -12,8 +12,8 @@
             <nav-menu></nav-menu>
           </div>
           <el-space alignment="stretch" direction="vertical" style="width: 100%; outline: none;">
-            <button @click="userStore.logout">登出</button>
-            <button @click="isCollapse = !isCollapse">{{ isCollapse ? '展开' : '收起' }}</button>
+            <button @click="userStore.logout">{{ t('nav.logout') }}</button>
+            <button @click="isCollapse = !isCollapse">{{ isCollapse ? t('nav.expand') : t('nav.close') }}</button>
           </el-space>
         </div>
       </el-aside>
@@ -34,6 +34,9 @@ import NavMenu from '../components/NavMenu.vue';
 import { useMenuStore } from '../store/useMenuStore'
 import { useCurrentUserStore } from '../store/useCurrentUserStore';
 import { useChatStore } from '../store/useChatStore';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n()
 
 const menuStore = useMenuStore();
 const { isCollapse } = storeToRefs(menuStore)
@@ -52,4 +55,3 @@ useChatStore().start();
   height: 80vh;
 }
 </style>
-../store/useCurrentUserStore

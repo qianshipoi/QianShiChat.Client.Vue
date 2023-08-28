@@ -1,8 +1,8 @@
 export default {
   nav: {
-    firend: "FIREND",
-    message: "MESSAGE",
-    sessings: "SETTINGS",
+    firends: "FIREND",
+    messages: "MESSAGE",
+    settings: "SETTINGS",
     logout: "LOGOUT",
     expand: "EXPAND",
     close: "CLOSE"
@@ -15,6 +15,11 @@ export default {
   },
   settings: {
     lang: "Language",
-    theme: "Theme"
-  }
+    theme: "Theme",
+    system: "system",
+    light: "light",
+    dark: "dark"
+  },
+  select_your_preferences: "Select your preferences.",
+  get_start: "Get start"
 }

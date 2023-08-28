@@ -1,8 +1,8 @@
 export default {
   nav: {
-    firend: "朋友",
-    message: "消息",
-    sessings: "设置",
+    firends: "朋友",
+    messages: "消息",
+    settings: "设置",
     logout: "登出",
     expand: "展开",
     close: "收起"
@@ -15,6 +15,11 @@ export default {
   },
   settings: {
     lang: "语言",
-    theme: "主题"
-  }
+    theme: "主题",
+    system: "来自系统",
+    light: "明亮",
+    dark: "暗黑"
+  },
+  select_your_preferences: "请选择您的偏好。",
+  get_start: "立即开始"
 }
