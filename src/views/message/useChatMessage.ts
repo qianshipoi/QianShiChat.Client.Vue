@@ -76,12 +76,12 @@ export const useChatMessage = () => {
         loading.value = true
         const paged = await history(roomMessage?.session.toId!, 1)
         if (paged.data?.items) {
-          paged.data?.items.forEach(async item => {
+          paged.data?.items.forEach(async (item: ChatMessage) => {
             item.fromUser = await getUser(item.fromId)
             roomMessage?.messages.unshift(item)
           })
 
-          const maxId = Math.max(...paged.data?.items.map(item => item.id));
+          const maxId = Math.max(...paged.data?.items.map((item: ChatMessage) => item.id));
 
           sessionStore.clearUnreadCount(roomMessage!.session.id)
           if (isFrst && maxId > 0) {
@@ -140,7 +140,7 @@ export const useChatMessage = () => {
 
         sendFileApi({
           toId: roomMessage!.session.toId,
-          attachmentId: message.content.id,
+          attachmentId: attachment.id,
           sendType: ChatMessageSendType.Personal
         }).then(({ succeeded, data }) => {
           if (!succeeded) {

@@ -1,6 +1,6 @@
 import { AxiosRequestConfig } from "axios";
-import { Attachment, GlobalResult } from "../types/Types.ts";
-import instance from "./index.ts";
+import { Attachment, GlobalResult } from "../types/Types";
+import instance from "./index";
 
 export function upload(file: File, config?: AxiosRequestConfig | undefined): Promise<GlobalResult<Attachment>> {
   const data = new FormData()

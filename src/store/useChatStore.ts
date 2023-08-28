@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
-import * as signalr from "@microsoft/signalr"
 import { useCurrentUserStore } from "./useCurrentUserStore";
 import { ChatMessage, ChatMessageSendType, Session } from "../types/Types";
 import { ElNotification } from "element-plus";
+import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 
 export const useChatStore = defineStore("chat", () => {
   const BASE_URL = import.meta.env.VITE_APP_BASE_URL + "/Hubs/Chat"
@@ -10,9 +10,10 @@ export const useChatStore = defineStore("chat", () => {
   const currentUserStore = useCurrentUserStore()
   const isReady = ref<boolean>(false)
 
-  const connection = new signalr.HubConnectionBuilder()
+  const connection = new HubConnectionBuilder()
     .withUrl(BASE_URL, { accessTokenFactory: () => currentUserStore.token })
     .withAutomaticReconnect()
+    .configureLogging(import.meta.env.MODE === "production" ? LogLevel.Warning : LogLevel.Debug)
     .build();
 
   const privateChatEventHandler: ((message: ChatMessage) => void)[] = []
@@ -23,16 +24,16 @@ export const useChatStore = defineStore("chat", () => {
     })
   })
 
-  const getCounter = () => connection.stream("Counter", 10, 2000)
-    .subscribe({
-      next: (item) => {
-        ElNotification.info("next: " + item);
-      },
-      complete: () => {
-        ElNotification.success("complete");
-      },
-      error: (err) => ElNotification.error(err)
-    })
+  // const getCounter = () => connection.stream("Counter", 10, 2000)
+  //   .subscribe({
+  //     next: (item) => {
+  //       ElNotification.info("next: " + item);
+  //     },
+  //     complete: () => {
+  //       ElNotification.success("complete");
+  //     },
+  //     error: (err) => ElNotification.error(err)
+  //   })
 
   type SubscribeCallback<T> = {
     next: (item: T) => void,
@@ -72,7 +73,7 @@ export const useChatStore = defineStore("chat", () => {
   const start = async () => {
     await connection.start();
     isReady.value = true;
-    getCounter()
+    // getCounter()
   }
 
   const close = async () => {

@@ -1,5 +1,5 @@
-import { ChatMessage, GlobalResult, PagedList, PrivateChatMessageRequest, SendFileMessageRequest } from "../types/Types.ts";
-import instance from "./index.ts";
+import { ChatMessage, GlobalResult, PagedList, PrivateChatMessageRequest, SendFileMessageRequest } from "../types/Types";
+import instance from "./index";
 
 export function history(id: number, page: number, size?: number): Promise<GlobalResult<PagedList<ChatMessage>>> {
   return instance.get(`/chat/${id}/history`, { params: { page, size } });
