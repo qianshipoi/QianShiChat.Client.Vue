@@ -38,12 +38,13 @@ const menuStore = useMenuStore();
 const { isCollapse } = storeToRefs(menuStore)
 const defaultActive = ref<string>('/')
 
+watchEffect(() => {
+  defaultActive.value = route.path
+})
+
 const el = ref<any>()
 const navBackGroundColor = useCssVar('--nav-bar-background-color', el);
 
-onMounted(() => {
-  defaultActive.value = route.path
-})
 </script>
 
 <style scoped>
