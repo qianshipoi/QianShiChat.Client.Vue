@@ -6,15 +6,18 @@
     <!-- <ChatMessage v-model="textMessage" is-self />
     <ChatMessage v-model="imageMessage" is-self />
     <ChatMessage v-model="otherFileMessage" is-self /> -->
-    <AddFriendSearch :model-value="true"></AddFriendSearch>
+    <!-- <AddFriendSearch :model-value="true"></AddFriendSearch> -->
+
+    <button @click="showFriendApplyNotification">show apply notification</button>
   </div>
 </template>
 
 <script setup lang='ts'>
 import ChatMessage from '../components/ChatMessage/index.vue'
-import { ChatMessageStatus, UserInfo } from '../types/Types';
+import { ApplyStatus, ChatMessageStatus, FriendApply, UserInfo } from '../types/Types';
 import { ChatMessageSendType, ChatMessage as ChatMessageClass, ChatMessageType } from '../types/Types';
 import AddFriendSearch from '../components/AddFriendSearch.vue'
+import { ElImage, ElNotification } from 'element-plus';
 
 const userinfo: UserInfo = {
   id: 1,
@@ -56,6 +59,35 @@ const otherFileMessage: ChatMessageClass = {
   ...imageMessage,
   messageType: ChatMessageType.OtherFile,
   status: ChatMessageStatus.Failed
+}
+
+const showFriendApplyNotification = () => {
+  const apply: FriendApply = {
+    id: 0,
+    userId: userinfo.id,
+    friendId: userinfo.id,
+    createTime: Date.now(),
+    remark: "测试",
+    status: ApplyStatus.Applied,
+    user: userinfo,
+    friend: userinfo
+  }
+
+  ElNotification({
+    title: "好友申请",
+    duration: 10000,
+    message: h('div', { class: 'apply-notification' }, [
+      h(ElImage, { src: apply.friend.avatar }),
+      h('div', { class: 'apply-notification-content' }, [
+        h('p', `收到来自[${apply.friend.nickName}]的好友申请，备注：${apply.remark}`),
+        h('div', { class: 'apply-notification-actions' }, [
+          h('button', { class: 'success' }, "同意"),
+          h('button', { class: 'warning' }, "驳回"),
+          h('button', "详情")
+        ])
+      ])
+    ])
+  })
 }
 
 </script>

@@ -11,13 +11,13 @@
       </div>
       <ul>
         <li v-for="session in sessions" :key="session.id">
-          <SessionItem :model-value="(session as Session)" @selected="selectedHandle"
-            :is-selected="openedRoomId === session.id" />
+          <SessionItem :model-value="(session as Session)" @selected="sessionStore.openRoom(session.id)"
+            :is-selected="sessionStore.isOpend(session.id)" />
         </li>
       </ul>
     </div>
     <div class="content">
-      <router-view :key="openedRoomId"></router-view>
+      <Room v-if="sessionStore.isOpendRoom" :room="sessionStore.opendRoomRaw!" />
     </div>
     <add-friend-search v-model="addFriendVisible"></add-friend-search>
   </div>
@@ -28,37 +28,12 @@ import { storeToRefs } from 'pinia';
 import { useSessionStore } from '../store/useSessionStore';
 import { Session } from '../types/Types';
 import { Plus } from '@element-plus/icons-vue'
-import { useRouter } from 'vue-router';
-import { useRoute } from 'vue-router';
+import Room from './message/Room.vue'
 import AddFriendSearch from '../components/AddFriendSearch.vue';
 
 const sessionStore = useSessionStore();
 const { sessions } = storeToRefs(sessionStore);
 const searchText = ref<string>('')
-const route = useRoute()
-const router = useRouter()
-
-const openedRoomId = ref<string>("")
-
-watch(() => route.fullPath, () => {
-  if (route.name === "Room") {
-    openedRoomId.value = route.params["id"] as string
-  } else {
-    openedRoomId.value = ''
-  }
-}, {
-  immediate: true
-})
-
-const selectedHandle = (session: Session) => {
-  router.replace({
-    name: "Room",
-    params: {
-      id: session.id
-    }
-  })
-}
-
 const addFriendVisible = ref<boolean>(false)
 
 </script>

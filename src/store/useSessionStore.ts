@@ -8,6 +8,8 @@ import { useUserStore } from "./useUserStore";
 export const useSessionStore = defineStore("session", () => {
   const sessions = useSessionStorage<Session[]>("sessions", [])
 
+  const opendRoom = ref<Session | null>(null)
+
   const currentUserStore = useCurrentUserStore()
   const userStore = useUserStore();
   const chatStore = useChatStore();
@@ -92,11 +94,21 @@ export const useSessionStore = defineStore("session", () => {
     return sessions.value.find(x => x.id === id)
   }
 
+  const openRoom = (roomId: string) => {
+    const room = sessions.value.find(x => x.id === roomId)
+    room && (opendRoom.value = room)
+  }
+
   return {
     sessions: computed(() => readonly(sessions.value)),
     addSession,
     removeSession,
     clearUnreadCount,
-    getSession
+    getSession,
+    opendRoom: readonly(opendRoom),
+    isOpendRoom: computed(() => !!opendRoom.value),
+    opendRoomRaw: opendRoom,
+    isOpend: computed(() => (roomId: string) => (!!opendRoom.value && opendRoom.value.id === roomId)),
+    openRoom
   }
 })

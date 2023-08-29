@@ -14,7 +14,10 @@
   -webkit-text-size-adjust: 100%;
 
   --nav-bar-background-color:#F2F2F2;
-  --primary:#0099FF
+  --primary:#0099FF;
+  --warning:#F0B86E;
+  --danger:#BB2525;
+  --success:#A8DF8E;
 }
 
 *{

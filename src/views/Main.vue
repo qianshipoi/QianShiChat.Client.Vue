@@ -1,31 +1,33 @@
 <template>
-  <el-container class="main">
-    <!-- <el-header>
-    </el-header> -->
-    <el-container>
-      <el-aside style="width: auto; background-color: var(--nav-bar-background-color);">
-        <div
-          style="display: flex; height: 100%; flex-direction: column; align-items: center; justify-content: space-between;">
-          <div>
-            <el-image style="width: 40px;height: 40px;margin: 20px 0; border-radius: 50%;"
-              :src="userStore.userInfo?.avatar" fit="cover" :lazy="true"></el-image>
-            <nav-menu></nav-menu>
+  <div class="main">
+    <el-alert v-if="!chatStore.isReady" style="position: absolute; top:0" type="error" effect="dark" :closable="false"
+      title="连接中断" show-icon />
+    <el-container class="container">
+      <el-container>
+        <el-aside style="width: auto; background-color: var(--nav-bar-background-color);">
+          <div
+            style="display: flex; height: 100%; flex-direction: column; align-items: center; justify-content: space-between;">
+            <div>
+              <el-image style="width: 40px;height: 40px;margin: 20px 0; border-radius: 50%;"
+                :src="userStore.userInfo?.avatar" fit="cover" :lazy="true"></el-image>
+              <nav-menu></nav-menu>
+            </div>
+            <el-space alignment="stretch" direction="vertical" style="width: 100%; outline: none;">
+              <button @click="userStore.logout">{{ t('nav.logout') }}</button>
+              <button @click="isCollapse = !isCollapse">{{ isCollapse ? t('nav.expand') : t('nav.close') }}</button>
+            </el-space>
           </div>
-          <el-space alignment="stretch" direction="vertical" style="width: 100%; outline: none;">
-            <button @click="userStore.logout">{{ t('nav.logout') }}</button>
-            <button @click="isCollapse = !isCollapse">{{ isCollapse ? t('nav.expand') : t('nav.close') }}</button>
-          </el-space>
-        </div>
-      </el-aside>
-      <el-main style="padding: 0;">
-        <router-view v-slot="{ Component }">
-          <keep-alive>
-            <component :is="Component" />
-          </keep-alive>
-        </router-view>
-      </el-main>
+        </el-aside>
+        <el-main style="padding: 0;">
+          <router-view v-slot="{ Component }">
+            <keep-alive>
+              <component :is="Component" />
+            </keep-alive>
+          </router-view>
+        </el-main>
+      </el-container>
     </el-container>
-  </el-container>
+  </div>
 </template>
 
 <script setup lang='ts'>
@@ -42,15 +44,24 @@ const { t } = useI18n()
 const menuStore = useMenuStore();
 const { isCollapse } = storeToRefs(menuStore)
 const userStore = useCurrentUserStore();
-useChatStore().start();
+const chatStore = useChatStore();
+chatStore.start();
 const friendStore = useFriendStore();
 friendStore.loadData();
 </script>
 
 <style scoped>
 .main {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
   max-width: 1280px;
-  margin: 60px auto;
   min-width: 600px;
   background-color: white;
   border-radius: 12px;

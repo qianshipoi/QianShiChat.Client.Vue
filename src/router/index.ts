@@ -19,13 +19,6 @@ const routes: RouteRecordRaw[] = [
         name: "Message",
         path: "/",
         component: () => import("../views/Message.vue"),
-        children: [
-          {
-            name: "Room",
-            path: "/room/:id",
-            component: () => import("../views/message/Room.vue")
-          }
-        ]
       },
       {
         name: "Friend",

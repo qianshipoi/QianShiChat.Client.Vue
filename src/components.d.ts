@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     AddFriendSearch: typeof import('./components/AddFriendSearch.vue')['default']
     ChatMessage: typeof import('./components/ChatMessage/index.vue')['default']
+    ElAlert: typeof import('element-plus/es')['ElAlert']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElContainer: typeof import('element-plus/es')['ElContainer']
@@ -33,7 +34,6 @@ declare module 'vue' {
     LoginSelectOption: typeof import('./components/LoginSelectOption.vue')['default']
     NavMenu: typeof import('./components/NavMenu.vue')['default']
     NotSupportedMessage: typeof import('./components/ChatMessage/NotSupportedMessage.vue')['default']
-    RoomSearch: typeof import('./components/RoomSearch.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SessionItem: typeof import('./components/SessionItem.vue')['default']

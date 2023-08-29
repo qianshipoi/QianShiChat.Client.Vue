@@ -16,6 +16,16 @@ export const useChatStore = defineStore("chat", () => {
     .configureLogging(import.meta.env.MODE === "production" ? LogLevel.Warning : LogLevel.Debug)
     .build();
 
+  connection.onclose((err: Error | undefined) => {
+    console.log("onclose", err);
+    isReady.value = false
+  })
+
+  connection.onreconnected((connectionId: string | undefined) => {
+    console.log("onreconnected", connectionId);
+    isReady.value = true;
+  })
+
   const privateChatEventHandler: ((message: ChatMessage) => void)[] = []
 
   connection.on("PrivateChat", (message: ChatMessage) => {

@@ -47,13 +47,11 @@ const sendMessage = async () => {
   room.name = props.user.nickName ?? ""
   room.avatar = props.user.avatar
   sessionsStore.addSession(room);
+  sessionsStore.openRoom(room.id);
 
   // join to message room.
   router.push({
-    name: "Room",
-    params: {
-      id: room.id
-    }
+    name: "Message"
   })
 }
 

@@ -24,14 +24,32 @@ export const useFriendStore = defineStore("friend", () => {
       }
     } else if (notification.type === NotificationType.FriendApply) {
       const apply = notification.message as FriendApply;
-      // ElNotification.info(`收到来自[${apply.friend.nickName}]的好友申请，备注：${apply.remark}`)
-      console.log(apply.friend.avatar);
-
-      ElNotification.info({
+      const handle = ElNotification({
         title: "好友申请",
-        message: h(ElImage, { src: apply.friend.avatar }),
-        duration: 0
+        duration: 10000,
+        message: h('div', { class: 'apply-notification' }, [
+          h(ElImage, { src: apply.user!.avatar }),
+          h('div', { class: 'apply-notification-content' }, [
+            h('p', `收到来自[${apply.user!.nickName}]的好友申请，备注：${apply.remark}`),
+            h('div', { class: 'apply-notification-actions' }, [
+              h('button', {
+                class: 'success', onClick: () => {
+                  console.log("同意");
+                  handle.close()
+                }
+              }, "同意"),
+              h('button', {
+                class: 'warning', onClick: () => console.log("驳回")
+              }, "驳回"),
+              h('button', {
+                onClick: () => console.log("详情")
+              }, "详情")
+            ])
+          ])
+        ])
       })
+    } else if (notification.type === NotificationType.NewFriend) {
+      
     }
   });
 
