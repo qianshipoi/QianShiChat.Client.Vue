@@ -67,10 +67,10 @@ const { height: messageBoxHeight } = useElementSize(messageBox)
 
 const { loadData, messages, sendText, sendFile, clearUnread } = getRoomMessage(props.room.id)
 
-const messageBoxScrollDown = () => {
+const messageBoxScrollDown = (first: boolean = false) => {
   messageListBox.value?.scrollTo({
     top: messageBoxHeight.value,
-    behavior: "smooth",
+    behavior: first ? "smooth" : "auto",
   })
 }
 
@@ -79,10 +79,10 @@ const moveEnd = () => {
 }
 
 onMounted(async () => {
-  await loadData()
-  await nextTick(() => {
+  await loadData(true)
+  setTimeout(() => {
     messageBoxScrollDown();
-  })
+  }, 5)
 })
 
 const isSelf = (formId: number): boolean => {
@@ -95,9 +95,7 @@ const send = async () => {
   messageBoxScrollDown();
 }
 
-const { open, onChange } = useFileDialog({
-
-})
+const { open, onChange } = useFileDialog()
 
 onChange(async (files) => {
   if (!files || files.length === 0) return;

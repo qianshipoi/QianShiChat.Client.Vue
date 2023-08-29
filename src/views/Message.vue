@@ -17,7 +17,7 @@
       </ul>
     </div>
     <div class="content">
-      <Room v-if="sessionStore.isOpendRoom" :room="sessionStore.opendRoomRaw!" />
+      <Room v-if="sessionStore.isOpendRoom" :key="sessionStore.opendRoomRaw?.id" :room="sessionStore.opendRoomRaw!" />
     </div>
     <add-friend-search v-model="addFriendVisible"></add-friend-search>
   </div>

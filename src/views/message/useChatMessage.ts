@@ -42,7 +42,7 @@ export const useChatMessage = () => {
     if (!roomMessage) {
       roomMessage = {
         id: id,
-        session: sessionStore.sessions.find(x => x.id === id)!,
+        session: sessionStore.opendRoomRaw!,
         messages: reactive([])
       }
       roomMessages.push(roomMessage)
@@ -85,8 +85,8 @@ export const useChatMessage = () => {
 
         paged.data.items.forEach(async (item: ChatMessage) => {
           item.fromUser = await getUser(item.fromId)
+          roomMessage?.messages.unshift(item)
         })
-        roomMessage?.messages.unshift(...paged.data.items)
         const maxId = Math.max(...paged.data.items.map((item: ChatMessage) => item.id));
         sessionStore.clearUnreadCount(roomMessage.session.id);
         if (isFrst && maxId > 0)
@@ -116,7 +116,7 @@ export const useChatMessage = () => {
         size: file.size
       }
 
-      const message: ChatMessage = {
+      const message = reactive<ChatMessage>({
         id: getNextId(),
         fromId: currentUserStore.userInfo?.id!,
         toId: roomMessage.session.toId,
@@ -127,7 +127,7 @@ export const useChatMessage = () => {
         createTime: getNextId(),
         fromUser: currentUserStore.userInfo,
         status: ChatMessageStatus.Sending
-      }
+      })
 
       upload(file, {
         onUploadProgress: ({ loaded, total }) => {
@@ -155,6 +155,7 @@ export const useChatMessage = () => {
           message.createTime = data!.createTime
           message.status = ChatMessageStatus.Succeeded
         }).catch(err => {
+          message.status = ChatMessageStatus.Failed
           ElNotification.error(err)
         })
       }).catch(err => {
@@ -164,7 +165,7 @@ export const useChatMessage = () => {
     }
 
     const sendText = (content: string) => {
-      const message: ChatMessage = {
+      const message = reactive<ChatMessage>({
         id: getNextId(),
         fromId: currentUserStore.userInfo?.id!,
         toId: roomMessage!.session.toId!,
@@ -175,7 +176,7 @@ export const useChatMessage = () => {
         createTime: getNextId(),
         fromUser: currentUserStore.userInfo,
         status: ChatMessageStatus.Sending
-      }
+      })
 
       sendTextApi({
         toId: roomMessage.session.toId,
@@ -191,6 +192,7 @@ export const useChatMessage = () => {
         message.createTime = data!.createTime
         message.status = ChatMessageStatus.Succeeded
       }).catch(err => {
+        message.status = ChatMessageStatus.Failed;
         ElNotification.error(err)
       })
 
