@@ -35,6 +35,7 @@ import { useMenuStore } from '../store/useMenuStore'
 import { useCurrentUserStore } from '../store/useCurrentUserStore';
 import { useChatStore } from '../store/useChatStore';
 import { useI18n } from 'vue-i18n';
+import { useFriendStore } from '../store/useFriendStore';
 
 const { t } = useI18n()
 
@@ -42,6 +43,8 @@ const menuStore = useMenuStore();
 const { isCollapse } = storeToRefs(menuStore)
 const userStore = useCurrentUserStore();
 useChatStore().start();
+const friendStore = useFriendStore();
+friendStore.loadData();
 </script>
 
 <style scoped>

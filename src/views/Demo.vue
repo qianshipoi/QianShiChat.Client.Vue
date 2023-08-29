@@ -6,6 +6,7 @@
     <!-- <ChatMessage v-model="textMessage" is-self />
     <ChatMessage v-model="imageMessage" is-self />
     <ChatMessage v-model="otherFileMessage" is-self /> -->
+    <AddFriendSearch :model-value="true"></AddFriendSearch>
   </div>
 </template>
 
@@ -13,6 +14,7 @@
 import ChatMessage from '../components/ChatMessage/index.vue'
 import { ChatMessageStatus, UserInfo } from '../types/Types';
 import { ChatMessageSendType, ChatMessage as ChatMessageClass, ChatMessageType } from '../types/Types';
+import AddFriendSearch from '../components/AddFriendSearch.vue'
 
 const userinfo: UserInfo = {
   id: 1,

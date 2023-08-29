@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { useCurrentUserStore } from "./useCurrentUserStore";
-import { ChatMessage, ChatMessageSendType, Session } from "../types/Types";
+import { ChatMessage, ChatMessageSendType, NotificationMessage, Session } from "../types/Types";
 import { ElNotification } from "element-plus";
 import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 
@@ -24,16 +24,12 @@ export const useChatStore = defineStore("chat", () => {
     })
   })
 
-  // const getCounter = () => connection.stream("Counter", 10, 2000)
-  //   .subscribe({
-  //     next: (item) => {
-  //       ElNotification.info("next: " + item);
-  //     },
-  //     complete: () => {
-  //       ElNotification.success("complete");
-  //     },
-  //     error: (err) => ElNotification.error(err)
-  //   })
+  const notificationEventHandler: ((notification: NotificationMessage) => void)[] = []
+
+  connection.on("Notification", (notification: NotificationMessage) => {
+    console.log(notification);
+    notificationEventHandler.forEach((item) => item(notification));
+  })
 
   type SubscribeCallback<T> = {
     next: (item: T) => void,
@@ -66,6 +62,10 @@ export const useChatStore = defineStore("chat", () => {
     privateChatEventHandler.push(callback)
   }
 
+  const onNotification = (callback: (notification: NotificationMessage) => void) => {
+    notificationEventHandler.push(callback);
+  }
+
   const getRoom = async (toId: number, type: ChatMessageSendType) => {
     return await connection.invoke<Session | null>("GetRoomAsync", toId, type)
   }
@@ -73,7 +73,6 @@ export const useChatStore = defineStore("chat", () => {
   const start = async () => {
     await connection.start();
     isReady.value = true;
-    // getCounter()
   }
 
   const close = async () => {
@@ -89,6 +88,7 @@ export const useChatStore = defineStore("chat", () => {
     getSessions,
     updateReadPosition,
     subscribeSessions,
-    getRoom
+    getRoom,
+    onNotification
   }
 })

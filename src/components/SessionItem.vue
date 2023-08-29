@@ -25,7 +25,7 @@ defineProps<{
   isSelected?: boolean
 }>()
 
-const session = defineModel<Session>()
+const session = defineModel<Session | undefined>()
 
 const emits = defineEmits<{
   (event: "selected", val: Session): void

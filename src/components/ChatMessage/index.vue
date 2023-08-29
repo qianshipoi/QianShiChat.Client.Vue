@@ -9,7 +9,7 @@
         <component :is="content" :content="message?.content" />
       </div>
       <el-icon v-if="message?.status === ChatMessageStatus.Sending">
-        <Loading />
+        <Loading style="animation: loading-rotate 2s linear infinite;" />
       </el-icon>
       <el-icon style="cursor: pointer;" v-else-if="message?.status === ChatMessageStatus.Failed" color="#F74C30">
         <WarningFilled />

@@ -4,7 +4,7 @@ import { useSessionStore } from "../../store/useSessionStore"
 import { useUserStore } from "../../store/useUserStore"
 import { Attachment, ChatMessage, ChatMessageSendType, ChatMessageStatus, ChatMessageType, Session, UserInfo } from "../../types/Types"
 import { ElMessage, ElNotification } from "element-plus"
-import { sendText as sendTextApi, sendFile as sendFileApi } from '../../api/chat';
+import { sendText as sendTextApi, sendFile as sendFileApi } from "../../api/chat";
 import { useCurrentUserStore } from "../../store/useCurrentUserStore"
 import { upload } from "../../api/attachment"
 
@@ -74,20 +74,23 @@ export const useChatMessage = () => {
     const loadData = async (isFrst: boolean = false) => {
       try {
         loading.value = true
-        const paged = await history(roomMessage?.session.toId!, 1)
-        if (paged.data?.items) {
-          paged.data?.items.forEach(async (item: ChatMessage) => {
-            item.fromUser = await getUser(item.fromId)
-            roomMessage?.messages.unshift(item)
-          })
-
-          const maxId = Math.max(...paged.data?.items.map((item: ChatMessage) => item.id));
-
-          sessionStore.clearUnreadCount(roomMessage!.session.id)
-          if (isFrst && maxId > 0) {
-            chatStore.updateReadPosition(roomMessage!.session.id, maxId)
-          }
+        const paged = await history(roomMessage.session.id, 1)
+        if (!paged.succeeded) {
+          throw new Error((paged.errors ?? "").toString())
         }
+
+        if (!paged.data || paged.data.items.length <= 0) {
+          return;
+        }
+
+        paged.data.items.forEach(async (item: ChatMessage) => {
+          item.fromUser = await getUser(item.fromId)
+        })
+        roomMessage?.messages.unshift(...paged.data.items)
+        const maxId = Math.max(...paged.data.items.map((item: ChatMessage) => item.id));
+        sessionStore.clearUnreadCount(roomMessage.session.id);
+        if (isFrst && maxId > 0)
+          chatStore.updateReadPosition(roomMessage.session.id, maxId)
       } catch (err) {
         ElMessage.error(err as string)
       } finally {
@@ -116,8 +119,8 @@ export const useChatMessage = () => {
       const message: ChatMessage = {
         id: getNextId(),
         fromId: currentUserStore.userInfo?.id!,
-        toId: roomMessage!.session.toId!,
-        sessionId: roomMessage!.session.id,
+        toId: roomMessage.session.toId,
+        sessionId: roomMessage.session.id,
         sendType: ChatMessageSendType.Personal,
         messageType: fileTypeToMessageType(file.type),
         content: attachment,

@@ -3,7 +3,7 @@
     <div class="sessions">
       <div class="search">
         <el-input v-model="searchText" size="small" placeholder="搜索"></el-input>
-        <button style="padding: 8px; font-weight: 600;">
+        <button style="padding: 8px; font-weight: 600;" @click="addFriendVisible = true">
           <el-icon>
             <Plus />
           </el-icon>
@@ -11,13 +11,15 @@
       </div>
       <ul>
         <li v-for="session in sessions" :key="session.id">
-          <SessionItem :model-value="session" @selected="selectedHandle" :is-selected="openedRoomId === session.id" />
+          <SessionItem :model-value="(session as Session)" @selected="selectedHandle"
+            :is-selected="openedRoomId === session.id" />
         </li>
       </ul>
     </div>
     <div class="content">
       <router-view :key="openedRoomId"></router-view>
     </div>
+    <add-friend-search v-model="addFriendVisible"></add-friend-search>
   </div>
 </template>
 
@@ -28,9 +30,10 @@ import { Session } from '../types/Types';
 import { Plus } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router';
 import { useRoute } from 'vue-router';
+import AddFriendSearch from '../components/AddFriendSearch.vue';
 
 const sessionStore = useSessionStore();
-const { sessions, } = storeToRefs(sessionStore);
+const { sessions } = storeToRefs(sessionStore);
 const searchText = ref<string>('')
 const route = useRoute()
 const router = useRouter()
@@ -55,6 +58,8 @@ const selectedHandle = (session: Session) => {
     }
   })
 }
+
+const addFriendVisible = ref<boolean>(false)
 
 </script>
 

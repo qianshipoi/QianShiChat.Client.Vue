@@ -2,7 +2,7 @@ export type GlobalResult<T> = {
   statusCode: number
   data?: T
   succeeded: boolean,
-  errors?: object,
+  errors: object | null | string,
   timestamp: number
 }
 
@@ -46,12 +46,55 @@ export interface ChatMessage {
   status: ChatMessageStatus
 }
 
+export enum NotificationType {
+  /// <summary>
+  /// 好友上线
+  /// </summary>
+  FriendOnline,
+  /// <summary>
+  /// 好友下线
+  /// </summary>
+  FriendOffline,
+  /// <summary>
+  /// 好友申请
+  /// </summary>
+  FriendApply,
+  /// <summary>
+  /// 新好友
+  /// </summary>
+  NewFriend,
+}
+
+export interface NotificationMessage {
+  type: NotificationType;
+  message: FriendApply | string | number;
+}
+
 export interface UserInfo {
-  id: number
-  account: string
-  nickName?: string
-  avatar: string
-  createTime: number
+  id: number;
+  account: string;
+  nickName?: string;
+  avatar: string;
+  createTime: number;
+  isOnline?: boolean;
+}
+
+export enum ApplyStatus {
+  Applied = 1,
+  Passed,
+  Rejected,
+  Ignored
+}
+
+export interface FriendApply {
+  id: number;
+  userId: number;
+  friendId: number;
+  createTime: number;
+  remark?: string;
+  status: ApplyStatus;
+  user?: UserInfo;
+  friend: UserInfo;
 }
 
 export interface Session {
@@ -69,7 +112,13 @@ export interface Session {
 }
 
 export interface Group {
-
+  id: number;
+  userId: number;
+  name: string;
+  avatar: string;
+  totalUser: number;
+  createTime: number;
+  users?: UserInfo[]
 }
 
 export interface Attachment {

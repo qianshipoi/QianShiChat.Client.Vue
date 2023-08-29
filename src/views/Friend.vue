@@ -33,8 +33,6 @@ const searchText = ref<string>('')
 const friendStore = useFriendStore()
 const { friends } = storeToRefs(friendStore)
 
-friendStore.loadData()
-
 const currentSelectedUser = ref<UserInfo>()
 
 const isSelected = computed(() => (user: UserInfo) => currentSelectedUser.value === user)
