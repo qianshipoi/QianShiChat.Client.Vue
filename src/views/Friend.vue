@@ -9,6 +9,12 @@
           </el-icon>
         </button>
       </div>
+
+      <div style="display: flex; flex-direction: column;gap: 8px;">
+        <button @click="openFriendApply">好友通知</button>
+        <button>群通知</button>
+      </div>
+
       <ul>
         <li v-for="friend in friends" :key="friend.id">
           <UserItem :model-value="friend" @selected="selectedHandle" :is-selected="isSelected(friend)" />
@@ -16,7 +22,8 @@
       </ul>
     </div>
     <div class="content">
-      <UserProfile v-if="currentSelectedUser" :user="currentSelectedUser" />
+      <component v-if="opendComponent" v-bind="componentProps" :is="opendComponent" />
+      <!-- <UserProfile v-if="currentSelectedUser" :user="currentSelectedUser" /> -->
     </div>
   </div>
 </template>
@@ -26,7 +33,9 @@ import { Plus } from '@element-plus/icons-vue'
 import { useFriendStore } from '../store/useFriendStore';
 import { storeToRefs } from 'pinia';
 import { UserInfo } from '../types/Types';
-import UserProfile from './friend/UserProfile.vue'
+
+const UserProfile = defineAsyncComponent(() => import('./friend/UserProfile.vue'))
+const FriendApply = defineAsyncComponent(() => import('./friend/FriendApply.vue'))
 
 const searchText = ref<string>('')
 
@@ -39,6 +48,18 @@ const isSelected = computed(() => (user: UserInfo) => currentSelectedUser.value 
 
 const selectedHandle = (user: UserInfo) => {
   currentSelectedUser.value = user
+  opendComponent.value = UserProfile;
+  componentProps.value = {
+    user
+  }
+}
+
+const opendComponent = shallowRef<any>(null)
+const componentProps = ref<any>(null)
+
+const openFriendApply = () => {
+  opendComponent.value = FriendApply;
+  componentProps.value = null;
 }
 
 </script>

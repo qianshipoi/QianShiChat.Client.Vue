@@ -20,7 +20,9 @@
           <ul class="list" v-if="displayUserResult">
             <li class="list-item" v-for="user in userResult" :key="user.id">
               <user-base :user="user" use-highlight :highlight-text="searchText"></user-base>
-              <button @click="selectedUser = user">添加</button>
+              <button v-if="user.relation === UserRelation.None" @click="selectedUser = user">添加</button>
+              <button v-else-if="user.relation === UserRelation.Friend">发消息</button>
+              <button v-else disabled>已申请</button>
             </li>
           </ul>
 
@@ -59,19 +61,32 @@ import { friendApply, search as searchApi } from '../api/user'
 import { ElNotification } from 'element-plus';
 import axios, { CancelTokenSource } from 'axios'
 import { useThrottleFn } from '@vueuse/core';
+import { useFriendStore } from '../store/useFriendStore';
 
 const visible = defineModel<boolean>()
 const searchText = ref<string>('')
 
-const userResult = ref<UserInfo[]>([]);
+const userResult = ref<UserResult[]>([]);
 const groupResult = ref<Group[]>([])
 const loading = ref<boolean>(false);
 
-const selectedUser = ref<UserInfo | null>(null)
+const selectedUser = ref<UserResult | null>(null)
 
 let cancelTokenSource: CancelTokenSource;
 
 const throttledSearch = useThrottleFn(() => search(), 1000)
+
+const friendStore = useFriendStore()
+
+enum UserRelation {
+  None,
+  Friend,
+  Applied
+}
+
+interface UserResult extends UserInfo {
+  relation: UserRelation;
+}
 
 const search = async () => {
   cancelTokenSource?.cancel();
@@ -86,7 +101,16 @@ const search = async () => {
     if (!result.succeeded) {
       throw new Error(result.errors as string)
     }
-    userResult.value = result.data!.items
+
+    const data: UserResult[] = []
+    result.data!.items.forEach((user: UserInfo) => {
+      data.push(reactive({
+        ...user,
+        relation: friendStore.isFriend(user.id) ? UserRelation.Friend : UserRelation.None
+      }))
+    });
+
+    userResult.value = data
   } catch (err: any) {
     ElNotification.error(err)
   } finally {
@@ -99,7 +123,7 @@ const displayUserResult = computed(() => userResult.value && userResult.value.le
 const displayGroupResult = computed(() => groupResult.value && groupResult.value.length > 0)
 
 const applyRemark = ref<string>('')
-const apply = async (user: UserInfo) => {
+const apply = async (user: UserResult) => {
   loading.value = true
 
   try {
@@ -112,7 +136,7 @@ const apply = async (user: UserInfo) => {
     ElNotification.success('已发送申请')
     selectedUser.value = null;
     applyRemark.value = ''
-
+    user.relation = UserRelation.Applied
   } catch (error: any) {
     ElNotification.error(error);
   } finally {

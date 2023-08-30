@@ -73,10 +73,10 @@ export interface NotificationMessage {
 export interface UserInfo {
   id: number;
   account: string;
-  nickName?: string;
+  nickName?: string | undefined;
   avatar: string;
   createTime: number;
-  isOnline?: boolean;
+  isOnline?: boolean | undefined;
 }
 
 export enum ApplyStatus {

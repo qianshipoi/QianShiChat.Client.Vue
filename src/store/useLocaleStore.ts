@@ -2,6 +2,8 @@ import { defineStore } from "pinia";
 import { LocaleLang } from "../lang";
 import { useI18n } from "vue-i18n";
 import { useLocalStorage } from "@vueuse/core";
+import * as dayjs from 'dayjs'
+import 'dayjs/locale/zh-cn'
 
 const DEFAULT_LANG = LocaleLang.ZH
 export const useLocaleStore = defineStore("locale", () => {
@@ -12,9 +14,11 @@ export const useLocaleStore = defineStore("locale", () => {
   const changeLang = (lang: LocaleLang) => {
     locale.value = lang.toString();
     currentLang.value = lang;
+    dayjs.locale(locale.value)
   }
 
   onMounted(() => {
+    dayjs.locale('zh-cn')
     if (currentLang.value !== DEFAULT_LANG) {
       changeLang(currentLang.value)
     }
@@ -23,6 +27,6 @@ export const useLocaleStore = defineStore("locale", () => {
   return {
     currentLang: readonly(currentLang),
     t,
-    changeLang
+    changeLang,
   }
 })

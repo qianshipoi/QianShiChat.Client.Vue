@@ -92,8 +92,13 @@ export const useFriendStore = defineStore("friend", () => {
     friends.push(...result.data!)
   }
 
+  const isFriend = (id: number): boolean => {
+    return friends.some(friend => friend.id === id);
+  }
+
   return {
     friends: readonly(friends),
+    isFriend,
     loadData,
   }
 })

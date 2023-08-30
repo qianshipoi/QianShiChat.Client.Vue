@@ -17,9 +17,8 @@
 </template>
 
 <script setup lang='ts'>
-import * as dayjs from 'dayjs'
-import * as isToday from 'dayjs/plugin/isToday'
 import { Session } from '../types/Types';
+import { timeFormat } from '../utils/timeUtils'
 
 defineProps<{
   isSelected?: boolean
@@ -31,7 +30,6 @@ const emits = defineEmits<{
   (event: "selected", val: Session): void
 }>()
 
-dayjs.extend(isToday);
 
 const selected = () => {
   emits('selected', session.value!);
@@ -45,26 +43,6 @@ const content = computed(() => {
   }
 })
 
-const isLessThenOneWeek = (date: dayjs.Dayjs): boolean => {
-  const aWeekAge = dayjs(new Date()).subtract(1, "week")
-  return aWeekAge.get("second") < date.get("second")
-}
-
-const timeFormat = (time?: number) => {
-  if (!time) {
-    return '';
-  }
-  const date = dayjs(time);
-  const isToday = date.isToday()
-
-  if (isToday) {
-    return `${date.hour()}:${date.minute()}`
-  } else if (isLessThenOneWeek(date)) {
-    return date.format("dd")
-  } else {
-    return date.format("YYYY/MM/DD")
-  }
-}
 
 </script>
 
