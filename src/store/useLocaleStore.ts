@@ -3,8 +3,8 @@ import { LocaleLang } from "../lang";
 import { useI18n } from "vue-i18n";
 import { useLocalStorage } from "@vueuse/core";
 
+const DEFAULT_LANG = LocaleLang.ZH
 export const useLocaleStore = defineStore("locale", () => {
-  const DEFAULT_LANG = LocaleLang.ZH
   const { t, locale } = useI18n()
 
   const currentLang = useLocalStorage<LocaleLang>("lang", DEFAULT_LANG);
@@ -21,7 +21,7 @@ export const useLocaleStore = defineStore("locale", () => {
   })
 
   return {
-    currentLang: computed(() => currentLang.value),
+    currentLang: readonly(currentLang),
     t,
     changeLang
   }

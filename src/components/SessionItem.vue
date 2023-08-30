@@ -1,7 +1,7 @@
 <template>
   <div :class="['session-item', isSelected ? 'selected' : '']" @click="selected">
     <div class="avatar">
-      <el-image style="width: 100%;height: 100%;" :src="session?.avatar" fit="cover" :lazy="true"></el-image>
+      <el-image style="width: 100%;height: 100%;" :src="session?.avatar" fit="cover"></el-image>
     </div>
     <div class="content">
       <div class="up">

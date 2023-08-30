@@ -47,10 +47,10 @@ export const useCurrentUserStore = defineStore('current_user', () => {
   }
 
   return {
-    token: computed(() => token.value),
+    token: readonly(token),
+    loading: readonly(loading),
     userInfo,
     isAuthenticated,
-    loading: computed(() => loading.value),
     login,
     logout,
     changeToken

@@ -21,5 +21,12 @@ export default {
     dark: "dark"
   },
   select_your_preferences: "Select your preferences.",
-  get_start: "Get start"
+  get_start: "Get start",
+  actions: {
+    pass: "Pass",
+    reject: "Reject",
+    ignore: "Ignore",
+    confirm: "Confirm",
+    detail: "Detail"
+  }
 }

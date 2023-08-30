@@ -2,12 +2,30 @@ import { defineStore } from "pinia";
 import { FriendApply, NotificationMessage, NotificationType, UserInfo } from "../types/Types";
 import { getFriends } from "../api/friend";
 import { useChatStore } from "./useChatStore";
-import { ElImage, ElNotification } from "element-plus";
+import { ElNotification, NotificationHandle } from "element-plus";
+import { useI18n } from "vue-i18n";
+import ApplyNotification from "../components/Notification/ApplyNotification.vue";
+import { useSettingsStore } from "./useSettingsStore";
+
+interface ApplyNotificationHandle {
+  apply: FriendApply;
+  handle: NotificationHandle;
+  timer: number;
+}
 
 export const useFriendStore = defineStore("friend", () => {
   const friends = reactive<UserInfo[]>([])
 
   const chatStore = useChatStore();
+  const settingsStore = useSettingsStore()
+  const { t } = useI18n()
+
+  const applyNotice: ApplyNotificationHandle[] = []
+
+  function removeApplyNotice(handle: NotificationHandle) {
+    const cacheIndex = applyNotice.findIndex(x => x.handle === handle);
+    applyNotice.splice(cacheIndex, 1);
+  }
 
   chatStore.onNotification((notification: NotificationMessage) => {
     if (notification.type === NotificationType.FriendOnline) {
@@ -23,33 +41,48 @@ export const useFriendStore = defineStore("friend", () => {
         ElNotification.info(`好友[${user?.nickName}]已下线`)
       }
     } else if (notification.type === NotificationType.FriendApply) {
-      const apply = notification.message as FriendApply;
-      const handle = ElNotification({
-        title: "好友申请",
-        duration: 10000,
-        message: h('div', { class: 'apply-notification' }, [
-          h(ElImage, { src: apply.user!.avatar }),
-          h('div', { class: 'apply-notification-content' }, [
-            h('p', `收到来自[${apply.user!.nickName}]的好友申请，备注：${apply.remark}`),
-            h('div', { class: 'apply-notification-actions' }, [
-              h('button', {
-                class: 'success', onClick: () => {
-                  console.log("同意");
-                  handle.close()
-                }
-              }, "同意"),
-              h('button', {
-                class: 'warning', onClick: () => console.log("驳回")
-              }, "驳回"),
-              h('button', {
-                onClick: () => console.log("详情")
-              }, "详情")
-            ])
-          ])
-        ])
-      })
+      const apply = reactive(notification.message as FriendApply);
+      const cache = applyNotice.find(x => x.apply.id === apply.id)
+
+      if (cache) {
+        cache.apply.remark = apply.remark;
+        cache.timer && clearTimeout(cache.timer)
+        cache.timer = setTimeout(() => {
+          cache.handle.close()
+        }, settingsStore.notifceDuration);
+      } else {
+        const handle = ElNotification({
+          title: "好友申请",
+          duration: 0,
+          message: h(ApplyNotification, {
+            apply,
+            onSuccess: () => {
+              console.log(t('actions.pass'));
+              handle.close();
+            },
+            onReject: () => {
+              console.log(t('actions.reject'));
+            },
+            onDetail: () => {
+              console.log(t('actions.detail'));
+            },
+          }),
+          onClose: () => {
+            removeApplyNotice(handle);
+          }
+        })
+        const timer = setTimeout(() => {
+          handle.close()
+        }, settingsStore.notifceDuration)
+        applyNotice.push({
+          timer,
+          apply,
+          handle
+        })
+      }
+
     } else if (notification.type === NotificationType.NewFriend) {
-      
+
     }
   });
 

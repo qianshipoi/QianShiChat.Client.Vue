@@ -33,7 +33,7 @@ export const useUserStore = defineStore("user", () => {
   }
 
   return {
-    loading: computed(() => loading.value),
+    loading: readonly(loading),
     getUser,
     getUsers
   }

@@ -21,5 +21,12 @@ export default {
     dark: "暗黑"
   },
   select_your_preferences: "请选择您的偏好。",
-  get_start: "立即开始"
+  get_start: "立即开始",
+  actions: {
+    pass: "通过",
+    reject: "驳回",
+    ignore: "忽略",
+    confirm: "确定",
+    detail: "详情"
+  }
 }

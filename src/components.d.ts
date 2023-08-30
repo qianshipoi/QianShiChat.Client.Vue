@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AddFriendSearch: typeof import('./components/AddFriendSearch.vue')['default']
+    ApplyNotification: typeof import('./components/Notification/ApplyNotification.vue')['default']
     ChatMessage: typeof import('./components/ChatMessage/index.vue')['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']
     ElAside: typeof import('element-plus/es')['ElAside']

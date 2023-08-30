@@ -91,7 +91,7 @@ export const useChatStore = defineStore("chat", () => {
   }
 
   return {
-    isReady: computed(() => isReady.value),
+    isReady: readonly(isReady),
     start,
     close,
     onPrivateChat,

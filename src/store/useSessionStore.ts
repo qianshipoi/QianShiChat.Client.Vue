@@ -100,7 +100,7 @@ export const useSessionStore = defineStore("session", () => {
   }
 
   return {
-    sessions: computed(() => readonly(sessions.value)),
+    sessions: readonly(sessions),
     addSession,
     removeSession,
     clearUnreadCount,
