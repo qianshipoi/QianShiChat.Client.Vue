@@ -37,7 +37,6 @@ export const useChatStore = defineStore("chat", () => {
   const notificationEventHandler: ((notification: NotificationMessage) => void)[] = []
 
   connection.on("Notification", (notification: NotificationMessage) => {
-    console.log(notification);
     notificationEventHandler.forEach((item) => item(notification));
   })
 

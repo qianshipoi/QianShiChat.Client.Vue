@@ -17,3 +17,21 @@ export const filterSize = (size: number): string => {
 function pow1024(num: number): number {
   return Math.pow(1024, num)
 }
+
+
+export const downloadFile = (url: string, filename?: string): void => {
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename ?? "true";
+  a.style.display = "none";
+
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+export const getFileExt = (filename: string): string => {
+  const lastIndex = filename.lastIndexOf('.');
+  if (lastIndex === -1) return '';
+  return filename.substring(lastIndex)
+}

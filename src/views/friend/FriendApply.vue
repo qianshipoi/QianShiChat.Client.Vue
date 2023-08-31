@@ -69,7 +69,6 @@ const loadData = async () => {
   } finally {
     loading.value = false
   }
-
 }
 
 loadData();

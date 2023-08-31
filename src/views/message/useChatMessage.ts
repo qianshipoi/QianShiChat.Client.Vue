@@ -14,6 +14,8 @@ type RoomMessages = {
   messages: ChatMessage[]
 }
 
+type NewMessageCallback = (message: ChatMessage) => void
+
 export const useChatMessage = () => {
   const roomMessages = reactive<RoomMessages[]>([])
 
@@ -68,6 +70,9 @@ export const useChatMessage = () => {
       if (message.sessionId === roomMessage?.id) {
         message.fromUser = await getUser(message.fromId)
         roomMessage?.messages.push(message)
+        newMessageCallback.forEach(callback => {
+          callback(message);
+        });
       }
     })
 
@@ -139,11 +144,11 @@ export const useChatMessage = () => {
           return
         }
 
-        message.content = uploadResult.data!
+        message.content = reactive(uploadResult.data as Attachment)
 
         sendFileApi({
           toId: roomMessage!.session.toId,
-          attachmentId: attachment.id,
+          attachmentId: message.content.id,
           sendType: ChatMessageSendType.Personal
         }).then(({ succeeded, data }) => {
           if (!succeeded) {
@@ -199,6 +204,12 @@ export const useChatMessage = () => {
       addMessage(message);
     }
 
+    const newMessageCallback: NewMessageCallback[] = []
+
+    const onNewMessage = (callback: NewMessageCallback) => {
+      newMessageCallback.push(callback)
+    }
+
     return {
       loading: computed(() => loading.value),
       messages: readonly(roomMessage.messages),
@@ -208,7 +219,8 @@ export const useChatMessage = () => {
       clearUnread: () => {
         sessionStore.clearUnreadCount(roomMessage.session.id)
         chatStore.updateReadPosition(roomMessage.session.id, roomMessage.messages[roomMessage.messages.length - 1].id)
-      }
+      },
+      onNewMessage
     }
   }
 

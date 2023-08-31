@@ -1,5 +1,5 @@
 <template>
-  <el-image class="image-message" :preview-src-list="[content.rawPath]" :src="content.previewPath" fit="cover"
+  <el-image class="image-message" :preview-src-list="[content.rawPath]" :src="content.previewPath" fit="fill"
     :lazy="true">
     <template #error>
       <div class="image-slot">

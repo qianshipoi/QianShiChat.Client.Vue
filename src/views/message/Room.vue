@@ -18,6 +18,12 @@
               </div>
             </div>
           </el-scrollbar>
+
+          <button v-if="!isActive" class="goto-bottom" @click="messageBoxScrollDown()">
+            <el-icon>
+              <ArrowDownBold />
+            </el-icon>
+          </button>
         </template>
         <template #end>
           <div class="send-box">
@@ -43,8 +49,8 @@
 </template>
 
 <script setup lang='ts'>
-import { MoreFilled, FolderAdd } from '@element-plus/icons-vue';
-import { useElementSize, useFileDialog } from '@vueuse/core';
+import { MoreFilled, FolderAdd, ArrowDownBold } from '@element-plus/icons-vue';
+import { useElementSize, useFileDialog, watchPausable } from '@vueuse/core';
 import { useChatMessage } from './useChatMessage';
 import ChatMessage from '../../components/ChatMessage/index.vue';
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
@@ -67,23 +73,35 @@ const { height: messageBoxHeight } = useElementSize(messageBox)
 
 const { loadData, messages, sendText, sendFile, clearUnread } = getRoomMessage(props.room.id)
 
-const messageBoxScrollDown = (first: boolean = false) => {
+loadData(true)
+
+const messageBoxScrollDown = (animation: boolean = true) => {
   messageListBox.value?.scrollTo({
     top: messageBoxHeight.value,
-    behavior: first ? "smooth" : "auto",
+    behavior: animation ? "smooth" : "auto",
   })
+}
+
+const { isActive, pause, resume } = watchPausable(
+  messageBoxHeight,
+  () => messageBoxScrollDown(false),
+)
+
+const messageListScrollHandle = (e: { scrollLeft: number, scrollTop: number }) => {
+  if ((messageListBox.value?.wrapRef?.clientHeight ?? 0) + e.scrollTop + 60 <= messageBoxHeight.value) {
+    pause();
+  } else {
+    resume();
+  }
+
+  if (props.room.unreadCount > 0 && e.scrollTop + (messageListBox.value?.wrapRef?.clientHeight ?? 0) + 40 > messageBoxHeight.value) {
+    clearUnread()
+  }
 }
 
 const moveEnd = () => {
   messageListBox.value?.update()
 }
-
-onMounted(async () => {
-  await loadData(true)
-  setTimeout(() => {
-    messageBoxScrollDown();
-  }, 5)
-})
 
 const isSelf = (formId: number): boolean => {
   return formId === currentUserStore.userInfo?.id
@@ -92,7 +110,7 @@ const isSelf = (formId: number): boolean => {
 const send = async () => {
   await sendText(messageContent.value)
   messageContent.value = ''
-  messageBoxScrollDown();
+  !isActive.value && messageBoxScrollDown(true)
 }
 
 const { open, onChange } = useFileDialog()
@@ -105,14 +123,8 @@ onChange(async (files) => {
     return;
   }
   await sendFile(files[0])
-  messageBoxScrollDown();
+  !isActive.value && messageBoxScrollDown(true)
 })
-
-const messageListScrollHandle = (e: { scrollLeft: number, scrollTop: number }) => {
-  if (props.room.unreadCount > 0 && e.scrollTop + (messageListBox.value?.wrapRef?.clientHeight ?? 0) + 40 > messageBoxHeight.value) {
-    clearUnread()
-  }
-}
 
 </script>
 
@@ -132,13 +144,13 @@ header {
   border-bottom: 1px solid #E9E9E9;
 }
 
-.el-icon {
+header .el-icon {
   cursor: pointer;
   font-size: 26px;
   padding: 4px;
 }
 
-.el-icon:hover {
+header .el-icon:hover {
   color: var(--primary);
 }
 
@@ -184,5 +196,22 @@ header {
 
 .send-box :deep(.el-textarea__inner) {
   padding: 0;
+}
+
+.goto-bottom {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  background-color: var(--primary);
+  font-size: 12px;
+  color: white;
+  padding: 4px 8px;
+  animation: opacity 1s linear alternate infinite;
+}
+
+@keyframes opacity {
+  to {
+    opacity: .4;
+  }
 }
 </style>
