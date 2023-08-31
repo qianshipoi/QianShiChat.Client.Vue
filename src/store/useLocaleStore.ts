@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { LocaleLang } from "../lang";
 import { useI18n } from "vue-i18n";
 import { useLocalStorage } from "@vueuse/core";
-import * as dayjs from 'dayjs'
+import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
 
 const DEFAULT_LANG = LocaleLang.ZH

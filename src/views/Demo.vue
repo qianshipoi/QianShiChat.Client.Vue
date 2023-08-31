@@ -16,7 +16,7 @@
 import ChatMessage from '../components/ChatMessage/index.vue'
 import { ApplyStatus, ChatMessageStatus, FriendApply, UserInfo } from '../types/Types';
 import { ChatMessageSendType, ChatMessage as ChatMessageClass, ChatMessageType } from '../types/Types';
-import AddFriendSearch from '../components/AddFriendSearch.vue'
+// import AddFriendSearch from '../components/AddFriendSearch.vue'
 import { ElImage, ElNotification } from 'element-plus';
 
 const userinfo: UserInfo = {

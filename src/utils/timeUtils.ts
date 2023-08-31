@@ -1,6 +1,7 @@
 
-import * as dayjs from 'dayjs'
-import * as isToday from 'dayjs/plugin/isToday'
+import dayjs from 'dayjs'
+import isToday from 'dayjs/plugin/isToday'
+
 dayjs.extend(isToday);
 
 export const timeFormat = (time?: number) => {
