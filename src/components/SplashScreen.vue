@@ -1,14 +1,15 @@
 <template>
   <div class="splash-screen" ref="splashScreen">
     <h1>{{ t('select_your_preferences') }}</h1>
-    <el-select v-model="settings.lang" class="lang-options" size="large" filterable @change="langChangeHandle">
+    <el-select :model-value="settingsStore.language" class="lang-options" size="large" filterable
+      @change="settingsStore.changeLanguage">
       <el-option v-for="item in langOptions" :key="item.value" :label="item.name" :value="item.value">
       </el-option>
     </el-select>
 
     <ul class="theme-options">
-      <li :class="['theme-options-item', { 'selected': colorStore === theme.name }]" v-for="theme in themeOptions"
-        :key="theme.name" @click="() => colorStore = theme.name">
+      <li :class="['theme-options-item', { 'selected': settingsStore.theme === theme.name }]"
+        v-for="theme in themeOptions" :key="theme.name" @click="settingsStore.changeTheme(theme.name)">
         <el-icon :size="22">
           <component :is="theme.icon" />
         </el-icon>
@@ -25,26 +26,14 @@ import { DefineComponent } from 'vue';
 import { LocaleLang } from '../lang';
 import { Moon, Platform, Sunny } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n';
-import { useLocaleStore } from "../store/useLocaleStore";
-import { useColorMode } from '@vueuse/core';
 import { useSettingsStore } from '../store/useSettingsStore';
 
-interface Settings {
-  lang: LocaleLang;
-  theme: Theme;
-}
-
-const localeStore = useLocaleStore()
+const settingsStore = useSettingsStore();
 
 interface LangOption {
   name: string;
   value: LocaleLang
 }
-
-const settings = reactive<Settings>({
-  lang: localeStore.currentLang,
-  theme: "auto"
-})
 
 const langOptions: LangOption[] = [
   {
@@ -59,9 +48,6 @@ const langOptions: LangOption[] = [
 
 const { t } = useI18n()
 
-const langChangeHandle = (lang: LocaleLang) => {
-  localeStore.changeLang(lang);
-}
 
 type Theme = 'auto' | 'dark' | 'light';
 
@@ -76,9 +62,7 @@ const themeOptions = reactive<ThemeOption[]>([
   { name: 'light', icon: markRaw(Sunny), value: () => t('settings.light') },
   { name: 'dark', icon: markRaw(Moon), value: () => t('settings.dark') },
 ])
-const { store: colorStore } = useColorMode()
 
-const settingsStore = useSettingsStore();
 const splashScreen = ref<HTMLElement | null>(null)
 
 const closeTime = 300;

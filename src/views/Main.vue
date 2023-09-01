@@ -4,7 +4,7 @@
       title="连接中断" show-icon />
     <el-container class="container">
       <el-container>
-        <el-aside style="width: auto; background-color: var(--nav-bar-background-color);">
+        <el-aside style="width: auto; background-color: var(--nav-bar-bg-color);">
           <div
             style="display: flex; height: 100%; flex-direction: column; align-items: center; justify-content: space-between;">
             <div>
@@ -63,7 +63,7 @@ friendStore.loadData();
 .container {
   max-width: 1280px;
   min-width: 600px;
-  background-color: white;
+  background-color: var(--main-container-color);
   border-radius: 12px;
   overflow: hidden;
   height: 80vh;

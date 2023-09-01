@@ -1,0 +1,19 @@
+@media (color-scheme: dark) {
+  :root {
+    --primary:#0099FF;
+    --warning:#F0B86E;
+    --danger:#BB2525;
+    --success:#A8DF8E;
+
+    --main-contanier-color:#1B1B1B;
+    --nav-bar-bg-color:#111111;
+    --item-hover-color:#F5F5F5;
+    --item-active-color:#0099FF;
+
+    --text-color-primary:var(--el-text-color-primary);
+    --text-color-regular:var(--el-text-color-regular);
+    --text-color-econdary:var(--el-text-color-econdary);
+    --text-color-placeholder:var(--el-text-color-placeholder);
+    --text-color-disabled:var(--el-text-color-disabled);
+  }
+}

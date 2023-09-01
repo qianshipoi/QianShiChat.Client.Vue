@@ -4,20 +4,17 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+}
 
-  --nav-bar-background-color:#F2F2F2;
-  --primary:#0099FF;
-  --warning:#F0B86E;
-  --danger:#BB2525;
-  --success:#A8DF8E;
+:root {
+  background-color: var(--el-bg-color);
+  color: var(--el-text-color-regular);
 }
 
 *{
@@ -39,7 +36,7 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background-color: ghostwhite;
+  background-color: var(--el-bg-color);
 }
 
 ul{
@@ -87,10 +84,24 @@ button:focus-visible {
 }
 
 @media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+ :root {
+    background-color: var(--el-bg-color);
+    color: var(--el-text-color-regular);
   }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+@media (color-scheme: light) {
+  body {
+    color: var(--el-text-color-regular);
+    background-color: ghostwhite;
+  }
+
   a:hover {
     color: #747bff;
   }

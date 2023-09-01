@@ -7,7 +7,7 @@ import 'dayjs/locale/zh-cn'
 
 const DEFAULT_LANG = LocaleLang.ZH
 export const useLocaleStore = defineStore("locale", () => {
-  const { t, locale } = useI18n()
+  const { locale } = useI18n()
 
   const currentLang = useLocalStorage<LocaleLang>("lang", DEFAULT_LANG);
 
@@ -26,7 +26,6 @@ export const useLocaleStore = defineStore("locale", () => {
 
   return {
     currentLang: readonly(currentLang),
-    t,
     changeLang,
   }
 })

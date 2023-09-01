@@ -7,6 +7,7 @@ import { ElMessage, ElNotification } from "element-plus"
 import { sendText as sendTextApi, sendFile as sendFileApi } from "../../api/chat";
 import { useCurrentUserStore } from "../../store/useCurrentUserStore"
 import { upload } from "../../api/attachment"
+import { TusUpload } from "../../utils/tusUtils"
 
 type RoomMessages = {
   id: String,
@@ -134,21 +135,10 @@ export const useChatMessage = () => {
         status: ChatMessageStatus.Sending
       })
 
-      upload(file, {
-        onUploadProgress: ({ loaded, total }) => {
-          attachment.progress = loaded / (total ?? file.size)
-        }
-      }).then(uploadResult => {
-        if (!uploadResult.succeeded) {
-          message.status = ChatMessageStatus.Failed
-          return
-        }
-
-        message.content = reactive(uploadResult.data as Attachment)
-
+      const sendFileMessage = (message: ChatMessage) => {
         sendFileApi({
           toId: roomMessage!.session.toId,
-          attachmentId: message.content.id,
+          attachmentId: (message.content as Attachment).id,
           sendType: ChatMessageSendType.Personal
         }).then(({ succeeded, data }) => {
           if (!succeeded) {
@@ -163,9 +153,42 @@ export const useChatMessage = () => {
           message.status = ChatMessageStatus.Failed
           ElNotification.error(err)
         })
-      }).catch(err => {
-        ElNotification.error(err)
-      })
+      }
+
+      if (file.size > 1024 * 1024 * 30) {
+        const upload = new TusUpload(file)
+          .addAuthorizationFactory(() => currentUserStore.token)
+          .setProgress((loaded, total) => {
+            attachment.progress = loaded / (total ?? file.size)
+          })
+          .setSuccess(() => {
+            // todo: no response。
+            // message.content = reactive(uploadResult.data as Attachment)
+            sendFileMessage(message);
+          })
+          .setError(() => {
+            message.status = ChatMessageStatus.Failed;
+          })
+          .build();
+
+        upload.start();
+      } else {
+        upload(file, {
+          onUploadProgress: ({ loaded, total }) => {
+            attachment.progress = loaded / (total ?? file.size)
+          }
+        }).then(uploadResult => {
+          if (!uploadResult.succeeded) {
+            message.status = ChatMessageStatus.Failed
+            return
+          }
+          message.content = reactive(uploadResult.data as Attachment)
+          sendFileMessage(message);
+        }).catch(err => {
+          ElNotification.error(err)
+        })
+      }
+
       addMessage(message);
     }
 

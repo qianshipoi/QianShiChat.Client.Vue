@@ -1,6 +1,5 @@
 <template>
-  <el-menu :background-color="navBackGroundColor" router :default-active="defaultActive" class="el-menu-vertical-demo"
-    :collapse="isCollapse">
+  <el-menu router :default-active="defaultActive" class="el-menu-vertical-demo" :collapse="isCollapse">
     <el-menu-item index="/">
       <el-icon><icon-menu /></el-icon>
       <template #title>{{ t('nav.messages') }}</template>
@@ -26,7 +25,6 @@ import {
   Menu as IconMenu,
   Setting,
 } from '@element-plus/icons-vue'
-import { useCssVar } from '@vueuse/core'
 import { useMenuStore } from '../store/useMenuStore';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
@@ -42,19 +40,18 @@ watchEffect(() => {
   defaultActive.value = route.path
 })
 
-const el = ref<any>()
-const navBackGroundColor = useCssVar('--nav-bar-background-color', el);
-
 </script>
 
 <style scoped>
+.el-menu-vertical-demo {
+  --el-menu-bg-color: var(--nav-bar-bg-color);
+  --el-menu-text-color: var(--text-color-primary);
+  --el-menu-active-color: var(--item-active-color);
+  border-right-width: 0;
+}
+
 .el-menu-vertical-demo:not(.el-menu--collapse) {
   width: 200px;
   min-height: 400px;
-}
-
-.el-menu-vertical-demo {
-
-  border-right-width: 0;
 }
 </style>
