@@ -38,7 +38,7 @@ export class TusUpload {
     this.upload = new Upload(this.file, {
       endpoint: END_POINT,
       retryDelays: [0, 3000, 5000, 10000, 20000],
-      chunkSize: 1024 * 1024,
+      chunkSize: 1024 * 1024 * 10,
       metadata: {
         filename: this.file.name,
         filetype: this.file.type
