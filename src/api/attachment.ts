@@ -7,3 +7,7 @@ export function upload(file: File, config?: AxiosRequestConfig | undefined): Pro
   data.append("file", file)
   return instance.post('/attachment', data, config)
 }
+
+export function bindTusFile(fileId: string): Promise<GlobalResult<Attachment>> {
+  return instance.put(`/attachment/bind-tus-file/${fileId}`)
+}

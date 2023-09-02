@@ -1,13 +1,13 @@
-import tus from 'tus-js-client'
+import { DetailedError, HttpRequest, Upload } from 'tus-js-client'
 
-const END_POINT = import.meta.env.VITE_APP_BASE_URL + "/tusfiles";
+const END_POINT = import.meta.env.VITE_APP_BASE_URL + "/api/tusfiles";
 
 export class TusUpload {
   file: File;
-  upload?: tus.Upload;
+  upload?: Upload;
   _onProgress?: (bytesSent: number, bytesTotal: number) => void;
-  _onSuccess?: () => void;
-  _onError?: (error: Error | tus.DetailedError) => void;
+  _onSuccess?: (fileId: string) => void;
+  _onError?: (error: Error | DetailedError) => void;
   _authorizationFactory?: () => string;
 
   constructor(file: File) {
@@ -19,12 +19,12 @@ export class TusUpload {
     return this;
   }
 
-  setSuccess(callback: () => void): TusUpload {
+  setSuccess(callback: (fileId: string) => void): TusUpload {
     this._onSuccess = callback;
     return this;
   }
 
-  setError(callback: (error: Error | tus.DetailedError) => void): TusUpload {
+  setError(callback: (error: Error | DetailedError) => void): TusUpload {
     this._onError = callback;
     return this;
   }
@@ -35,22 +35,23 @@ export class TusUpload {
   }
 
   build(): TusUpload {
-    this.upload = new tus.Upload(this.file, {
+    this.upload = new Upload(this.file, {
       endpoint: END_POINT,
       retryDelays: [0, 3000, 5000, 10000, 20000],
+      chunkSize: 1024 * 1024,
       metadata: {
         filename: this.file.name,
         filetype: this.file.type
       },
       onError: this._onError,
       onProgress: this._onProgress,
-      onAfterResponse: (_: tus.HttpRequest, resp: tus.HttpResponse) => {
-        console.log(resp);
-      },
       onSuccess: () => {
-        this._onSuccess && this._onSuccess();
+        const lastIndex = this.upload?.url?.lastIndexOf('/')!
+        const fileId = this.upload?.url?.substring(lastIndex + 1)!;
+        this._onSuccess && this._onSuccess(fileId);
       },
-      onBeforeRequest: (req: tus.HttpRequest) => {
+      onBeforeRequest: (req: HttpRequest) => {
+        req.setHeader("Client-Type", "VueClient")
         // req.setHeader("Authorization", "Bearer [token]");
         !!this._authorizationFactory && req.setHeader("Authorization", this._authorizationFactory())
       }

@@ -6,7 +6,7 @@ import { Attachment, ChatMessage, ChatMessageSendType, ChatMessageStatus, ChatMe
 import { ElMessage, ElNotification } from "element-plus"
 import { sendText as sendTextApi, sendFile as sendFileApi } from "../../api/chat";
 import { useCurrentUserStore } from "../../store/useCurrentUserStore"
-import { upload } from "../../api/attachment"
+import { bindTusFile, upload } from "../../api/attachment"
 import { TusUpload } from "../../utils/tusUtils"
 
 type RoomMessages = {
@@ -157,14 +157,23 @@ export const useChatMessage = () => {
 
       if (file.size > 1024 * 1024 * 30) {
         const upload = new TusUpload(file)
-          .addAuthorizationFactory(() => currentUserStore.token)
+          .addAuthorizationFactory(() => `Bearer ${currentUserStore.token}`)
           .setProgress((loaded, total) => {
             attachment.progress = loaded / (total ?? file.size)
           })
-          .setSuccess(() => {
+          .setSuccess((fileId: string) => {
             // todo: no response。
             // message.content = reactive(uploadResult.data as Attachment)
-            sendFileMessage(message);
+
+            bindTusFile(fileId).then(res => {
+              if (!res.succeeded) {
+                throw new Error('upload file error.')
+              }
+              message.content = reactive(res.data as Attachment);
+              sendFileMessage(message);
+            }).catch(err => {
+              ElNotification.error(err)
+            })
           })
           .setError(() => {
             message.status = ChatMessageStatus.Failed;

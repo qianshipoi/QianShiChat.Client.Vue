@@ -57,7 +57,7 @@ import { useCurrentUserStore } from '../../store/useCurrentUserStore';
 import { ElNotification, ElScrollbar } from 'element-plus';
 import SplitterPanel from '../../components/SplitterPanel.vue';
 import { Session } from '../../types/Types';
-const FILE_MAX_SIZE = 1024 * 1024 * 30;
+const FILE_MAX_SIZE = 1024 * 1024 * 1024;
 
 const props = defineProps<{
   room: Session
@@ -113,7 +113,9 @@ const send = async () => {
   !isActive.value && messageBoxScrollDown(true)
 }
 
-const { open, onChange } = useFileDialog()
+const { open, onChange } = useFileDialog({
+  reset: true
+})
 
 onChange(async (files) => {
   if (!files || files.length === 0) return;
@@ -122,7 +124,7 @@ onChange(async (files) => {
     ElNotification.warning(`The uploaded file size cannot be larger than ${FILE_MAX_SIZE / 1024 / 1024}`)
     return;
   }
-  await sendFile(files[0])
+  await sendFile(file)
   !isActive.value && messageBoxScrollDown(true)
 })
 
