@@ -1,5 +1,5 @@
 <template>
-  <div :class="['user-item', isSelected ? 'selected' : '']" @click="selected">
+  <div :class="['user-item', isSelected ? 'selected' : '']" @click="emits('selected', user!)">
     <div class="avatar">
       <el-image style="width: 100%;height: 100%;" :src="user?.avatar" fit="cover" :lazy="true"></el-image>
     </div>
@@ -8,6 +8,8 @@
         <span class="name">{{ user?.nickName }}</span>
       </div>
       <div class="down">
+        <span class="status">[ <span :class="['dot', { 'is-online': user?.isOnline }]"></span>
+          {{ user?.isOnline ? t('status.online') : t('status.offline') }}]</span>
         <span class="message">描述</span>
       </div>
     </div>
@@ -15,8 +17,8 @@
 </template>
 
 <script setup lang='ts'>
+import { useI18n } from 'vue-i18n';
 import { UserInfo } from '../types/Types';
-
 
 defineProps<{
   isSelected?: boolean
@@ -26,15 +28,12 @@ const emits = defineEmits<{
   (event: "selected", val: UserInfo): void
 }>()
 
+const { t } = useI18n();
 const user = defineModel<UserInfo>()
-
-const selected = () => {
-  emits('selected', user.value!);
-}
 
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .user-item {
   display: flex;
   padding: 0 10px;
@@ -54,7 +53,6 @@ const selected = () => {
   color: white;
 }
 
-
 .avatar {
   height: 40px;
   width: 40px;
@@ -72,7 +70,25 @@ const selected = () => {
 .up,
 .down {
   display: flex;
-  justify-content: space-between;
+  gap: 4px;
+
+  .status {
+    display: flex;
+    align-items: center;
+
+    .dot {
+      display: block;
+      width: 14px;
+      height: 14px;
+      background-color: var(--message-description-text-color);
+      border-radius: 50%;
+      margin: 0 2px;
+
+      &.is-online {
+        background-color: var(--success);
+      }
+    }
+  }
 }
 
 .name,

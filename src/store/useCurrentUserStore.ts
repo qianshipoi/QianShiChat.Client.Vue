@@ -1,22 +1,28 @@
 import { defineStore } from "pinia";
-import { computed, ref } from "vue";
+import { ref } from "vue";
 import { UserInfo } from "../types/Types";
 import { login as loginApi } from "../api/auth";
 import { useRouter } from "vue-router";
-import { useSessionStorage, useTitle } from "@vueuse/core";
+import { StorageSerializers, useFavicon, useSessionStorage, useTitle } from "@vueuse/core";
 import { useChatStore } from "./useChatStore";
 
-export const useCurrentUserStore = defineStore('current_user', () => {
-  const token = useSessionStorage('token', '')
-  const userInfo = ref<UserInfo>()
-  const isAuthenticated = computed(() => !!token.value);
+export const useCurrentUserStore = defineStore("current_user", () => {
+  const token = useSessionStorage("token", "")
+  const userInfo = useSessionStorage<UserInfo>("user", null, {
+    serializer: StorageSerializers.object
+  })
   const loading = ref<boolean>(false)
   const router = useRouter()
   const title = useTitle()
   const chatStore = useChatStore()
+  const favicon = useFavicon()
 
   watchEffect(() => {
     title.value = userInfo.value?.nickName ?? "QianShiChat - Vue"
+  })
+
+  watchEffect(() => {
+    favicon.value = userInfo.value?.avatar
   })
 
   const login = async (account: string, password: string): Promise<boolean> => {
@@ -38,6 +44,7 @@ export const useCurrentUserStore = defineStore('current_user', () => {
 
   const logout = () => {
     token.value = ''
+    userInfo.value = null;
     chatStore.close();
     router.push({ name: "Login" })
   }
@@ -49,16 +56,10 @@ export const useCurrentUserStore = defineStore('current_user', () => {
   return {
     token: readonly(token),
     loading: readonly(loading),
-    userInfo,
-    isAuthenticated,
+    isAuthenticated: computed(() => !!token.value),
+    userInfo: readonly(userInfo),
     login,
     logout,
     changeToken
-  }
-}, {
-  persist: {
-    key: 'user',
-    paths: ['userInfo', 'isAuthenticated'],
-    storage: window.sessionStorage
   }
 })

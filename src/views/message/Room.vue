@@ -3,7 +3,8 @@
     <header>
       <div class="left">
         <span>{{ room.name }}</span>
-        <span v-if="!isGroup">{{ (room.toObject as UserInfo).isOnline ? '在线' : '离线' }}</span>
+        <span v-if="!isGroup">[{{ (room.toObject as UserInfo).isOnline ? t('status.online') : t('status.offline')
+        }}]</span>
       </div>
       <div class="menu">
         <el-icon>
@@ -60,7 +61,7 @@ import { useCurrentUserStore } from '../../store/useCurrentUserStore';
 import { ElNotification, ElScrollbar } from 'element-plus';
 import SplitterPanel from '../../components/SplitterPanel.vue';
 import { ChatMessageSendType, Session, UserInfo } from '../../types/Types';
-import { useChatStore } from '../../store/useChatStore'
+import { useI18n } from 'vue-i18n';
 const FILE_MAX_SIZE = 1024 * 1024 * 1024;
 
 const props = defineProps<{
@@ -68,12 +69,7 @@ const props = defineProps<{
 }>()
 
 const isGroup = computed(() => props.room.type === ChatMessageSendType.Group)
-
-if (!isGroup.value) {
-  const chatStore = useChatStore()
-  const userinfo = (props.room.toObject as UserInfo)
-  chatStore.userIsOnline(userinfo.id).then((onlineStatus: boolean) => userinfo.isOnline = onlineStatus)
-}
+const { t } = useI18n();
 
 const currentUserStore = useCurrentUserStore();
 const { getRoomMessage } = useChatMessage()
@@ -142,7 +138,7 @@ onChange(async (files) => {
 
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .room {
   display: flex;
   flex-direction: column;
@@ -156,6 +152,12 @@ header {
   padding: 4px 18px;
   height: 68px;
   border-bottom: 1px solid var(--room-border-color);
+
+  .left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 }
 
 header .el-icon {

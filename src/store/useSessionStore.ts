@@ -1,9 +1,10 @@
 import { defineStore } from "pinia";
-import { Session } from "../types/Types";
+import { ChatMessageSendType, NotificationMessage, NotificationType, Session, UserInfo } from "../types/Types";
 import { useSessionStorage } from "@vueuse/core";
 import { useChatStore } from "./useChatStore";
 import { useCurrentUserStore } from "./useCurrentUserStore";
 import { useUserStore } from "./useUserStore";
+import emitter from "../utils/mitt";
 
 export const useSessionStore = defineStore("session", () => {
   const sessions = useSessionStorage<Session[]>("sessions", [])
@@ -58,6 +59,17 @@ export const useSessionStore = defineStore("session", () => {
     }
     moveSessionTop(session)
   });
+
+  chatStore.onNotification((notification: NotificationMessage) => {
+    if (notification.type === NotificationType.FriendOffline || notification.type === NotificationType.FriendOnline) {
+      const userId = notification.message as number;
+      const room = sessions.value.find(x => x.toId === userId && x.type === ChatMessageSendType.Personal);
+      if (room) {
+        (room.toObject as UserInfo).isOnline = notification.type === NotificationType.FriendOnline;
+        emitter.emit("online-change", { id: userId, status: notification.type === NotificationType.FriendOnline })
+      }
+    }
+  })
 
   const addSession = (session: Session) => {
     moveSessionTop(session);

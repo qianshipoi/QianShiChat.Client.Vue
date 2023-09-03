@@ -28,5 +28,9 @@ export default {
     ignore: "Ignore",
     confirm: "Confirm",
     detail: "Detail"
+  },
+  status: {
+    online: 'on-line',
+    offline: 'off-line'
   }
 }

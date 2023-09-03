@@ -28,5 +28,9 @@ export default {
     ignore: "忽略",
     confirm: "确定",
     detail: "详情"
+  },
+  status: {
+    online: "在线",
+    offline: "离线"
   }
 }
