@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { useCurrentUserStore } from "./useCurrentUserStore";
-import { ChatMessage, ChatMessageSendType, NotificationMessage, Session } from "../types/Types";
-import { ElNotification } from "element-plus";
+import { ChatMessage, ChatMessageSendType, NotificationMessage, NotificationType, Session } from "../types/Types";
+import { ElMessageBox, ElNotification } from "element-plus";
 import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
 
 export const useChatStore = defineStore("chat", () => {
@@ -37,6 +37,18 @@ export const useChatStore = defineStore("chat", () => {
   const notificationEventHandler: ((notification: NotificationMessage) => void)[] = []
 
   connection.on("Notification", (notification: NotificationMessage) => {
+    if (notification.type === NotificationType.Signed) {
+      currentUserStore.logout();
+      ElMessageBox.alert("账号已在其他地方登录！", "警告", {
+        confirmButtonText: '确定',
+        showClose: false,
+        closeOnClickModal: false,
+        callback: () => {
+          currentUserStore.logout();
+        }
+      })
+      return;
+    }
     notificationEventHandler.forEach((item) => item(notification));
   })
 

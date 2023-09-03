@@ -63,6 +63,10 @@ export enum NotificationType {
   /// 新好友
   /// </summary>
   NewFriend,
+  /**
+   * 强制注销
+   */
+  Signed
 }
 
 export interface NotificationMessage {
