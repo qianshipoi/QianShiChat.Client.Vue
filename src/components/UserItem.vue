@@ -46,7 +46,7 @@ const selected = () => {
 }
 
 .user-item:hover {
-  background-color: #F5F5F5;
+  background-color: var(--item-hover-color);
 }
 
 .user-item.selected {

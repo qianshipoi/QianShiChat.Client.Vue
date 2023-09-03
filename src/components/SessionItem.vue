@@ -58,11 +58,11 @@ const content = computed(() => {
 }
 
 .session-item:hover {
-  background-color: #F5F5F5;
+  background-color: var(--item-hover-color);
 }
 
 .session-item.selected {
-  background-color: var(--primary);
+  background-color: var(--item-active-color);
   color: white;
 }
 

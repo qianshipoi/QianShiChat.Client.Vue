@@ -97,7 +97,7 @@ onMounted(() => {
 
 .resizer {
   flex-basis: 2px;
-  background-color: #E9E9E9;
+  background-color: var(--room-border-color);
   position: relative;
   z-index: 2;
   cursor: row-resize;

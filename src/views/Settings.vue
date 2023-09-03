@@ -1,7 +1,7 @@
 <template>
   <div class="settings">
-    <el-select :model-value="settingsStore.language" class="lang-options" size="large" filterable
-      @change="settingsStore.changeLanguage">
+    <el-select :model-value="settingsStore.language" popper-class="language-select-popper" class="lang-options"
+      size="large" filterable @change="settingsStore.changeLanguage">
       <el-option v-for="item in langOptions" :key="item.value" :label="item.name" :value="item.value">
       </el-option>
     </el-select>
@@ -60,6 +60,16 @@ const themeOptions = reactive<ThemeOption[]>([
 </script>
 
 <style lang="scss" scoped>
+.settings {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  height: 100%;
+}
+
+
 .lang-options {
   background-color: transparent;
   border: 4px solid var(--primary);
@@ -106,5 +116,13 @@ const themeOptions = reactive<ThemeOption[]>([
 .theme-options-item.selected {
   background-color: var(--primary);
   color: white;
+}
+</style>
+
+<style>
+.language-select-popper {
+  --el-bg-color-overlay: var(--primary);
+  --el-color-primary: var(--el-text-color-primary);
+  --el-border-color-light: var(--primary);
 }
 </style>

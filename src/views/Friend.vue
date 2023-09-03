@@ -2,18 +2,29 @@
   <div class="friend">
     <div class="sessions">
       <div class="search">
-        <el-input v-model="searchText" size="small" placeholder="搜索"></el-input>
-        <button style="padding: 8px; font-weight: 600;">
+        <el-input v-model="searchText" style="background-color: var(--input-bg-color);" size="small"
+          placeholder="搜索"></el-input>
+        <button style="padding: 8px; font-weight: 600; background-color: var(--input-bg-color); border-radius: 4px;">
           <el-icon>
             <Plus />
           </el-icon>
         </button>
       </div>
 
-      <div style="display: flex; flex-direction: column;gap: 8px;">
-        <button @click="openFriendApply">好友通知</button>
-        <button>群通知</button>
-      </div>
+      <ul class="options">
+        <li @click="openFriendApply">
+          <span>好友通知</span>
+          <el-icon>
+            <ArrowRight />
+          </el-icon>
+        </li>
+        <li>
+          <span>群通知</span>
+          <el-icon>
+            <ArrowRight />
+          </el-icon>
+        </li>
+      </ul>
 
       <ul>
         <li v-for="friend in friends" :key="friend.id">
@@ -23,13 +34,12 @@
     </div>
     <div class="content">
       <component v-if="opendComponent" v-bind="componentProps" :is="opendComponent" />
-      <!-- <UserProfile v-if="currentSelectedUser" :user="currentSelectedUser" /> -->
     </div>
   </div>
 </template>
 
 <script setup lang='ts'>
-import { Plus } from '@element-plus/icons-vue'
+import { Plus, ArrowRight } from '@element-plus/icons-vue'
 import { useFriendStore } from '../store/useFriendStore';
 import { storeToRefs } from 'pinia';
 import { UserInfo } from '../types/Types';
@@ -60,11 +70,12 @@ const componentProps = ref<any>(null)
 const openFriendApply = () => {
   opendComponent.value = FriendApply;
   componentProps.value = null;
+  currentSelectedUser.value = undefined;
 }
 
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .friend {
   display: flex;
   height: 100%;
@@ -73,6 +84,7 @@ const openFriendApply = () => {
 .sessions {
   width: 260px;
   height: 100%;
+  background-color: var(--room-list-bg-color);
 }
 
 .search {
@@ -87,7 +99,25 @@ const openFriendApply = () => {
 
 .content {
   flex: 1;
-  background-color: #F2F2F2;
   height: 100%;
+  background-color: var(--room-bg-color);
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  &>li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--primary);
+    }
+  }
 }
 </style>

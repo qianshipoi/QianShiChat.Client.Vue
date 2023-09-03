@@ -68,7 +68,8 @@ const content = computed(() => {
 
 .content {
   border-radius: 12px;
-  background-color: white;
+  background-color: var(--message-bg-color);
+  color: var(--message-title-text-color);
   overflow: hidden;
 }
 </style>

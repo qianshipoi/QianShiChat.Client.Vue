@@ -6,7 +6,7 @@
         <el-form :model="baseInfo" ref="formInstance" :rules="rules" :inline="false">
           <el-form-item prop="account">
             <login-select v-model="baseInfo.account" :placeholder="t('login.accountPlaceholder')" clearable>
-              asdasda
+              asdsd
             </login-select>
           </el-form-item>
           <el-form-item prop="password">

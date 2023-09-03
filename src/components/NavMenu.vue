@@ -1,12 +1,14 @@
 <template>
   <el-menu router :default-active="defaultActive" class="el-menu-vertical-demo" :collapse="isCollapse">
     <el-menu-item index="/">
-      <el-icon><icon-menu /></el-icon>
+      <el-icon>
+        <ChatLineSquare />
+      </el-icon>
       <template #title>{{ t('nav.messages') }}</template>
     </el-menu-item>
     <el-menu-item index="/friend">
       <el-icon>
-        <document />
+        <UserFilled />
       </el-icon>
       <template #title>{{ t('nav.firends') }}</template>
     </el-menu-item>
@@ -21,8 +23,8 @@
 
 <script setup lang='ts'>
 import {
-  Document,
-  Menu as IconMenu,
+  UserFilled,
+  ChatLineSquare,
   Setting,
 } from '@element-plus/icons-vue'
 import { useMenuStore } from '../store/useMenuStore';

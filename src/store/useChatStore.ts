@@ -79,6 +79,10 @@ export const useChatStore = defineStore("chat", () => {
     return await connection.invoke<Session | null>("GetRoomAsync", toId, type)
   }
 
+  const userIsOnline = async (id: number) => {
+    return await connection.invoke<boolean>("UserIsOnline", id);
+  }
+
   const start = async () => {
     await connection.start();
     isReady.value = true;
@@ -98,6 +102,7 @@ export const useChatStore = defineStore("chat", () => {
     updateReadPosition,
     subscribeSessions,
     getRoom,
-    onNotification
+    onNotification,
+    userIsOnline
   }
 })

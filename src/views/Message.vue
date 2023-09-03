@@ -2,8 +2,10 @@
   <div class="message">
     <div class="sessions">
       <div class="search">
-        <el-input v-model="searchText" size="small" placeholder="搜索"></el-input>
-        <button style="padding: 8px; font-weight: 600;" @click="addFriendVisible = true">
+        <el-input v-model="searchText" style="background-color: var(--input-bg-color);" size="small"
+          placeholder="搜索"></el-input>
+        <button style="padding: 8px; font-weight: 600; background-color: var(--input-bg-color); border-radius: 4px;"
+          @click="addFriendVisible = true">
           <el-icon>
             <Plus />
           </el-icon>
@@ -35,7 +37,6 @@ const sessionStore = useSessionStore();
 const { sessions } = storeToRefs(sessionStore);
 const searchText = ref<string>('')
 const addFriendVisible = ref<boolean>(false)
-
 </script>
 
 <style scoped>
@@ -47,6 +48,7 @@ const addFriendVisible = ref<boolean>(false)
 .sessions {
   width: 260px;
   height: 100%;
+  background-color: var(--room-list-bg-color);
 }
 
 .search {
@@ -61,7 +63,7 @@ const addFriendVisible = ref<boolean>(false)
 
 .content {
   flex: 1;
-  background-color: #F2F2F2;
   height: 100%;
+  background-color: var(--room-bg-color);
 }
 </style>

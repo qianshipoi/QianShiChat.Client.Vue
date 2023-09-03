@@ -67,18 +67,19 @@ span {
   display: flex;
   justify-content: center;
   align-items: center;
-  color: white;
+  color: var(--message-title-text-color);
   font-size: 12px;
   font-weight: 600;
 }
 
 .name {
   font-size: 14px;
+  word-wrap: break-word;
 }
 
 .description {
   font-size: 12px;
-  color: gray;
+  color: var(--message-description-text-color);
 }
 
 .menu-actions {

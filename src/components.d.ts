@@ -33,6 +33,7 @@ declare module 'vue' {
     ElScrollbar: typeof import('element-plus/es')['ElScrollbar']
     ElSelect: typeof import('element-plus/es')['ElSelect']
     ElSpace: typeof import('element-plus/es')['ElSpace']
+    ElTooltip: typeof import('element-plus/es')['ElTooltip']
     FileMessage: typeof import('./components/ChatMessage/FileMessage.vue')['default']
     GroupBase: typeof import('./components/GroupBase.vue')['default']
     ImageMessage: typeof import('./components/ChatMessage/ImageMessage.vue')['default']

@@ -13,8 +13,20 @@
               <nav-menu></nav-menu>
             </div>
             <el-space alignment="stretch" direction="vertical" style="width: 100%; outline: none;">
-              <button @click="userStore.logout">{{ t('nav.logout') }}</button>
-              <button @click="isCollapse = !isCollapse">{{ isCollapse ? t('nav.expand') : t('nav.close') }}</button>
+
+              <el-tooltip :content="t('nav.logout')" placement="right">
+                <button @click="userStore.logout">
+                  <el-icon>
+                    <SwitchButton />
+                  </el-icon>
+                </button>
+              </el-tooltip>
+
+              <el-tooltip :content="isCollapse ? t('nav.expand') : t('nav.close')" placement="right">
+                <button @click="isCollapse = !isCollapse"><el-icon>
+                    <Switch />
+                  </el-icon></button>
+              </el-tooltip>
             </el-space>
           </div>
         </el-aside>
@@ -38,6 +50,8 @@ import { useCurrentUserStore } from '../store/useCurrentUserStore';
 import { useChatStore } from '../store/useChatStore';
 import { useI18n } from 'vue-i18n';
 import { useFriendStore } from '../store/useFriendStore';
+import { SwitchButton, Switch } from '@element-plus/icons-vue'
+
 
 const { t } = useI18n()
 

@@ -116,7 +116,7 @@ main {
     height: 80px;
     padding: 1rem 2rem;
     margin: 0 1rem;
-    background-color: white;
+    background-color: var(--friend-apply-item-bg-color);
     border-radius: .8rem;
 
     .base-info {

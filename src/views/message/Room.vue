@@ -1,7 +1,10 @@
 <template>
   <div class="room">
     <header>
-      <span>{{ room.name }}</span>
+      <div class="left">
+        <span>{{ room.name }}</span>
+        <span v-if="!isGroup">{{ (room.toObject as UserInfo).isOnline ? '在线' : '离线' }}</span>
+      </div>
       <div class="menu">
         <el-icon>
           <MoreFilled />
@@ -56,12 +59,21 @@ import ChatMessage from '../../components/ChatMessage/index.vue';
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
 import { ElNotification, ElScrollbar } from 'element-plus';
 import SplitterPanel from '../../components/SplitterPanel.vue';
-import { Session } from '../../types/Types';
+import { ChatMessageSendType, Session, UserInfo } from '../../types/Types';
+import { useChatStore } from '../../store/useChatStore'
 const FILE_MAX_SIZE = 1024 * 1024 * 1024;
 
 const props = defineProps<{
   room: Session
 }>()
+
+const isGroup = computed(() => props.room.type === ChatMessageSendType.Group)
+
+if (!isGroup.value) {
+  const chatStore = useChatStore()
+  const userinfo = (props.room.toObject as UserInfo)
+  chatStore.userIsOnline(userinfo.id).then((onlineStatus: boolean) => userinfo.isOnline = onlineStatus)
+}
 
 const currentUserStore = useCurrentUserStore();
 const { getRoomMessage } = useChatMessage()
@@ -143,7 +155,7 @@ header {
   align-items: center;
   padding: 4px 18px;
   height: 68px;
-  border-bottom: 1px solid #E9E9E9;
+  border-bottom: 1px solid var(--room-border-color);
 }
 
 header .el-icon {
