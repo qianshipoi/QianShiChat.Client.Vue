@@ -42,10 +42,7 @@ export const useChatStore = defineStore("chat", () => {
       ElMessageBox.alert("账号已在其他地方登录！", "警告", {
         confirmButtonText: '确定',
         showClose: false,
-        closeOnClickModal: false,
-        callback: () => {
-          currentUserStore.logout();
-        }
+        closeOnClickModal: false
       })
       return;
     }
