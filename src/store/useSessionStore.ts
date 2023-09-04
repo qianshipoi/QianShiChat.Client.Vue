@@ -94,7 +94,6 @@ export const useSessionStore = defineStore("session", () => {
           addSession(item)
         }
       })
-      chatStore.sendSteam()
     }
   })
 

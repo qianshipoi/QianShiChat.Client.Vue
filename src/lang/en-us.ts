@@ -27,10 +27,12 @@ export default {
     reject: "Reject",
     ignore: "Ignore",
     confirm: "Confirm",
-    detail: "Detail"
+    detail: "Detail",
+    warning: "Warning"
   },
   status: {
     online: 'on-line',
     offline: 'off-line'
-  }
+  },
+  signed: "The account repeatedly logged in elsewhere!"
 }

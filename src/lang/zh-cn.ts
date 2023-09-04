@@ -27,10 +27,12 @@ export default {
     reject: "驳回",
     ignore: "忽略",
     confirm: "确定",
-    detail: "详情"
+    detail: "详情",
+    warning: "警告"
   },
   status: {
     online: "在线",
     offline: "离线"
-  }
+  },
+  signed: "账号已在其他地方登录！"
 }

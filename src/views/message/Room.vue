@@ -131,7 +131,9 @@ onChange(async (files) => {
   if (file.size > FILE_MAX_SIZE) {
     ElNotification.warning(`The uploaded file size cannot be larger than ${FILE_MAX_SIZE / 1024 / 1024}`)
     return;
+
   }
+
   await sendFile(file)
   !isActive.value && messageBoxScrollDown(true)
 })

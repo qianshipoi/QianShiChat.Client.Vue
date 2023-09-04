@@ -35,3 +35,41 @@ export const getFileExt = (filename: string): string => {
   if (lastIndex === -1) return '';
   return filename.substring(lastIndex)
 }
+
+
+export function createChunks(file: File, chunkSzie: number) {
+  const result: Blob[] = []
+
+  for (let i = 0;i < file.size;i += chunkSzie) {
+    result.push(file.slice(i, i + chunkSzie))
+  }
+
+  return result;
+}
+
+export function fileToBase64(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(file);
+    reader.onload = function () {
+      resolve(reader.result as string)
+    }
+    reader.onerror = function () {
+      reject()
+    }
+  })
+}
+
+export function base64ToFile(base64: string, filename: string, type: string) {
+  console.log(base64);
+
+  let arr = base64.split(",")!;
+  let bstr = atob(arr[1]);
+  let n = bstr.length;
+  let u8arr = new Uint8Array(n);
+
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type });
+}

@@ -66,12 +66,50 @@ export enum NotificationType {
   /**
    * 强制注销
    */
-  Signed
+  Signed,
+
+  /// <summary>
+  /// 询问在线文件传输
+  /// </summary>
+  OnlineTransmissionConfirm,
+
+  /// <summary>
+  /// 确认在线传呼文件
+  /// </summary>
+  OnlineTransmissionPassed,
+
+  /// <summary>
+  /// 取消在线传呼文件
+  /// </summary>
+  OnlineTransmissionCancel,
 }
 
 export interface NotificationMessage {
   type: NotificationType;
-  message: FriendApply | string | number;
+  message: FriendApply | FileOnlineTransmission | string | number;
+}
+
+export interface FileOnlineTransmission {
+  id: string;
+  fromId: number;
+  toId: number;
+  fileInfo: FileBaseInfo;
+  status: TransmissionStatus;
+  ClientType?: string
+}
+
+export enum TransmissionStatus {
+  Confirm,
+  Passed,
+  Reject,
+  Cancel,
+  Transmitting,
+}
+
+export interface FileBaseInfo {
+  name: string;
+  contentType: string;
+  size: number;
 }
 
 export interface UserInfo {

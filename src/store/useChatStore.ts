@@ -1,8 +1,16 @@
 import { defineStore } from "pinia";
 import { useCurrentUserStore } from "./useCurrentUserStore";
-import { ChatMessage, ChatMessageSendType, NotificationMessage, NotificationType, Session } from "../types/Types";
-import { ElMessageBox, ElNotification } from "element-plus";
+import { ChatMessage, ChatMessageSendType, FileOnlineTransmission, NotificationMessage, NotificationType, Session } from "../types/Types";
+import { Action, ElMessageBox, ElNotification } from "element-plus";
 import { HubConnectionBuilder, LogLevel, Subject } from "@microsoft/signalr";
+import { useI18n } from "vue-i18n";
+import { base64ToFile, fileToBase64 } from "../utils";
+
+type SubscribeCallback<T> = {
+  next: (item: T) => void,
+  complate?: () => void,
+  error?: (err: any) => void
+}
 
 export const useChatStore = defineStore("chat", () => {
   const BASE_URL = import.meta.env.VITE_APP_BASE_URL + "/Hubs/Chat"
@@ -28,9 +36,41 @@ export const useChatStore = defineStore("chat", () => {
 
   const privateChatEventHandler: ((message: ChatMessage) => void)[] = []
 
+
   connection.on("PrivateChat", (message: ChatMessage) => {
     privateChatEventHandler.map(item => {
       item(message)
+    })
+  })
+
+  connection.on("OnlineFileReceive", (message: FileOnlineTransmission) => {
+    let data: string = ""
+    connection.stream<string>("OnlineReceiveFileStream", message.id)
+      .subscribe({
+        next: (val: string) => {
+          console.log('receive ' + val.length)
+          data += val;
+        },
+        complete: () => {
+          console.log('complate ' + data.length)
+          const file = base64ToFile(data, message.fileInfo.name, message.fileInfo.contentType);
+          const img = document.createElement('img')
+          img.src = URL.createObjectURL(file)
+          document.body.appendChild(img)
+        },
+        error: (err) => console.error(err)
+      })
+  })
+
+  connection.on("ConfirmOnlineFile", (message: FileOnlineTransmission) => {
+    return new Promise<boolean>((resolve) => {
+      ElMessageBox.confirm(`是否接受来自[${message.fromId}]的在线文件[${message.fileInfo.name}]?`, "在线文件", {
+        confirmButtonText: "接受",
+        cancelButtonText: "拒绝",
+        callback: (callback: Action) => {
+          resolve(callback === "confirm");
+        }
+      })
     })
   })
 
@@ -38,22 +78,34 @@ export const useChatStore = defineStore("chat", () => {
 
   connection.on("Notification", (notification: NotificationMessage) => {
     if (notification.type === NotificationType.Signed) {
+
+      const { t } = useI18n();
       currentUserStore.logout();
-      ElMessageBox.alert("账号已在其他地方登录！", "警告", {
-        confirmButtonText: '确定',
+      ElMessageBox.alert(t('signed'), t('actions.warning'), {
+        confirmButtonText: t('actions.confirm'),
         showClose: false,
         closeOnClickModal: false
       })
       return;
     }
+
+    // if (notification.type === NotificationType.OnlineTransmissionConfirm) {
+    //   const message = notification.message as FileOnlineTransmission
+
+    //   ElMessageBox.confirm(`是否接受来自[${message.fromId}]的在线文件[${message.fileInfo.name}]?`, "在线文件", {
+    //     confirmButtonText: "接受",
+    //     cancelButtonText: "拒绝",
+    //     callback: (callback: Action) => {
+    //       if (callback === 'cancel' || callback === 'close') {
+    //         rejectOnlineFile(message.id);
+    //         return;
+    //       }
+    //     }
+    //   })
+    // }
+
     notificationEventHandler.forEach((item) => item(notification));
   })
-
-  type SubscribeCallback<T> = {
-    next: (item: T) => void,
-    complate?: () => void,
-    error?: (err: any) => void
-  }
 
   const subscribeSessions = (callback: SubscribeCallback<Session>) => connection.stream("GetSessionsAsync")
     .subscribe({
@@ -102,18 +154,24 @@ export const useChatStore = defineStore("chat", () => {
     isReady.value = false
   }
 
-  const sendSteam = () => {
-    const subject = new Subject();
-    connection.send("UploadStream", subject, '这是id');
-    var iteration = 0;
-    const timer = setInterval(() => {
-      iteration++;
-      subject.next(iteration.toString())
-      if (iteration === 10) {
-        clearInterval(timer);
-        subject.complete();
-      }
-    }, 1000)
+  const onlineFile = async (toId: number, file: File) => {
+    const channelId = await connection.invoke<string>("OnlineFileStreamConfirm", toId, {
+      name: file.name,
+      contentType: file.type,
+      size: file.size
+    });
+    if (channelId && channelId.length > 0) {
+      const subject = new Subject<string>();
+      const data = await fileToBase64(file);
+      const chunks = data.match(/.{1,25000}/g);
+      connection.send("OnlineUploadFileStream", subject, channelId);
+      chunks?.forEach((chunk: string) => {
+        subject.next(chunk)
+      })
+      subject.complete()
+    } else {
+      ElNotification.error("对方已拒绝")
+    }
   }
 
   return {
@@ -127,6 +185,6 @@ export const useChatStore = defineStore("chat", () => {
     getRoom,
     onNotification,
     userIsOnline,
-    sendSteam
+    onlineFile
   }
 })
