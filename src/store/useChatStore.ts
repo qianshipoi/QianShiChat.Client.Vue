@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { useCurrentUserStore } from "./useCurrentUserStore";
 import { ChatMessage, ChatMessageSendType, NotificationMessage, NotificationType, Session } from "../types/Types";
 import { ElMessageBox, ElNotification } from "element-plus";
-import { HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+import { HubConnectionBuilder, LogLevel, Subject } from "@microsoft/signalr";
 
 export const useChatStore = defineStore("chat", () => {
   const BASE_URL = import.meta.env.VITE_APP_BASE_URL + "/Hubs/Chat"
@@ -102,6 +102,20 @@ export const useChatStore = defineStore("chat", () => {
     isReady.value = false
   }
 
+  const sendSteam = () => {
+    const subject = new Subject();
+    connection.send("UploadStream", subject, '这是id');
+    var iteration = 0;
+    const timer = setInterval(() => {
+      iteration++;
+      subject.next(iteration.toString())
+      if (iteration === 10) {
+        clearInterval(timer);
+        subject.complete();
+      }
+    }, 1000)
+  }
+
   return {
     isReady: readonly(isReady),
     start,
@@ -112,6 +126,7 @@ export const useChatStore = defineStore("chat", () => {
     subscribeSessions,
     getRoom,
     onNotification,
-    userIsOnline
+    userIsOnline,
+    sendSteam
   }
 })
