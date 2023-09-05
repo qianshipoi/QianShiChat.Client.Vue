@@ -7,7 +7,6 @@ import { useI18n } from "vue-i18n";
 import ApplyNotification from "../components/Notification/ApplyNotification.vue";
 import { useSettingsStore } from "./useSettingsStore";
 
-
 interface ApplyNotificationHandle {
   apply: FriendApply;
   handle: NotificationHandle;
@@ -57,6 +56,7 @@ export const useFriendStore = defineStore("friend", () => {
           duration: 0,
           message: h(ApplyNotification, {
             apply,
+            applyType: "friend",
             onSuccess: () => {
               console.log(t('actions.pass'));
               handle.close();

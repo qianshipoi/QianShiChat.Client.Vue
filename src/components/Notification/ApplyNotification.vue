@@ -2,7 +2,7 @@
   <div class="apply-notification">
     <el-image :src="apply.user!.avatar" fit="cover"></el-image>
     <div class="apply-notification-content">
-      <p>收到来自[{{ apply.user!.nickName }}]的好友申请，备注：{{ apply.remark }}</p>
+      <p>收到来自[{{ apply.user!.nickName }}]的{{ applyType === 'friend' ? "好友" : "进群" }}申请，备注：{{ apply.remark }}</p>
       <div class="apply-notification-actions">
         <button class="success" @click="emits('success')">{{ i18n.global.t('actions.pass') }}</button>
         <button class="warning" @click="emits('reject')">{{ i18n.global.t('actions.reject') }}</button>
@@ -13,11 +13,12 @@
 </template>
 
 <script setup lang='ts'>
-import { FriendApply } from '../../types/Types'
+import { FriendApply, GroupApply } from '../../types/Types'
 import i18n from '../../lang/index'
 
 defineProps<{
-  apply: FriendApply
+  apply: FriendApply | GroupApply,
+  applyType: "friend" | "group"
 }>();
 
 const emits = defineEmits<{

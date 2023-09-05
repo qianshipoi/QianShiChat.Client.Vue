@@ -82,11 +82,19 @@ export enum NotificationType {
   /// 取消在线传呼文件
   /// </summary>
   OnlineTransmissionCancel,
+  /// <summary>
+  /// 进群申请
+  /// </summary>
+  GroupApply,
+  /// <summary>
+  /// 新群
+  /// </summary>
+  NewGroup
 }
 
 export interface NotificationMessage {
   type: NotificationType;
-  message: FriendApply | FileOnlineTransmission | string | number;
+  message: FriendApply | GroupApply | FileOnlineTransmission | string | number;
 }
 
 export interface FileOnlineTransmission {
@@ -137,6 +145,17 @@ export interface FriendApply {
   status: ApplyStatus;
   user?: UserInfo;
   friend: UserInfo;
+}
+
+export interface GroupApply {
+  id: number;
+  userId: number;
+  groupId: number;
+  createTime: number;
+  remark?: string;
+  status: ApplyStatus;
+  user?: UserInfo;
+  group: Group;
 }
 
 export interface Session {
