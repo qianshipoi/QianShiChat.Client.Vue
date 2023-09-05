@@ -76,19 +76,27 @@ export const useChatMessage = () => {
         });
       }
     })
+    let page = 1;
+    let hasMore = ref<boolean>(true);
 
     const loadData = async (isFrst: boolean = false) => {
+      if (loading.value || !hasMore.value) {
+        return;
+      }
+
       try {
         loading.value = true
-        const paged = await history(roomMessage.session.id, 1)
+        const paged = await history(roomMessage.session.id, page)
         if (!paged.succeeded) {
           throw new Error((paged.errors ?? "").toString())
         }
 
         if (!paged.data || paged.data.items.length <= 0) {
+          hasMore.value = false
           return;
         }
-
+        hasMore.value = paged.data.hasNext
+        page++;
         paged.data.items.forEach(async (item: ChatMessage) => {
           item.fromUser = await getUser(item.fromId)
           roomMessage?.messages.unshift(item)
@@ -243,7 +251,7 @@ export const useChatMessage = () => {
     }
 
     return {
-      loading: computed(() => loading.value),
+      loading: readonly(loading),
       messages: readonly(roomMessage.messages),
       loadData,
       sendText,
@@ -252,7 +260,8 @@ export const useChatMessage = () => {
         sessionStore.clearUnreadCount(roomMessage.session.id)
         chatStore.updateReadPosition(roomMessage.session.id, roomMessage.messages[roomMessage.messages.length - 1].id)
       },
-      onNewMessage
+      onNewMessage,
+      hasMore: readonly(hasMore)
     }
   }
 

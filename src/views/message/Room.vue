@@ -54,7 +54,7 @@
 
 <script setup lang='ts'>
 import { MoreFilled, FolderAdd, ArrowDownBold } from '@element-plus/icons-vue';
-import { useElementSize, useFileDialog, watchPausable } from '@vueuse/core';
+import { useElementSize, useFileDialog, useThrottleFn, watchPausable } from '@vueuse/core';
 import { useChatMessage } from './useChatMessage';
 import ChatMessage from '../../components/ChatMessage/index.vue';
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
@@ -79,7 +79,7 @@ const messageListBox = ref<InstanceType<typeof ElScrollbar> | null>(null)
 const messageBox = ref<HTMLDivElement | null>(null)
 const { height: messageBoxHeight } = useElementSize(messageBox)
 
-const { loadData, messages, sendText, sendFile, clearUnread } = getRoomMessage(props.room.id)
+const { loadData, messages, sendText, sendFile, clearUnread, hasMore } = getRoomMessage(props.room.id)
 
 loadData(true)
 
@@ -95,6 +95,10 @@ const { isActive, pause, resume } = watchPausable(
   () => messageBoxScrollDown(false),
 )
 
+const loadMoreData = useThrottleFn(() => {
+  loadData()
+}, 1000)
+
 const messageListScrollHandle = (e: { scrollLeft: number, scrollTop: number }) => {
   if ((messageListBox.value?.wrapRef?.clientHeight ?? 0) + e.scrollTop + 60 <= messageBoxHeight.value) {
     pause();
@@ -104,6 +108,11 @@ const messageListScrollHandle = (e: { scrollLeft: number, scrollTop: number }) =
 
   if (props.room.unreadCount > 0 && e.scrollTop + (messageListBox.value?.wrapRef?.clientHeight ?? 0) + 40 > messageBoxHeight.value) {
     clearUnread()
+  }
+
+  if (e.scrollTop < 200 && hasMore) {
+    // load more data.
+    loadMoreData()
   }
 }
 
@@ -131,7 +140,6 @@ onChange(async (files) => {
   if (file.size > FILE_MAX_SIZE) {
     ElNotification.warning(`The uploaded file size cannot be larger than ${FILE_MAX_SIZE / 1024 / 1024}`)
     return;
-
   }
 
   await sendFile(file)
