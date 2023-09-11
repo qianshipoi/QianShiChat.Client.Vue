@@ -1,8 +1,8 @@
 import { history } from "../../api/chat"
 import { useChatStore } from "../../store/useChatStore"
-import { useSessionStore } from "../../store/useSessionStore"
+import { useRoomStore } from "../../store/useRoomStore"
 import { useUserStore } from "../../store/useUserStore"
-import { Attachment, ChatMessage, ChatMessageSendType, ChatMessageStatus, ChatMessageType, Session, UserInfo } from "../../types/Types"
+import { Attachment, ChatMessage, ChatMessageSendType, ChatMessageStatus, ChatMessageType, Room, UserInfo } from "../../types/Types"
 import { ElMessage, ElNotification } from "element-plus"
 import { sendText as sendTextApi, sendFile as sendFileApi } from "../../api/chat";
 import { useCurrentUserStore } from "../../store/useCurrentUserStore"
@@ -11,7 +11,7 @@ import { TusUpload } from "../../utils/tusUtils"
 
 type RoomMessages = {
   id: String,
-  session: Session,
+  room: Room,
   messages: ChatMessage[]
 }
 
@@ -19,9 +19,8 @@ type NewMessageCallback = (message: ChatMessage) => void
 
 export const useChatMessage = () => {
   const roomMessages = reactive<RoomMessages[]>([])
-
   const userStore = useUserStore()
-  const sessionStore = useSessionStore()
+  const roomStore = useRoomStore()
   const chatStore = useChatStore()
   const currentUserStore = useCurrentUserStore()
 
@@ -45,22 +44,22 @@ export const useChatMessage = () => {
     if (!roomMessage) {
       roomMessage = {
         id: id,
-        session: sessionStore.opendRoomRaw!,
+        room: roomStore.opendRoomRaw!,
         messages: reactive([])
       }
       roomMessages.push(roomMessage)
     }
 
-    const isPersonalSession = (): boolean => roomMessage?.session.type === ChatMessageSendType.Personal;
+    const isPersonalRoom = (): boolean => roomMessage?.room.type === ChatMessageSendType.Personal;
 
     const getUser = async (fromId: number): Promise<UserInfo> => {
       if (fromId === currentUserStore.userInfo?.id) {
         return currentUserStore.userInfo;
       }
 
-      if (isPersonalSession()) {
-        return roomMessage!.session.toObject as UserInfo
-      } else if (roomMessage!.session.type === ChatMessageSendType.Group) {
+      if (isPersonalRoom()) {
+        return roomMessage!.room.toObject as UserInfo
+      } else if (roomMessage!.room.type === ChatMessageSendType.Group) {
         return await userStore.getUser(fromId)
       } else {
         throw new Error("not supported.")
@@ -68,7 +67,7 @@ export const useChatMessage = () => {
     }
 
     chatStore.onPrivateChat(async (message: ChatMessage) => {
-      if (message.sessionId === roomMessage?.id) {
+      if (message.roomId === roomMessage?.id) {
         message.fromUser = await getUser(message.fromId)
         roomMessage?.messages.push(message)
         newMessageCallback.forEach(callback => {
@@ -86,7 +85,7 @@ export const useChatMessage = () => {
 
       try {
         loading.value = true
-        const paged = await history(roomMessage.session.id, page)
+        const paged = await history(roomMessage.room.id, page)
         if (!paged.succeeded) {
           throw new Error((paged.errors ?? "").toString())
         }
@@ -102,9 +101,9 @@ export const useChatMessage = () => {
           roomMessage?.messages.unshift(item)
         })
         const maxId = Math.max(...paged.data.items.map((item: ChatMessage) => item.id));
-        sessionStore.clearUnreadCount(roomMessage.session.id);
+        roomStore.clearUnreadCount(roomMessage.room.id);
         if (isFrst && maxId > 0)
-          chatStore.updateReadPosition(roomMessage.session.id, maxId)
+          chatStore.updateReadPosition(roomMessage.room.id, maxId)
       } catch (err) {
         ElMessage.error(err as string)
       } finally {
@@ -114,7 +113,7 @@ export const useChatMessage = () => {
 
     const addMessage = (message: ChatMessage) => {
       roomMessage!.messages.push(message)
-      sessionStore.clearUnreadCount(roomMessage!.session.id)
+      roomStore.clearUnreadCount(roomMessage!.room.id)
     }
 
     const sendFile = (file: File): void => {
@@ -133,8 +132,8 @@ export const useChatMessage = () => {
       const message = reactive<ChatMessage>({
         id: getNextId(),
         fromId: currentUserStore.userInfo?.id!,
-        toId: roomMessage.session.toId,
-        sessionId: roomMessage.session.id,
+        toId: roomMessage.room.toId,
+        roomId: roomMessage.room.id,
         sendType: ChatMessageSendType.Personal,
         messageType: fileTypeToMessageType(file.type),
         content: attachment,
@@ -145,7 +144,7 @@ export const useChatMessage = () => {
 
       const sendFileMessage = (message: ChatMessage) => {
         sendFileApi({
-          toId: roomMessage!.session.toId,
+          toId: roomMessage!.room.toId,
           attachmentId: (message.content as Attachment).id,
           sendType: ChatMessageSendType.Personal
         }).then(({ succeeded, data }) => {
@@ -213,8 +212,8 @@ export const useChatMessage = () => {
       const message = reactive<ChatMessage>({
         id: getNextId(),
         fromId: currentUserStore.userInfo?.id!,
-        toId: roomMessage!.session.toId!,
-        sessionId: roomMessage!.session.id,
+        toId: roomMessage!.room.toId!,
+        roomId: roomMessage!.room.id,
         sendType: ChatMessageSendType.Personal,
         messageType: ChatMessageType.Text,
         content: content,
@@ -224,7 +223,7 @@ export const useChatMessage = () => {
       })
 
       sendTextApi({
-        toId: roomMessage.session.toId,
+        toId: roomMessage.room.toId,
         sendType: ChatMessageSendType.Personal,
         message: content
       }).then(({ succeeded, data }) => {
@@ -257,8 +256,8 @@ export const useChatMessage = () => {
       sendText,
       sendFile,
       clearUnread: () => {
-        sessionStore.clearUnreadCount(roomMessage.session.id)
-        chatStore.updateReadPosition(roomMessage.session.id, roomMessage.messages[roomMessage.messages.length - 1].id)
+        roomStore.clearUnreadCount(roomMessage.room.id)
+        chatStore.updateReadPosition(roomMessage.room.id, roomMessage.messages[roomMessage.messages.length - 1].id)
       },
       onNewMessage,
       hasMore: readonly(hasMore)

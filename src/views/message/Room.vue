@@ -60,12 +60,12 @@ import ChatMessage from '../../components/ChatMessage/index.vue';
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
 import { ElNotification, ElScrollbar } from 'element-plus';
 import SplitterPanel from '../../components/SplitterPanel.vue';
-import { ChatMessageSendType, Session, UserInfo } from '../../types/Types';
+import { ChatMessageSendType, Room, UserInfo } from '../../types/Types';
 import { useI18n } from 'vue-i18n';
 const FILE_MAX_SIZE = 1024 * 1024 * 1024;
 
 const props = defineProps<{
-  room: Session
+  room: Room
 }>()
 
 const isGroup = computed(() => props.room.type === ChatMessageSendType.Group)

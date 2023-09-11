@@ -1,6 +1,6 @@
 <template>
   <div class="friend">
-    <div class="sessions">
+    <div class="friend-list">
       <div class="search">
         <el-input v-model="searchText" style="background-color: var(--input-bg-color);" size="small"
           placeholder="搜索"></el-input>
@@ -81,7 +81,7 @@ const openFriendApply = () => {
   height: 100%;
 }
 
-.sessions {
+.friend-list {
   width: 260px;
   height: 100%;
   background-color: var(--room-list-bg-color);

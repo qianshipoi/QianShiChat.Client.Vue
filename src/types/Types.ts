@@ -37,7 +37,7 @@ export interface ChatMessage {
   id: number
   fromId: number
   toId: number
-  sessionId: string
+  roomId: string
   sendType: ChatMessageSendType
   messageType: ChatMessageType
   content: string | Attachment
@@ -158,7 +158,7 @@ export interface GroupApply {
   group: Group;
 }
 
-export interface Session {
+export interface Room {
   id: string,
   toId: number,
   type: ChatMessageSendType,

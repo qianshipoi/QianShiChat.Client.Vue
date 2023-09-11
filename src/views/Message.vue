@@ -1,6 +1,6 @@
 <template>
   <div class="message">
-    <div class="sessions">
+    <div class="room-list">
       <div class="search">
         <el-input v-model="searchText" style="background-color: var(--input-bg-color);" size="small"
           placeholder="搜索"></el-input>
@@ -12,14 +12,14 @@
         </button>
       </div>
       <ul>
-        <li v-for="session in sessions" :key="session.id">
-          <SessionItem :model-value="(session as Session)" @selected="sessionStore.openRoom(session.id)"
-            :is-selected="sessionStore.isOpend(session.id)" />
+        <li v-for="room in rooms" :key="room.id">
+          <RoomItem :model-value="(room as RoomType)" @selected="roomStore.openRoom(room.id)"
+            :is-selected="roomStore.isOpend(room.id)" />
         </li>
       </ul>
     </div>
     <div class="content">
-      <Room v-if="sessionStore.isOpendRoom" :key="sessionStore.opendRoomRaw?.id" :room="sessionStore.opendRoomRaw!" />
+      <Room v-if="roomStore.isOpendRoom" :key="roomStore.opendRoomRaw?.id" :room="roomStore.opendRoomRaw!" />
     </div>
     <add-friend-search v-model="addFriendVisible"></add-friend-search>
   </div>
@@ -27,14 +27,15 @@
 
 <script setup lang='ts'>
 import { storeToRefs } from 'pinia';
-import { useSessionStore } from '../store/useSessionStore';
-import { Session } from '../types/Types';
+import { useRoomStore } from '../store/useRoomStore';
+import {  Room as RoomType } from '../types/Types';
 import { Plus } from '@element-plus/icons-vue'
 import Room from './message/Room.vue'
 import AddFriendSearch from '../components/AddFriendSearch.vue';
+import RoomItem from '../components/RoomItem.vue';
 
-const sessionStore = useSessionStore();
-const { sessions } = storeToRefs(sessionStore);
+const roomStore = useRoomStore();
+const {  rooms } = storeToRefs(roomStore);
 const searchText = ref<string>('')
 const addFriendVisible = ref<boolean>(false)
 </script>
@@ -45,7 +46,7 @@ const addFriendVisible = ref<boolean>(false)
   height: 100%;
 }
 
-.sessions {
+.room-list {
   width: 260px;
   height: 100%;
   background-color: var(--room-list-bg-color);

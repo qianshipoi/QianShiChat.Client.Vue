@@ -21,7 +21,7 @@
 <script setup lang='ts'>
 import { ElNotification } from 'element-plus';
 import { useChatStore } from '../../store/useChatStore';
-import { useSessionStore } from '../../store/useSessionStore';
+import { useRoomStore } from '../../store/useRoomStore';
 import { ChatMessageSendType, UserInfo } from '../../types/Types';
 import { Message } from '@element-plus/icons-vue'
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
@@ -32,7 +32,7 @@ const props = defineProps<{
 }>()
 
 const chatStore = useChatStore()
-const sessionsStore = useSessionStore()
+const roomsStore = useRoomStore()
 const currentUserStore = useCurrentUserStore()
 const router = useRouter()
 
@@ -46,8 +46,8 @@ const sendMessage = async () => {
   room.fromUser = currentUserStore.userInfo
   room.name = props.user.nickName ?? ""
   room.avatar = props.user.avatar
-  sessionsStore.addSession(room);
-  sessionsStore.openRoom(room.id);
+  roomsStore.addRoom(room);
+  roomsStore.openRoom(room.id);
 
   // join to message room.
   router.push({
@@ -102,3 +102,4 @@ const sendMessage = async () => {
 }
 </style>
 
+../../store/useRoomStore

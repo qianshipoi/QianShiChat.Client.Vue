@@ -31,7 +31,7 @@ const textMessage: ChatMessageClass = {
   id: 0,
   fromId: 1,
   toId: 2,
-  sessionId: '1-2',
+  roomId: '1-2',
   sendType: ChatMessageSendType.Personal,
   messageType: ChatMessageType.Text,
   content: "文字消息",

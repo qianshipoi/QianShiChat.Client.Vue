@@ -1,45 +1,45 @@
 <template>
-  <div :class="['session-item', isSelected ? 'selected' : '']" @click="selected">
+  <div :class="['room-item', isSelected ? 'selected' : '']" @click="selected">
     <div class="avatar">
-      <el-image style="width: 100%;height: 100%;" :src="session?.avatar" fit="cover"></el-image>
+      <el-image style="width: 100%;height: 100%;" :src="room?.avatar" fit="cover"></el-image>
     </div>
     <div class="content">
       <div class="up">
-        <span class="name">{{ session?.name }}</span>
-        <span class="time">{{ timeFormat(session?.lastMessageTime) }}</span>
+        <span class="name">{{ room?.name }}</span>
+        <span class="time">{{ timeFormat(room?.lastMessageTime) }}</span>
       </div>
       <div class="down">
         <span class="message">{{ content }}</span>
-        <span class="unread" v-if="(session?.unreadCount ?? 0) > 0">{{ session?.unreadCount }}</span>
+        <span class="unread" v-if="(room?.unreadCount ?? 0) > 0">{{ room?.unreadCount }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang='ts'>
-import { Session } from '../types/Types';
+import { Room } from '../types/Types';
 import { timeFormat } from '../utils/timeUtils'
 
 defineProps<{
   isSelected?: boolean
 }>()
 
-const session = defineModel<Session | undefined>()
+const room = defineModel<Room | undefined>()
 
 const emits = defineEmits<{
-  (event: "selected", val: Session): void
+  (event: "selected", val: Room): void
 }>()
 
 
 const selected = () => {
-  emits('selected', session.value!);
+  emits('selected', room.value!);
 }
 
 const content = computed(() => {
-  if (typeof session.value?.lastMessageContent === 'string') {
-    return session.value.lastMessageContent
+  if (typeof room.value?.lastMessageContent === 'string') {
+    return room.value.lastMessageContent
   } else {
-    return session.value?.lastMessageContent?.name
+    return room.value?.lastMessageContent?.name
   }
 })
 
@@ -47,7 +47,7 @@ const content = computed(() => {
 </script>
 
 <style scoped>
-.session-item {
+.room-item {
   display: flex;
   padding: 0 10px;
   align-items: center;
@@ -57,17 +57,17 @@ const content = computed(() => {
   transition: all .3s ease;
 }
 
-.session-item:hover {
+.room-item:hover {
   background-color: var(--item-hover-color);
 }
 
-.session-item.selected {
+.room-item.selected {
   background-color: var(--item-active-color);
   color: white;
 }
 
-.session-item.selected .message,
-.session-item.selected .time {
+.room-item.selected .message,
+.room-item.selected .time {
   color: white;
 }
 

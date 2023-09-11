@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { useCurrentUserStore } from "./useCurrentUserStore";
-import { ChatMessage, ChatMessageSendType, FileOnlineTransmission, NotificationMessage, NotificationType, Session } from "../types/Types";
+import { ChatMessage, ChatMessageSendType, FileOnlineTransmission, NotificationMessage, NotificationType, Room } from "../types/Types";
 import { Action, ElMessageBox, ElNotification } from "element-plus";
 import { HubConnectionBuilder, LogLevel, Subject } from "@microsoft/signalr";
 import { useI18n } from "vue-i18n";
@@ -78,7 +78,6 @@ export const useChatStore = defineStore("chat", () => {
 
   connection.on("Notification", (notification: NotificationMessage) => {
     if (notification.type === NotificationType.Signed) {
-
       const { t } = useI18n();
       currentUserStore.logout();
       ElMessageBox.alert(t('signed'), t('actions.warning'), {
@@ -88,26 +87,10 @@ export const useChatStore = defineStore("chat", () => {
       })
       return;
     }
-
-    // if (notification.type === NotificationType.OnlineTransmissionConfirm) {
-    //   const message = notification.message as FileOnlineTransmission
-
-    //   ElMessageBox.confirm(`是否接受来自[${message.fromId}]的在线文件[${message.fileInfo.name}]?`, "在线文件", {
-    //     confirmButtonText: "接受",
-    //     cancelButtonText: "拒绝",
-    //     callback: (callback: Action) => {
-    //       if (callback === 'cancel' || callback === 'close') {
-    //         rejectOnlineFile(message.id);
-    //         return;
-    //       }
-    //     }
-    //   })
-    // }
-
     notificationEventHandler.forEach((item) => item(notification));
   })
 
-  const subscribeSessions = (callback: SubscribeCallback<Session>) => connection.stream("GetSessionsAsync")
+  const subscribeRooms = (callback: SubscribeCallback<Room>) => connection.stream("GetRoomsAsync")
     .subscribe({
       next: callback.next,
       complete: () => callback.complate && callback.complate(),
@@ -120,8 +103,8 @@ export const useChatStore = defineStore("chat", () => {
       }
     })
 
-  const getSessions = async (): Promise<Session[]> => {
-    return await connection.invoke<Session[]>("GetSessionsAsync")
+  const getRooms = async (): Promise<Room[]> => {
+    return await connection.invoke<Room[]>("GetRoomsAsync")
   }
 
   const updateReadPosition = async (roomId: string, position: number): Promise<any> => {
@@ -137,7 +120,7 @@ export const useChatStore = defineStore("chat", () => {
   }
 
   const getRoom = async (toId: number, type: ChatMessageSendType) => {
-    return await connection.invoke<Session | null>("GetRoomAsync", toId, type)
+    return await connection.invoke<Room | null>("GetRoomAsync", toId, type)
   }
 
   const userIsOnline = async (id: number) => {
@@ -179,9 +162,9 @@ export const useChatStore = defineStore("chat", () => {
     start,
     close,
     onPrivateChat,
-    getSessions,
+    getRooms,
     updateReadPosition,
-    subscribeSessions,
+    subscribeRooms,
     getRoom,
     onNotification,
     userIsOnline,

@@ -1,48 +1,48 @@
 import { defineStore } from "pinia";
-import { ChatMessageSendType, NotificationMessage, NotificationType, Session, UserInfo } from "../types/Types";
+import { ChatMessageSendType, NotificationMessage, NotificationType, Room, UserInfo } from "../types/Types";
 import { useSessionStorage } from "@vueuse/core";
 import { useChatStore } from "./useChatStore";
 import { useCurrentUserStore } from "./useCurrentUserStore";
 import { useUserStore } from "./useUserStore";
 import emitter from "../utils/mitt";
 
-export const useSessionStore = defineStore("session", () => {
-  const sessions = useSessionStorage<Session[]>("sessions", [])
+export const useRoomStore = defineStore("room_store", () => {
+  const rooms = useSessionStorage<Room[]>("rooms", [])
 
-  const opendRoom = ref<Session | null>(null)
+  const opendRoom = ref<Room | null>(null)
 
   const currentUserStore = useCurrentUserStore()
   const userStore = useUserStore();
   const chatStore = useChatStore();
 
-  function moveSessionTop(session: Session) {
-    const index = sessions.value.findIndex(s => s.id === session.id);
+  function moveRoomTop(room: Room) {
+    const index = rooms.value.findIndex(s => s.id === room.id);
     if (index === -1) {
-      sessions.value.unshift(session)
+      rooms.value.unshift(room)
     } else if (index === 0) {
-      const oldSession = sessions.value[index];
-      oldSession.avatar = session.avatar
-      oldSession.unreadCount = session.unreadCount
-      oldSession.lastMessageContent = session.lastMessageContent
-      oldSession.lastMessageTime = session.lastMessageTime
-      oldSession.name = session.name
+      const oldRoom = rooms.value[index];
+      oldRoom.avatar = room.avatar
+      oldRoom.unreadCount = room.unreadCount
+      oldRoom.lastMessageContent = room.lastMessageContent
+      oldRoom.lastMessageTime = room.lastMessageTime
+      oldRoom.name = room.name
     } else {
-      const oldSession = sessions.value.splice(index, 1)[0];
-      oldSession.avatar = session.avatar
-      oldSession.unreadCount = session.unreadCount
-      oldSession.lastMessageContent = session.lastMessageContent
-      oldSession.lastMessageTime = session.lastMessageTime
-      oldSession.name = session.name
-      sessions.value.unshift(oldSession);
+      const oldRoom = rooms.value.splice(index, 1)[0];
+      oldRoom.avatar = room.avatar
+      oldRoom.unreadCount = room.unreadCount
+      oldRoom.lastMessageContent = room.lastMessageContent
+      oldRoom.lastMessageTime = room.lastMessageTime
+      oldRoom.name = room.name
+      rooms.value.unshift(oldRoom);
     }
   }
 
   chatStore.onPrivateChat(async message => {
-    let session = sessions.value.find(s => s.id === message.sessionId)
-    if (!session) {
+    let room = rooms.value.find(s => s.id === message.roomId)
+    if (!room) {
       const user = await userStore.getUser(message.fromId)
-      session = {
-        id: message.sessionId,
+      room = {
+        id: message.roomId,
         toId: message.fromId,
         type: message.sendType,
         unreadCount: 1,
@@ -55,15 +55,15 @@ export const useSessionStore = defineStore("session", () => {
         from: user
       }
     } else {
-      session.unreadCount++;
+      room.unreadCount++;
     }
-    moveSessionTop(session)
+    moveRoomTop(room)
   });
 
   chatStore.onNotification((notification: NotificationMessage) => {
     if (notification.type === NotificationType.FriendOffline || notification.type === NotificationType.FriendOnline) {
       const userId = notification.message as number;
-      const room = sessions.value.find(x => x.toId === userId && x.type === ChatMessageSendType.Personal);
+      const room = rooms.value.find(x => x.toId === userId && x.type === ChatMessageSendType.Personal);
       if (room) {
         (room.toObject as UserInfo).isOnline = notification.type === NotificationType.FriendOnline;
         emitter.emit("online-change", { id: userId, status: notification.type === NotificationType.FriendOnline })
@@ -71,52 +71,52 @@ export const useSessionStore = defineStore("session", () => {
     }
   })
 
-  const addSession = (session: Session) => {
-    moveSessionTop(session);
+  const addRoom = (room: Room) => {
+    moveRoomTop(room);
   }
 
-  const removeSession = (session: Session) => {
-    const index = sessions.value.findIndex(s => s.id === session.id);
+  const removeRoom = (room: Room) => {
+    const index = rooms.value.findIndex(s => s.id === room.id);
     if (index !== -1) {
-      sessions.value.splice(index, 1);
+      rooms.value.splice(index, 1);
     }
   }
 
   watch(() => chatStore.isReady, (isReady: boolean) => {
     if (isReady) {
-      chatStore.subscribeSessions({
+      chatStore.subscribeRooms({
         next: async (item) => {
           const user = await userStore.getUser(item.toId)
           item.fromUser = currentUserStore.userInfo
           item.avatar = user.avatar
           item.name = user.nickName ?? user.account
           item.toObject = user;
-          addSession(item)
+          addRoom(item)
         }
       })
     }
   })
 
-  const clearUnreadCount = (sessionId: string) => {
-    const session = sessions.value.find(x => x.id === sessionId)
-    session && (session.unreadCount = 0)
+  const clearUnreadCount = (roomId: string) => {
+    const room = rooms.value.find(x => x.id === roomId)
+    room && (room.unreadCount = 0)
   }
 
-  const getSession = (id: string) => {
-    return sessions.value.find(x => x.id === id)
+  const getRoom = (id: string) => {
+    return rooms.value.find(x => x.id === id)
   }
 
   const openRoom = (roomId: string) => {
-    const room = sessions.value.find(x => x.id === roomId)
+    const room = rooms.value.find(x => x.id === roomId)
     room && (opendRoom.value = room)
   }
 
   return {
-    sessions: readonly(sessions),
-    addSession,
-    removeSession,
+    rooms: readonly(rooms),
+    addRoom,
+    removeRoom,
     clearUnreadCount,
-    getSession,
+    getRoom,
     opendRoom: readonly(opendRoom),
     isOpendRoom: computed(() => !!opendRoom.value),
     opendRoomRaw: opendRoom,
