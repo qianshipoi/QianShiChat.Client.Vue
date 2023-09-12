@@ -36,13 +36,13 @@
                 <FolderAdd />
               </el-icon>
             </div>
-            <!-- <el-scrollbar class="message-editor-scrollbar">
-              <div class="message-editor" contenteditable>
+            <el-scrollbar class="message-editor-scrollbar">
+              <div class="message-editor" ref="messageEditor" contenteditable>
                 asdsad
                 <img src="http://localhost:5224/Raw/DefaultAvatar/1.jpg">
               </div>
-            </el-scrollbar> -->
-            <el-input style="height: 100%;" resize="none" type="textarea" v-model="messageContent"></el-input>
+            </el-scrollbar>
+            <!-- <el-input style="height: 100%;" resize="none" type="textarea" v-model="messageContent"></el-input> -->
             <el-button style="position: absolute; bottom: 20px; right: 20px;" type="primary" size="default" @click="send"
               :disabled="!messageContent">发送</el-button>
           </div>
@@ -54,7 +54,7 @@
 
 <script setup lang='ts'>
 import { MoreFilled, FolderAdd, ArrowDownBold } from '@element-plus/icons-vue';
-import { useElementSize, useFileDialog, useThrottleFn, watchPausable } from '@vueuse/core';
+import { useElementSize, useEventListener, useFileDialog, useThrottleFn, watchPausable } from '@vueuse/core';
 import { useChatMessage } from './useChatMessage';
 import ChatMessage from '../../components/ChatMessage/index.vue';
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
@@ -98,6 +98,63 @@ const { isActive, pause, resume } = watchPausable(
 const loadMoreData = useThrottleFn(() => {
   loadData()
 }, 1000)
+
+const messageEditor = ref<HTMLDivElement>()
+
+useEventListener(messageEditor, 'paste', (event) => {
+  event.preventDefault();
+  console.log(event.clipboardData);
+
+  const text = event.clipboardData?.getData('text/plain')
+  if (!text) {
+    return;
+  }
+  addText(text)
+  const file = event.clipboardData!.files[0];
+  console.log(file);
+})
+
+function addText(text: string) {
+  const span: HTMLSpanElement = document.createElement('span')
+  span.innerText = text;
+  messageEditor.value?.appendChild(span)
+}
+
+useEventListener(messageEditor, 'drop', async (event) => {
+  event.preventDefault();
+  const files = event.dataTransfer?.files
+  if (files && files?.length > 0) {
+    console.log(files.item(0));
+    return;
+  }
+  console.log(event.dataTransfer?.files[0]);
+  const text = event.dataTransfer?.getData('text/plain');
+  if (!text) return;
+  if (await isImage(text)) {
+    addImage(text)
+  } else {
+    addText(text);
+  }
+})
+
+const addImage = (url: string) => {
+  const img: HTMLImageElement = document.createElement('img')
+  img.src = url;
+  messageEditor.value?.appendChild(img)
+}
+
+const isImage = (url: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = url
+    img.onload = function () {
+      resolve(true)
+    }
+    img.onerror = function () {
+      resolve(false)
+    }
+  })
+}
 
 const messageListScrollHandle = (e: { scrollLeft: number, scrollTop: number }) => {
   if ((messageListBox.value?.wrapRef?.clientHeight ?? 0) + e.scrollTop + 60 <= messageBoxHeight.value) {
@@ -196,7 +253,7 @@ header .el-icon:hover {
   outline: none;
 }
 
-.message-editor>img {
+.message-editor>:deep(img) {
   max-width: 100px;
   max-height: 60px;
 }
