@@ -54,7 +54,7 @@
 
 <script setup lang='ts'>
 import { MoreFilled, FolderAdd, ArrowDownBold } from '@element-plus/icons-vue';
-import { useElementSize, useEventListener, useFileDialog, useThrottleFn, watchPausable } from '@vueuse/core';
+import { useElementSize, useFileDialog, useThrottleFn, watchPausable } from '@vueuse/core';
 import { useChatMessage } from './useChatMessage';
 import ChatMessage from '../../components/ChatMessage/index.vue';
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
@@ -62,6 +62,7 @@ import { ElNotification, ElScrollbar } from 'element-plus';
 import SplitterPanel from '../../components/SplitterPanel.vue';
 import { ChatMessageSendType, Room, UserInfo } from '../../types/Types';
 import { useI18n } from 'vue-i18n';
+import { useRichText } from './useRichText';
 const FILE_MAX_SIZE = 1024 * 1024 * 1024;
 
 const props = defineProps<{
@@ -101,60 +102,8 @@ const loadMoreData = useThrottleFn(() => {
 
 const messageEditor = ref<HTMLDivElement>()
 
-useEventListener(messageEditor, 'paste', (event) => {
-  event.preventDefault();
-  console.log(event.clipboardData);
+useRichText(messageEditor)
 
-  const text = event.clipboardData?.getData('text/plain')
-  if (!text) {
-    return;
-  }
-  addText(text)
-  const file = event.clipboardData!.files[0];
-  console.log(file);
-})
-
-function addText(text: string) {
-  const span: HTMLSpanElement = document.createElement('span')
-  span.innerText = text;
-  messageEditor.value?.appendChild(span)
-}
-
-useEventListener(messageEditor, 'drop', async (event) => {
-  event.preventDefault();
-  const files = event.dataTransfer?.files
-  if (files && files?.length > 0) {
-    console.log(files.item(0));
-    return;
-  }
-  console.log(event.dataTransfer?.files[0]);
-  const text = event.dataTransfer?.getData('text/plain');
-  if (!text) return;
-  if (await isImage(text)) {
-    addImage(text)
-  } else {
-    addText(text);
-  }
-})
-
-const addImage = (url: string) => {
-  const img: HTMLImageElement = document.createElement('img')
-  img.src = url;
-  messageEditor.value?.appendChild(img)
-}
-
-const isImage = (url: string): Promise<boolean> => {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.src = url
-    img.onload = function () {
-      resolve(true)
-    }
-    img.onerror = function () {
-      resolve(false)
-    }
-  })
-}
 
 const messageListScrollHandle = (e: { scrollLeft: number, scrollTop: number }) => {
   if ((messageListBox.value?.wrapRef?.clientHeight ?? 0) + e.scrollTop + 60 <= messageBoxHeight.value) {
@@ -238,15 +187,16 @@ header .el-icon:hover {
 }
 
 .message-editor-scrollbar {
-  position: absolute;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
+  // position: absolute;
+  // left: 0;
+  // top: 0;
+  // right: 0;
+  // bottom: 0;
 }
 
 .message-editor {
   padding: 1rem;
+  min-height: 100px;
 }
 
 .message-editor:focus {

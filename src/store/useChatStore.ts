@@ -21,7 +21,7 @@ export const useChatStore = defineStore("chat", () => {
   const connection = new HubConnectionBuilder()
     .withUrl(BASE_URL, { accessTokenFactory: () => currentUserStore.token })
     .withAutomaticReconnect()
-    .configureLogging(import.meta.env.MODE === "production" ? LogLevel.Warning : LogLevel.Debug)
+    .configureLogging(import.meta.env.MODE === "production" ? LogLevel.Warning : LogLevel.Warning)
     .build();
 
   connection.onclose((err: Error | undefined) => {
