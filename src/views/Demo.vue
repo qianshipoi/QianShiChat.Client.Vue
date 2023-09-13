@@ -1,23 +1,29 @@
 <template>
   <div class="demo">
-    <ChatMessage v-model="textMessage" />
+    <DropFilePanel @drop="dropHandle">
+      <UploadFileControl ref="uploadFileControlRef" v-if="showUploadFileControl" :file="dropFile!"
+        style="position: absolute; bottom: 20px; width: calc(100% - 40px); left: 20px; right: 20px;"
+        @cancel="cancelUploadHandle" @completed="uploadCompletedHandle" />
+    </DropFilePanel>
+    <!-- <ChatMessage v-model="textMessage" />
     <ChatMessage v-model="imageMessage" />
     <ChatMessage v-model="otherFileMessage" />
-    <!-- <ChatMessage v-model="textMessage" is-self />
+    <ChatMessage v-model="textMessage" is-self />
     <ChatMessage v-model="imageMessage" is-self />
-    <ChatMessage v-model="otherFileMessage" is-self /> -->
-    <!-- <AddFriendSearch :model-value="true"></AddFriendSearch> -->
-
-    <button @click="showFriendApplyNotification">show apply notification</button>
+    <ChatMessage v-model="otherFileMessage" is-self />
+    <AddFriendSearch :model-value="true"></AddFriendSearch>
+    <button @click="showFriendApplyNotification">show apply notification</button> -->
   </div>
 </template>
 
 <script setup lang='ts'>
 import ChatMessage from '../components/ChatMessage/index.vue'
-import { ApplyStatus, ChatMessageStatus, FriendApply, UserInfo } from '../types/Types';
+import { ApplyStatus, Attachment, ChatMessageStatus, FriendApply, UserInfo } from '../types/Types';
 import { ChatMessageSendType, ChatMessage as ChatMessageClass, ChatMessageType } from '../types/Types';
-// import AddFriendSearch from '../components/AddFriendSearch.vue'
+import AddFriendSearch from '../components/AddFriendSearch.vue'
 import { ElImage, ElNotification } from 'element-plus';
+import DropFilePanel from '../components/DropFilePanel/DropFilePanel.vue';
+import UploadFileControl from '../components/UploadFileControl/UploadFileControl.vue';
 
 const userinfo: UserInfo = {
   id: 1,
@@ -88,6 +94,29 @@ const showFriendApplyNotification = () => {
       ])
     ])
   })
+}
+
+const showUploadFileControl = ref(false);
+
+const uploadFileControlRef = ref<InstanceType<typeof UploadFileControl>>()
+
+const dropFile = shallowRef<File | null>()
+
+const dropHandle = async (files: File[]) => {
+  dropFile.value = files[0]
+  showUploadFileControl.value = true;
+  await nextTick()
+  uploadFileControlRef.value?.start();
+}
+
+const uploadCompletedHandle = (attachment: Attachment) => {
+  showUploadFileControl.value = false;
+  ElNotification.success('上传完毕')
+  console.log(attachment);
+}
+const cancelUploadHandle = () => {
+  showUploadFileControl.value = false;
+  ElNotification.warning('取消上传')
 }
 
 </script>

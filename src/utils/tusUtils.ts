@@ -41,9 +41,14 @@ export class TusUpload {
       chunkSize: 1024 * 1024 * 10,
       metadata: {
         filename: this.file.name,
-        filetype: this.file.type
+        filetype: this.file.type ? this.file.type : "application/octet-stream"
       },
-      onError: this._onError,
+      onError: (error) => {
+        if ((error as DetailedError).originalResponse?.getStatus() === 401) {
+          console.log('Unauthorized.');
+        }
+        this._onError && this._onError(error)
+      },
       onProgress: this._onProgress,
       onSuccess: () => {
         const lastIndex = this.upload?.url?.lastIndexOf('/')!
@@ -61,7 +66,7 @@ export class TusUpload {
 
   start() {
     if (!this.upload) {
-      throw new Error('uninitialized.')
+      throw new Error('Unauthorized.')
     }
     this.upload?.findPreviousUploads().then((previousUploads) => {
       if (previousUploads.length) {

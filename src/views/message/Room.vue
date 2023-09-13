@@ -13,41 +13,47 @@
       </div>
     </header>
     <div style="flex: 1;">
-      <SplitterPanel storage-key="room-chat-message" @end="moveEnd">
-        <template #start>
-          <el-scrollbar @scroll="messageListScrollHandle" ref="messageListBox">
-            <div ref="messageBox">
-              <div v-for="message in messages" :key="message.id" style="margin-bottom: 8px;">
-                <ChatMessage :model-value="message" :is-self="isSelf(message.fromId)" />
-              </div>
-            </div>
-          </el-scrollbar>
-
-          <button v-if="!isActive" class="goto-bottom" @click="messageBoxScrollDown()">
-            <el-icon>
-              <ArrowDownBold />
-            </el-icon>
-          </button>
-        </template>
-        <template #end>
-          <div class="send-box">
-            <div class="options">
-              <el-icon @click="open">
-                <FolderAdd />
-              </el-icon>
-            </div>
-            <el-scrollbar class="message-editor-scrollbar">
-              <div class="message-editor" ref="messageEditor" contenteditable>
-                asdsad
-                <img src="http://localhost:5224/Raw/DefaultAvatar/1.jpg">
+      <DropFilePanel @drop="fileDropHandle">
+        <SplitterPanel storage-key="room-chat-message" @end="moveEnd">
+          <template #start>
+            <el-scrollbar @scroll="messageListScrollHandle" ref="messageListBox">
+              <div ref="messageBox">
+                <div v-for="message in messages" :key="message.id" style="margin-bottom: 8px;">
+                  <ChatMessage :model-value="message" :is-self="isSelf(message.fromId)" />
+                </div>
               </div>
             </el-scrollbar>
-            <!-- <el-input style="height: 100%;" resize="none" type="textarea" v-model="messageContent"></el-input> -->
-            <el-button style="position: absolute; bottom: 20px; right: 20px;" type="primary" size="default" @click="send"
-              :disabled="!messageContent">发送</el-button>
-          </div>
-        </template>
-      </SplitterPanel>
+
+            <button v-if="!isActive" class="goto-bottom" @click="messageBoxScrollDown()">
+              <el-icon>
+                <ArrowDownBold />
+              </el-icon>
+            </button>
+
+            <UploadFileControl @cancel="waitUploadFile = null"
+              style="position: absolute; left: 1rem; right: 1rem; bottom: 1rem;" ref="uploadFileControl"
+              v-if="waitUploadFile" :file="waitUploadFile" @completed="uploadCompletedHandle" />
+          </template>
+          <template #end>
+            <div class="send-box">
+              <div class="options">
+                <el-icon @click="open">
+                  <FolderAdd />
+                </el-icon>
+              </div>
+              <el-scrollbar class="message-editor-scrollbar">
+                <div class="message-editor" ref="messageEditor" contenteditable>
+                  asdsad
+                  <img src="http://localhost:5224/Raw/DefaultAvatar/1.jpg">
+                </div>
+              </el-scrollbar>
+              <!-- <el-input style="height: 100%;" resize="none" type="textarea" v-model="messageContent"></el-input> -->
+              <el-button style="position: absolute; bottom: 20px; right: 20px;" type="primary" size="default"
+                @click="send" :disabled="!messageContent">发送</el-button>
+            </div>
+          </template>
+        </SplitterPanel>
+      </DropFilePanel>
     </div>
   </div>
 </template>
@@ -60,9 +66,10 @@ import ChatMessage from '../../components/ChatMessage/index.vue';
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
 import { ElNotification, ElScrollbar } from 'element-plus';
 import SplitterPanel from '../../components/SplitterPanel.vue';
-import { ChatMessageSendType, Room, UserInfo } from '../../types/Types';
+import { Attachment, ChatMessageSendType, Room, UserInfo } from '../../types/Types';
 import { useI18n } from 'vue-i18n';
 import { useRichText } from './useRichText';
+import UploadFileControl from '../../components/UploadFileControl/UploadFileControl.vue';
 const FILE_MAX_SIZE = 1024 * 1024 * 1024;
 
 const props = defineProps<{
@@ -80,7 +87,14 @@ const messageListBox = ref<InstanceType<typeof ElScrollbar> | null>(null)
 const messageBox = ref<HTMLDivElement | null>(null)
 const { height: messageBoxHeight } = useElementSize(messageBox)
 
-const { loadData, messages, sendText, sendFile, clearUnread, hasMore } = getRoomMessage(props.room.id)
+const { loadData,
+  messages,
+  sendText,
+  sendFile,
+  clearUnread,
+  hasMore,
+  sendAttachment
+} = getRoomMessage(props.room.id)
 
 loadData(true)
 
@@ -151,6 +165,22 @@ onChange(async (files) => {
   await sendFile(file)
   !isActive.value && messageBoxScrollDown(true)
 })
+
+const waitUploadFile = shallowRef<File | null>(null)
+
+const uploadFileControl = ref<InstanceType<typeof UploadFileControl>>()
+
+const fileDropHandle = async (files: File[] | null) => {
+  if (!files) return;
+  waitUploadFile.value = files[0]
+  await nextTick()
+  uploadFileControl.value?.start()
+}
+
+const uploadCompletedHandle = (attachment: Attachment) => {
+  waitUploadFile.value = null
+  sendAttachment(attachment);
+}
 
 </script>
 

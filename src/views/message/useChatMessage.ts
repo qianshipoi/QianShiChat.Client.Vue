@@ -208,6 +208,39 @@ export const useChatMessage = () => {
       addMessage(message);
     }
 
+    const sendAttachment = (attachment: Attachment): void => {
+      const message = reactive<ChatMessage>({
+        id: getNextId(),
+        fromId: currentUserStore.userInfo?.id!,
+        toId: roomMessage.room.toId,
+        roomId: roomMessage.room.id,
+        sendType: ChatMessageSendType.Personal,
+        messageType: fileTypeToMessageType(attachment.contentType),
+        content: attachment,
+        createTime: getNextId(),
+        fromUser: currentUserStore.userInfo,
+        status: ChatMessageStatus.Sending
+      })
+      sendFileApi({
+        toId: roomMessage!.room.toId,
+        attachmentId: attachment.id,
+        sendType: ChatMessageSendType.Personal
+      }).then(({ succeeded, data }) => {
+        if (!succeeded) {
+          message.status = ChatMessageStatus.Failed;
+          return
+        }
+
+        message.id = data!.id
+        message.createTime = data!.createTime
+        message.status = ChatMessageStatus.Succeeded
+      }).catch(err => {
+        message.status = ChatMessageStatus.Failed
+        ElNotification.error(err)
+      })
+      addMessage(message);
+    }
+
     const sendText = (content: string) => {
       const message = reactive<ChatMessage>({
         id: getNextId(),
@@ -260,6 +293,7 @@ export const useChatMessage = () => {
         chatStore.updateReadPosition(roomMessage.room.id, roomMessage.messages[roomMessage.messages.length - 1].id)
       },
       onNewMessage,
+      sendAttachment,
       hasMore: readonly(hasMore)
     }
   }
