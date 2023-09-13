@@ -30,9 +30,12 @@
               </el-icon>
             </button>
 
-            <UploadFileControl @cancel="waitUploadFile = null"
+            <UploadFileList @completed="sendAttachment" :files="waitUploadFiles"
+              style="position: absolute; left: 1rem; right: 1rem; bottom: 1rem;" />
+
+            <!-- <UploadFileControl @cancel="waitUploadFile = null"
               style="position: absolute; left: 1rem; right: 1rem; bottom: 1rem;" ref="uploadFileControl"
-              v-if="waitUploadFile" :file="waitUploadFile" @completed="uploadCompletedHandle" />
+              v-if="waitUploadFile" :file="waitUploadFile" @completed="uploadCompletedHandle" /> -->
           </template>
           <template #end>
             <div class="send-box">
@@ -66,10 +69,12 @@ import ChatMessage from '../../components/ChatMessage/index.vue';
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
 import { ElNotification, ElScrollbar } from 'element-plus';
 import SplitterPanel from '../../components/SplitterPanel.vue';
-import { Attachment, ChatMessageSendType, Room, UserInfo } from '../../types/Types';
+import { ChatMessageSendType, Room, UserInfo } from '../../types/Types';
 import { useI18n } from 'vue-i18n';
 import { useRichText } from './useRichText';
-import UploadFileControl from '../../components/UploadFileControl/UploadFileControl.vue';
+import { generateUUID } from '../../utils';
+import { UploadFileListFile } from '../../components/UploadFileList/UploadFIleList.vue';
+
 const FILE_MAX_SIZE = 1024 * 1024 * 1024;
 
 const props = defineProps<{
@@ -166,20 +171,16 @@ onChange(async (files) => {
   !isActive.value && messageBoxScrollDown(true)
 })
 
-const waitUploadFile = shallowRef<File | null>(null)
-
-const uploadFileControl = ref<InstanceType<typeof UploadFileControl>>()
+const waitUploadFiles = shallowReactive<UploadFileListFile[]>([])
 
 const fileDropHandle = async (files: File[] | null) => {
   if (!files) return;
-  waitUploadFile.value = files[0]
-  await nextTick()
-  uploadFileControl.value?.start()
-}
-
-const uploadCompletedHandle = (attachment: Attachment) => {
-  waitUploadFile.value = null
-  sendAttachment(attachment);
+  files.forEach(file => {
+    waitUploadFiles.push({
+      file,
+      id: generateUUID()
+    })
+  })
 }
 
 </script>

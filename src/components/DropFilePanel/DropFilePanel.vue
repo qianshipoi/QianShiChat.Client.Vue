@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang='ts'>
-import { useDropZone } from '@vueuse/core';
+import { useDropZone, useEventListener } from '@vueuse/core';
 import { Vue3Lottie } from 'vue3-lottie';
 import uploadJSON from '../../assets/json/upload.json'
 
@@ -20,11 +20,40 @@ const emits = defineEmits<{
   (e: 'drop', files: File[]): void
 }>()
 
-function onDrop(files: File[] | null) {
-  files && emits('drop', files);
+const { isOverDropZone } = useDropZone(document.body)
+
+const includeFolder = (items: DataTransferItemList | null | undefined) => {
+  if (!items) return
+  for (let i = 0;i <= items.length - 1;i++) {
+    let item = items[i];
+    if (item.kind === 'file') {
+      const entry = item.webkitGetAsEntry()
+      if (entry?.isDirectory) {
+        return true
+      }
+    }
+  }
+  return false
 }
 
-const { isOverDropZone } = useDropZone(dropPanel, onDrop)
+useEventListener(dropPanel, 'drop', (event: DragEvent) => {
+  event.preventDefault()
+  if (includeFolder(event.dataTransfer?.items)) {
+    ElNotification.warning('不支持文件夹')
+    return;
+  }
+  const files = event.dataTransfer?.files
+  if (files && files?.length > 0) {
+    const fileArray: File[] = []
+    for (let i = 0;i < files.length;i++) {
+      const file = files[i];
+      fileArray.push(file);
+    }
+    emits('drop', fileArray)
+    return;
+  }
+})
+
 </script>
 
 <style lang="scss" scoped>

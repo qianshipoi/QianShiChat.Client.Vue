@@ -6,7 +6,7 @@
       <div class="icon pause" v-if="uploading" @click="pause">
         <Icon icon="material-symbols:pause" />
       </div>
-      <div class="icon start" @click="start" v-else>
+      <div class="icon start" @click="start(true)" v-else>
         <Icon icon="teenyicons:play-solid" />
       </div>
       <div class="icon cancel" @click="cancel">
@@ -44,12 +44,15 @@ const currentUserStore = useCurrentUserStore()
 
 let upload: TusUpload | null = null;
 
-const start = () => {
+let manualPasue = false
+
+const start = (force: boolean = false) => {
+  if (!force && manualPasue) return;
   if (uploading.value) return;
   upload = new TusUpload(props.file)
     .addAuthorizationFactory(() => `Bearer ${currentUserStore.token}`)
     .setProgress((loaded, total) => {
-      progressValue.value = Math.ceil(loaded / (total ?? props.file.size))
+      progressValue.value = Math.ceil(loaded / (total ?? props.file.size) * 100)
     })
     .setSuccess((fileId: string) => {
       bindTusFile(fileId).then(res => {
@@ -74,6 +77,7 @@ const start = () => {
 
 const pause = () => {
   uploading.value = false
+  manualPasue = true;
   upload && upload.pause();
 }
 
@@ -98,6 +102,7 @@ defineExpose({
   background-color: white;
   border-radius: 12px;
   padding: 8px 16px;
+  user-select: none;
 }
 
 .progress-value {
