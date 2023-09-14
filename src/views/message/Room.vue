@@ -36,9 +36,14 @@
           <div class="message-box">
             <input type="text" v-model="messageContent" placeholder="Write your message...">
             <div class="actions">
-              <button class="icon">
-                <Icon icon="fluent:emoji-16-filled" />
-              </button>
+              <el-popover ref="iconPopover" placement="top" :width="200" trigger="click">
+                <template #reference>
+                  <button class="icon">
+                    <Icon icon="fluent:emoji-16-filled" />
+                  </button>
+                </template>
+                <EmojiPanel @selected="iconSelectedHandle" />
+              </el-popover>
               <button class="icon">
                 <Icon icon="bx:link" />
               </button>
@@ -67,6 +72,7 @@ import { useRichText } from './useRichText';
 import { generateUUID } from '../../utils';
 import UploadFileList, { UploadFileListFile } from '../../components/UploadFileList/UploadFileList.vue';
 import { Rectangle } from '../../components/DropFilePanel/DropFilePanel.vue';
+import { ElPopover } from 'element-plus'
 
 const props = defineProps<{
   room: Room
@@ -170,6 +176,13 @@ watchThrottled(
   },
   { throttle: 500 },
 )
+
+const iconPopover = ref<InstanceType<typeof ElPopover>>()
+
+const iconSelectedHandle = (emoji: string) => {
+  messageContent.value += emoji
+  iconPopover.value?.hide()
+}
 
 </script>
 
