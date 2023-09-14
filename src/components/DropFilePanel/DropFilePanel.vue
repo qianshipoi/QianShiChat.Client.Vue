@@ -10,9 +10,20 @@
 </template>
 
 <script setup lang='ts'>
-import { useDropZone, useEventListener } from '@vueuse/core';
+import { useDropZone, useElementBounding, useEventListener } from '@vueuse/core';
 import { Vue3Lottie } from 'vue3-lottie';
 import uploadJSON from '../../assets/json/upload.json'
+
+export type Rectangle = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+const props = defineProps<{
+  closeRect?: Rectangle
+}>()
 
 const dropPanel = ref<HTMLDivElement>()
 
@@ -35,6 +46,26 @@ const includeFolder = (items: DataTransferItemList | null | undefined) => {
   }
   return false
 }
+
+const { bottom, left, right, top } = useElementBounding(dropPanel)
+
+const closePosition = computed(() => {
+  if (props.closeRect) {
+    return {
+      top: props.closeRect.y - top.value + 'px',
+      left: props.closeRect.x - left.value + 'px',
+      bottom: bottom.value - (props.closeRect.y + props.closeRect.height) + 'px',
+      right: right.value - (props.closeRect.x + props.closeRect.width) + 'px',
+    }
+  } else {
+    return {
+      bottom: bottom.value / 0.6 + 'px',
+      right: right.value / 0.6 + 'px',
+      left: left.value / 0.6 + 'px',
+      top: top.value / 0.6 + 'px',
+    }
+  }
+})
 
 useEventListener(dropPanel, 'drop', (event: DragEvent) => {
   event.preventDefault()
@@ -80,8 +111,10 @@ useEventListener(dropPanel, 'drop', (event: DragEvent) => {
 }
 
 .modal-leave-to {
-  opacity: 0;
-  transform: scale(.6);
+  bottom: v-bind('closePosition.bottom');
+  left: v-bind('closePosition.left');
+  top: v-bind('closePosition.top');
+  right: v-bind('closePosition.right');
 }
 
 .modal-leave-active {

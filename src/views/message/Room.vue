@@ -13,7 +13,7 @@
       </div>
     </header>
     <div style="flex: 1;">
-      <DropFilePanel @drop="fileDropHandle">
+      <DropFilePanel @drop="fileDropHandle" :close-rect="closeRect">
         <SplitterPanel storage-key="room-chat-message" @end="moveEnd">
           <template #start>
             <el-scrollbar @scroll="messageListScrollHandle" ref="messageListBox">
@@ -30,7 +30,7 @@
               </el-icon>
             </button>
 
-            <UploadFileList @completed="sendAttachment" :files="waitUploadFiles"
+            <UploadFileList ref="uploadFileList" @completed="sendAttachment" :files="waitUploadFiles"
               style="position: absolute; left: 1rem; right: 1rem; bottom: 1rem;" />
 
             <!-- <UploadFileControl @cancel="waitUploadFile = null"
@@ -63,7 +63,7 @@
 
 <script setup lang='ts'>
 import { MoreFilled, FolderAdd, ArrowDownBold } from '@element-plus/icons-vue';
-import { useElementSize, useFileDialog, useThrottleFn, watchPausable } from '@vueuse/core';
+import { useElementBounding, useElementSize, useFileDialog, useThrottleFn, watchPausable } from '@vueuse/core';
 import { useChatMessage } from './useChatMessage';
 import ChatMessage from '../../components/ChatMessage/index.vue';
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
@@ -73,7 +73,8 @@ import { ChatMessageSendType, Room, UserInfo } from '../../types/Types';
 import { useI18n } from 'vue-i18n';
 import { useRichText } from './useRichText';
 import { generateUUID } from '../../utils';
-import { UploadFileListFile } from '../../components/UploadFileList/UploadFIleList.vue';
+import UploadFileList, { UploadFileListFile } from '../../components/UploadFileList/UploadFileList.vue';
+import { Rectangle } from '../../components/DropFilePanel/DropFilePanel.vue';
 
 const FILE_MAX_SIZE = 1024 * 1024 * 1024;
 
@@ -122,7 +123,6 @@ const loadMoreData = useThrottleFn(() => {
 const messageEditor = ref<HTMLDivElement>()
 
 useRichText(messageEditor)
-
 
 const messageListScrollHandle = (e: { scrollLeft: number, scrollTop: number }) => {
   if ((messageListBox.value?.wrapRef?.clientHeight ?? 0) + e.scrollTop + 60 <= messageBoxHeight.value) {
@@ -182,6 +182,21 @@ const fileDropHandle = async (files: File[] | null) => {
     })
   })
 }
+
+const uploadFileList = ref<HTMLElement>()
+
+const { top, left, width } = useElementBounding(uploadFileList)
+
+const closeRect = ref<Rectangle | undefined>()
+
+onMounted(() => {
+  closeRect.value = {
+    x: left.value,
+    y: top.value - 40,
+    width: width.value,
+    height: 40
+  }
+})
 
 </script>
 
