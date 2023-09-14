@@ -48,7 +48,8 @@ const content = computed(() => {
 
 <style scoped>
 .room-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr;
   padding: 0 10px;
   align-items: center;
   height: 70px;
@@ -79,7 +80,6 @@ const content = computed(() => {
 }
 
 .content {
-  flex-grow: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
@@ -90,6 +90,11 @@ const content = computed(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.down {
+  display: grid;
+  grid-template-columns: 1fr auto;
 }
 
 .name,

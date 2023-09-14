@@ -12,10 +12,10 @@
         </el-icon>
       </div>
     </header>
-    <div style="flex: 1; overflow: hidden;">
+    <div style="flex: 1;">
       <DropFilePanel @drop="fileDropHandle" :close-rect="closeRect">
-        <div class="content">
-          <div class="message-content" style="position: relative;">
+        <SplitterPanel storage-key="room-chat-message" @end="moveEnd">
+          <template #start>
             <el-scrollbar @scroll="messageListScrollHandle" ref="messageListBox">
               <div ref="messageBox">
                 <div v-for="message in messages" :key="message.id" style="margin-bottom: 8px;">
@@ -23,50 +23,56 @@
                 </div>
               </div>
             </el-scrollbar>
+
             <button v-if="!isActive" class="goto-bottom" @click="messageBoxScrollDown()">
               <el-icon>
                 <ArrowDownBold />
               </el-icon>
             </button>
-            <UploadFileList ref="uploadFileList" class="upload-file-list" @completed="sendAttachment"
-              :files="waitUploadFiles" />
-          </div>
 
-
-          <div class="message-box">
-            <input type="text" v-model="messageContent" placeholder="Write your message...">
-            <div class="actions">
-              <button class="icon">
-                <Icon icon="fluent:emoji-16-filled" />
-              </button>
-              <button class="icon">
-                <Icon icon="bx:link" />
-              </button>
-              <button class="icon send" :disabled="!messageContent" @click="send">
-                <Icon icon="mingcute:send-fill" />
-              </button>
+            <UploadFileList ref="uploadFileList" @completed="sendAttachment" :files="waitUploadFiles"
+              style="position: absolute; left: 1rem; right: 1rem; bottom: 1rem;" />
+          </template>
+          <template #end>
+            <div class="send-box">
+              <div class="options">
+                <el-icon @click="open">
+                  <FolderAdd />
+                </el-icon>
+              </div>
+              <!-- <el-scrollbar class="message-editor-scrollbar">
+                <div class="message-editor" ref="messageEditor" contenteditable>
+                  asdsad
+                  <img src="http://localhost:5224/Raw/DefaultAvatar/1.jpg">
+                </div>
+              </el-scrollbar> -->
+              <el-input style="height: 100%;" resize="none" type="textarea" v-model="messageContent"></el-input>
+              <el-button style="position: absolute; bottom: 20px; right: 20px;" type="primary" size="default"
+                @click="send" :disabled="!messageContent">发送</el-button>
             </div>
-          </div>
-        </div>
+          </template>
+        </SplitterPanel>
       </DropFilePanel>
     </div>
   </div>
 </template>
 
 <script setup lang='ts'>
-import { Icon } from '@iconify/vue';
-import { MoreFilled, ArrowDownBold } from '@element-plus/icons-vue';
-import { useElementBounding, useElementSize, useThrottleFn, watchPausable, watchThrottled } from '@vueuse/core';
+import { MoreFilled, FolderAdd, ArrowDownBold } from '@element-plus/icons-vue';
+import { useElementBounding, useElementSize, useFileDialog, useThrottleFn, watchPausable, watchThrottled } from '@vueuse/core';
 import { useChatMessage } from './useChatMessage';
 import ChatMessage from '../../components/ChatMessage/index.vue';
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
-import { ElScrollbar } from 'element-plus';
+import { ElNotification, ElScrollbar } from 'element-plus';
+import SplitterPanel from '../../components/SplitterPanel.vue';
 import { ChatMessageSendType, Room, UserInfo } from '../../types/Types';
 import { useI18n } from 'vue-i18n';
 import { useRichText } from './useRichText';
 import { generateUUID } from '../../utils';
 import UploadFileList, { UploadFileListFile } from '../../components/UploadFileList/UploadFileList.vue';
 import { Rectangle } from '../../components/DropFilePanel/DropFilePanel.vue';
+
+const FILE_MAX_SIZE = 1024 * 1024 * 1024;
 
 const props = defineProps<{
   room: Room
@@ -86,6 +92,7 @@ const { height: messageBoxHeight } = useElementSize(messageBox)
 const { loadData,
   messages,
   sendText,
+  sendFile,
   clearUnread,
   hasMore,
   sendAttachment
@@ -130,6 +137,10 @@ const messageListScrollHandle = (e: { scrollLeft: number, scrollTop: number }) =
   }
 }
 
+const moveEnd = () => {
+  messageListBox.value?.update()
+}
+
 const isSelf = (formId: number): boolean => {
   return formId === currentUserStore.userInfo?.id
 }
@@ -139,6 +150,22 @@ const send = async () => {
   messageContent.value = ''
   !isActive.value && messageBoxScrollDown(true)
 }
+
+const { open, onChange } = useFileDialog({
+  reset: true
+})
+
+onChange(async (files) => {
+  if (!files || files.length === 0) return;
+  const file = files[0];
+  if (file.size > FILE_MAX_SIZE) {
+    ElNotification.warning(`The uploaded file size cannot be larger than ${FILE_MAX_SIZE / 1024 / 1024}`)
+    return;
+  }
+
+  await sendFile(file)
+  !isActive.value && messageBoxScrollDown(true)
+})
 
 const waitUploadFiles = shallowReactive<UploadFileListFile[]>([])
 
@@ -175,10 +202,8 @@ watchThrottled(
 
 <style lang="scss" scoped>
 .room {
-  --border-radius: 8px;
   display: flex;
   flex-direction: column;
-  background-color: #EDF0F5;
   height: 100%;
 }
 
@@ -205,91 +230,6 @@ header .el-icon {
 
 header .el-icon:hover {
   color: var(--primary);
-}
-
-.content {
-  display: grid;
-  grid-template-rows: 1fr auto;
-  gap: 8px;
-  height: 100%;
-  overflow: hidden;
-}
-
-.message-content {
-  position: relative;
-  overflow: hidden;
-}
-
-.upload-file-list {
-  position: absolute;
-  left: 1rem;
-  right: 1rem;
-  bottom: 0.5rem;
-}
-
-.message-box {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  height: 52px;
-  margin: 0 16px 16px;
-  padding: 6px;
-  box-shadow: 0 0 6px #ccc;
-  background-color: white;
-  border-radius: var(--border-radius);
-
-  &>input {
-    height: 100%;
-    border: none;
-    outline: none;
-    margin: 0 0 0 8px;
-  }
-
-  &>.actions {
-    display: flex;
-
-    &>.icon {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #D6DCE4;
-      font-size: 18px;
-      padding: 0;
-      outline: none;
-      background-color: transparent;
-      width: 40px;
-      height: 40px;
-      border: none;
-      border-radius: var(--border-radius);
-      cursor: pointer;
-      transition: .1s ease-in-out;
-
-      &:hover {
-        border: none;
-      }
-
-      &.send {
-        background-color: #00A389;
-        color: white;
-
-        &:disabled {
-          background-color: rgba($color: #00A389, $alpha: .6);
-          cursor: not-allowed;
-        }
-
-        &:active {
-          transform: scale(.9);
-        }
-      }
-
-
-      &:hover:not(:last-child) {
-        color: #00A389;
-        transform: scale(1.2);
-      }
-    }
-  }
-
 }
 
 .message-editor {

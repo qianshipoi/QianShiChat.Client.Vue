@@ -1,6 +1,6 @@
 <template>
   <TransitionGroup tag="div" name="file-list" class="upload-file-list">
-    <UploadFileControl ref="uploadFileControlRef" @cancel="cancelHandle(file.id)"
+    <UploadFileControl ref="uploadFileControlRefs" @cancel="cancelHandle(file.id)"
       @completed="(attachment) => completedHandle(file, attachment)" v-for="(file) in queue" :key="file.id"
       :file="file.file" />
   </TransitionGroup>
@@ -31,7 +31,7 @@ const props = withDefaults(defineProps<UploadFileListProps>(), {
 })
 
 const queue: UploadFileListFile[] = reactive([])
-const uploadFileControlRef = ref<InstanceType<typeof UploadFileControl>[]>()
+const uploadFileControlRefs = ref<InstanceType<typeof UploadFileControl>[]>()
 
 const addQueue = async () => {
   if (queue.length >= props.maxCount) {
@@ -44,7 +44,12 @@ const addQueue = async () => {
     }
     queue.push(file);
     await nextTick()
-    uploadFileControlRef.value?.forEach(item => item.start())
+    if (uploadFileControlRefs.value && uploadFileControlRefs.value.length > 0) {
+      const control = uploadFileControlRefs.value[uploadFileControlRefs.value.length - 1]
+      setTimeout(() => {
+        control.start();
+      }, 1000)
+    }
     if (queue.length >= props.maxCount) {
       break;
     }

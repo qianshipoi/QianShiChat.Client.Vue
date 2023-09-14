@@ -67,6 +67,8 @@ const closePosition = computed(() => {
   }
 })
 
+const transitionTime = ref('0s')
+
 useEventListener(dropPanel, 'drop', (event: DragEvent) => {
   event.preventDefault()
   if (includeFolder(event.dataTransfer?.items)) {
@@ -80,6 +82,10 @@ useEventListener(dropPanel, 'drop', (event: DragEvent) => {
       const file = files[i];
       fileArray.push(file);
     }
+    transitionTime.value = ".3s"
+    setTimeout(() => {
+      transitionTime.value = "0s"
+    }, 1000);
     emits('drop', fileArray)
     return;
   }
@@ -118,6 +124,6 @@ useEventListener(dropPanel, 'drop', (event: DragEvent) => {
 }
 
 .modal-leave-active {
-  transition: all .3s ease-out;
+  transition: all v-bind(transitionTime) ease-out;
 }
 </style>
