@@ -47,7 +47,7 @@ const includeFolder = (items: DataTransferItemList | null | undefined) => {
   return false
 }
 
-const { bottom, left, right, top } = useElementBounding(dropPanel)
+const { bottom, left, right, top, height, width } = useElementBounding(dropPanel)
 
 const closePosition = computed(() => {
   if (props.closeRect) {
@@ -59,10 +59,10 @@ const closePosition = computed(() => {
     }
   } else {
     return {
-      bottom: bottom.value / 0.6 + 'px',
-      right: right.value / 0.6 + 'px',
-      left: left.value / 0.6 + 'px',
-      top: top.value / 0.6 + 'px',
+      bottom: height.value / 2 * 0.6 + 'px',
+      right: width.value / 2 * 0.6 + 'px',
+      left: width.value / 2 * 0.6 + 'px',
+      top: height.value / 2 * 0.6 + 'px',
     }
   }
 })

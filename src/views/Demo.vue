@@ -1,6 +1,16 @@
 <template>
-  <div class="demo">
+  <div class="demo" style="height: 100%;">
     <DropFilePanel @drop="dropHandle">
+      <ChatMessage v-model="textMessage" />
+      <ChatMessage v-model="imageMessage" />
+      <ChatMessage v-model="auidoMessage" />
+      <ChatMessage v-model="otherFileMessage" />
+      <ChatMessage v-model="textMessage" is-self />
+      <ChatMessage v-model="imageMessage" is-self />
+      <ChatMessage v-model="auidoMessage" is-self />
+      <ChatMessage v-model="otherFileMessage" is-self />
+      <AddFriendSearch :model-value="false"></AddFriendSearch>
+      <button @click="showFriendApplyNotification">show apply notification</button>
       <UploadFileControl ref="uploadFileControlRef" v-if="showUploadFileControl" :file="dropFile!"
         style="position: absolute; bottom: 20px; width: calc(100% - 40px); left: 20px; right: 20px;"
         @cancel="cancelUploadHandle" @completed="uploadCompletedHandle" />
@@ -43,7 +53,8 @@ const textMessage: ChatMessageClass = {
   content: "文字消息",
   createTime: new Date().getTime(),
   fromUser: userinfo,
-  status: ChatMessageStatus.Succeeded
+  status: ChatMessageStatus.Succeeded,
+  attachments: []
 }
 
 const imageMessage: ChatMessageClass = {
@@ -59,6 +70,20 @@ const imageMessage: ChatMessageClass = {
     contentType: "image/jpeg",
     size: 209904
   },
+}
+const auidoMessage: ChatMessageClass = {
+  ...imageMessage,
+  messageType: ChatMessageType.Audio,
+  status: ChatMessageStatus.Succeeded,
+  content: {
+    id: 1,
+    name: "1551470082826313728.mp3",
+    rawPath: "http://localhost:5224/files/461201462808645.mp3",
+    previewPath: undefined,
+    hash: "8d3186c00a453ca11a169d1a575692a4",
+    contentType: "audio/mpeg",
+    size: 2772823
+  }
 }
 
 const otherFileMessage: ChatMessageClass = {

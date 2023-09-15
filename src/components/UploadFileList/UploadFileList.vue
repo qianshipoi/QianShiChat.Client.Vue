@@ -1,5 +1,5 @@
 <template>
-  <TransitionGroup tag="div" name="file-list" class="upload-file-list">
+  <TransitionGroup tag="div" name="files" class="upload-file-list">
     <UploadFileControl ref="uploadFileControlRefs" @cancel="cancelHandle(file.id)"
       @completed="(attachment) => completedHandle(file, attachment)" v-for="(file) in queue" :key="file.id"
       :file="file.file" />
@@ -85,28 +85,29 @@ const completedHandle = (file: UploadFileListFile, attachment: Attachment) => {
 
 <style lang="scss" scoped>
 .upload-file-list {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.file-list-move,
-.file-list-enter-active,
-.file-list-leave-active {
-  transition: all 0.5s ease;
+.files-move,
+.files-enter-active,
+.files-leave-active {
+  transition: all 0.3s ease;
 }
 
-.file-list-enter-from {
+.files-enter-from {
   opacity: 0;
   transform: translateX(30px);
 }
 
-.file-list-leave-to {
+.files-leave-to {
   opacity: 0;
-  transform: translateY(30px);
+  transform: scale(0.6, 0.8);
 }
 
-.file-list-leave-active {
+.files-leave-active {
   position: absolute;
   width: 100%;
 }

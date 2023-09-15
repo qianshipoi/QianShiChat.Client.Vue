@@ -100,6 +100,7 @@ const content = computed(() => {
 .name,
 .message {
   overflow: hidden;
+  text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

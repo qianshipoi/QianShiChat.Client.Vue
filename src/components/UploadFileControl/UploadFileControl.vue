@@ -2,7 +2,7 @@
   <div class="upload-file-control">
     <span class="progress-value">{{ progressValueText }}</span>
     <div class="progress-bar"></div>
-    <div class="actions">
+    <div class="actions" v-if="!isCompleted">
       <div class="icon pause" v-if="uploading" @click="pause">
         <Icon icon="material-symbols:pause" />
       </div>
@@ -16,6 +16,12 @@
         <Icon icon="mingcute:more-2-line" />
       </div>
     </div>
+    <div class="completed" v-else>
+      <span>completed</span>
+      <div class="icon">
+        <Vue3Lottie :animation-data="completedJSON" :loop="false" :width="32" :height="32" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -25,6 +31,8 @@ import { TusUpload } from '../../utils/tusUtils';
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
 import { bindTusFile } from '../../api/attachment';
 import { Attachment } from '../../types/Types';
+import { Vue3Lottie } from 'vue3-lottie';
+import completedJSON from '../../assets/json/completed.json'
 
 const emits = defineEmits<{
   (e: 'completed', attachment: Attachment): void,
@@ -60,8 +68,7 @@ const start = (force: boolean = false) => {
           throw new Error('upload file error.')
         }
         const attachment = res.data as Attachment;
-        emits('completed', attachment)
-        pause()
+        completed(attachment);
       }).catch(err => {
         ElNotification.error(err)
       })
@@ -73,6 +80,18 @@ const start = (force: boolean = false) => {
     .build();
   upload.start();
   uploading.value = true
+}
+
+const isCompleted = ref(false);
+
+const completed = (attachment: Attachment) => {
+  // animation
+  isCompleted.value = true;
+  setTimeout(() => {
+    emits('completed', attachment)
+    pause()
+    isCompleted.value = false
+  }, 1000)
 }
 
 const pause = () => {
@@ -148,8 +167,23 @@ defineExpose({
       background-color: #FCEFF0;
       color: #DF9EAF;
     }
-
   }
+}
 
+.completed {
+  display: flex;
+  align-items: center;
+  width: 112px;
+  gap: 8px;
+  // color:#20E3C6;
+  color: #00A38B;
+
+  &>.icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+  }
 }
 </style>

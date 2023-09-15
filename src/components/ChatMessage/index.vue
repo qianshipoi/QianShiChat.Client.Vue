@@ -26,6 +26,7 @@ import TextMessage from './TextMessage.vue';
 import VideoMessage from './VideoMessage.vue';
 import NotSupportedMessage from './NotSupportedMessage.vue'
 import { Loading, WarningFilled } from '@element-plus/icons-vue'
+import AuidoMessage from './AuidoMessage.vue';
 
 const message = defineModel<ChatMessage>()
 
@@ -43,6 +44,8 @@ const content = computed(() => {
       return ImageMessage
     case ChatMessageType.Video:
       return VideoMessage
+    case ChatMessageType.Audio:
+      return AuidoMessage
     case ChatMessageType.OtherFile:
       return FileMessage
     default:

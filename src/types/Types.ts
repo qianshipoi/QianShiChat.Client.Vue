@@ -22,9 +22,10 @@ export enum ChatMessageSendType {
 
 export enum ChatMessageType {
   Text = 1,
-  Image,
-  Video,
-  OtherFile
+  Image = 2,
+  Video = 3,
+  Audio = 4,
+  OtherFile = 127
 }
 
 export enum ChatMessageStatus {
@@ -34,16 +35,17 @@ export enum ChatMessageStatus {
 }
 
 export interface ChatMessage {
-  id: number
-  fromId: number
-  toId: number
-  roomId: string
-  sendType: ChatMessageSendType
-  messageType: ChatMessageType
-  content: string | Attachment
-  createTime: number
-  fromUser?: UserInfo
-  status: ChatMessageStatus
+  id: number;
+  fromId: number;
+  toId: number;
+  roomId: string;
+  sendType: ChatMessageSendType;
+  messageType: ChatMessageType;
+  content: string | Attachment;
+  createTime: number;
+  fromUser?: UserInfo;
+  status: ChatMessageStatus;
+  attachments: Attachment[];
 }
 
 export enum NotificationType {

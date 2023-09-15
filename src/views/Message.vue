@@ -27,6 +27,7 @@
     </div>
     <div class="content">
       <Room v-if="roomStore.isOpendRoom" :key="roomStore.opendRoomRaw?.id" :room="roomStore.opendRoomRaw!" />
+      <Vue3Lottie v-else :loop="false" :animation-data="messagesJSON" />
     </div>
     <add-friend-search v-model="addFriendVisible"></add-friend-search>
     <CreateGroup v-if="displayCreateGroup" v-model="displayCreateGroup" />
@@ -42,6 +43,8 @@ import Room from './message/Room.vue'
 import AddFriendSearch from '../components/AddFriendSearch.vue';
 import RoomItem from '../components/RoomItem.vue';
 import CreateGroup from '../components/CreateGroup/CreateGroup.vue'
+import { Vue3Lottie } from 'vue3-lottie';
+import messagesJSON from '../assets/json/messages.json'
 
 const roomStore = useRoomStore();
 const { rooms } = storeToRefs(roomStore);
