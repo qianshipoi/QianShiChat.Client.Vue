@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     AddFriendSearch: typeof import('./components/AddFriendSearch.vue')['default']
     ApplyNotification: typeof import('./components/Notification/ApplyNotification.vue')['default']
+    AudioRecorder: typeof import('./components/AudioRecorder/AudioRecorder.vue')['default']
     AuidoMessage: typeof import('./components/ChatMessage/AuidoMessage.vue')['default']
     ChatMessage: typeof import('./components/ChatMessage/index.vue')['default']
     CreateGroup: typeof import('./components/CreateGroup/CreateGroup.vue')['default']

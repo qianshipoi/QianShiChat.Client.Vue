@@ -32,7 +32,6 @@
               :files="waitUploadFiles" />
           </div>
 
-
           <div class="message-box">
             <input type="text" v-model="messageContent" placeholder="Write your message...">
             <div class="actions">
@@ -89,7 +88,8 @@ const messageListBox = ref<InstanceType<typeof ElScrollbar> | null>(null)
 const messageBox = ref<HTMLDivElement | null>(null)
 const { height: messageBoxHeight } = useElementSize(messageBox)
 
-const { loadData,
+const {
+  loadData,
   messages,
   sendText,
   clearUnread,
@@ -136,9 +136,9 @@ const messageListScrollHandle = (e: { scrollLeft: number, scrollTop: number }) =
   }
 }
 
-const isSelf = (formId: number): boolean => {
+const isSelf = computed(() => (formId: number): boolean => {
   return formId === currentUserStore.userInfo?.id
-}
+})
 
 const send = async () => {
   await sendText(messageContent.value)

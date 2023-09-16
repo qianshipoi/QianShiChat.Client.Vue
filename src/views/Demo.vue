@@ -1,16 +1,19 @@
 <template>
   <div class="demo" style="height: 100%;">
     <DropFilePanel @drop="dropHandle">
+
+      <AudioRecorder />
+
       <ChatMessage v-model="textMessage" />
       <ChatMessage v-model="imageMessage" />
-      <ChatMessage v-model="auidoMessage" />
+      <!-- <ChatMessage v-model="auidoMessage" /> -->
       <ChatMessage v-model="otherFileMessage" />
-      <ChatMessage v-model="textMessage" is-self />
+      <!-- <ChatMessage v-model="textMessage" is-self />
       <ChatMessage v-model="imageMessage" is-self />
       <ChatMessage v-model="auidoMessage" is-self />
       <ChatMessage v-model="otherFileMessage" is-self />
       <AddFriendSearch :model-value="false"></AddFriendSearch>
-      <button @click="showFriendApplyNotification">show apply notification</button>
+      <button @click="showFriendApplyNotification">show apply notification</button> -->
       <UploadFileControl ref="uploadFileControlRef" v-if="showUploadFileControl" :file="dropFile!"
         style="position: absolute; bottom: 20px; width: calc(100% - 40px); left: 20px; right: 20px;"
         @cancel="cancelUploadHandle" @completed="uploadCompletedHandle" />
@@ -30,7 +33,6 @@
 import ChatMessage from '../components/ChatMessage/index.vue'
 import { ApplyStatus, Attachment, ChatMessageStatus, FriendApply, UserInfo } from '../types/Types';
 import { ChatMessageSendType, ChatMessage as ChatMessageClass, ChatMessageType } from '../types/Types';
-import AddFriendSearch from '../components/AddFriendSearch.vue'
 import { ElImage, ElNotification } from 'element-plus';
 import DropFilePanel from '../components/DropFilePanel/DropFilePanel.vue';
 import UploadFileControl from '../components/UploadFileControl/UploadFileControl.vue';

@@ -33,6 +33,8 @@ export const useChatMessage = () => {
       return ChatMessageType.Image;
     } else if (["video/mpeg4"].includes(fileType)) {
       return ChatMessageType.Video;
+    } else if (["audio/mpeg"].includes(fileType)) {
+      return ChatMessageType.Audio;
     } else {
       return ChatMessageType.OtherFile;
     }
@@ -139,7 +141,8 @@ export const useChatMessage = () => {
         content: attachment,
         createTime: getNextId(),
         fromUser: currentUserStore.userInfo,
-        status: ChatMessageStatus.Sending
+        status: ChatMessageStatus.Sending,
+        attachments: []
       })
 
       const sendFileMessage = (message: ChatMessage) => {
@@ -219,7 +222,8 @@ export const useChatMessage = () => {
         content: attachment,
         createTime: getNextId(),
         fromUser: currentUserStore.userInfo,
-        status: ChatMessageStatus.Sending
+        status: ChatMessageStatus.Sending,
+        attachments: [attachment]
       })
       sendFileApi({
         toId: roomMessage!.room.toId,
@@ -252,7 +256,8 @@ export const useChatMessage = () => {
         content: content,
         createTime: getNextId(),
         fromUser: currentUserStore.userInfo,
-        status: ChatMessageStatus.Sending
+        status: ChatMessageStatus.Sending,
+        attachments: []
       })
 
       sendTextApi({
@@ -284,7 +289,7 @@ export const useChatMessage = () => {
 
     return {
       loading: readonly(loading),
-      messages: readonly(roomMessage.messages),
+      messages: roomMessage.messages,
       loadData,
       sendText,
       sendFile,
