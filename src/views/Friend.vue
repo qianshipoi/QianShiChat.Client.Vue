@@ -18,7 +18,7 @@
             <ArrowRight />
           </el-icon>
         </li>
-        <li>
+        <li @click="openGroupApply">
           <span>群通知</span>
           <el-icon>
             <ArrowRight />
@@ -46,13 +46,15 @@ import { UserInfo } from '../types/Types';
 
 const UserProfile = defineAsyncComponent(() => import('./friend/UserProfile.vue'))
 const FriendApply = defineAsyncComponent(() => import('./friend/FriendApply.vue'))
+const GroupApply = defineAsyncComponent(() => import('./friend/GroupApply.vue'))
 
 const searchText = ref<string>('')
-
+const opendComponent = shallowRef<any>(null)
+const currentSelectedUser = ref<UserInfo>()
+const componentProps = ref<any>(null)
 const friendStore = useFriendStore()
 const { friends } = storeToRefs(friendStore)
 
-const currentSelectedUser = ref<UserInfo>()
 
 const isSelected = computed(() => (user: UserInfo) => currentSelectedUser.value === user)
 
@@ -64,11 +66,15 @@ const selectedHandle = (user: UserInfo) => {
   }
 }
 
-const opendComponent = shallowRef<any>(null)
-const componentProps = ref<any>(null)
 
 const openFriendApply = () => {
   opendComponent.value = FriendApply;
+  componentProps.value = null;
+  currentSelectedUser.value = undefined;
+}
+
+const openGroupApply = () => {
+  opendComponent.value = GroupApply;
   componentProps.value = null;
   currentSelectedUser.value = undefined;
 }

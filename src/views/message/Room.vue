@@ -264,7 +264,7 @@ header .el-icon:hover {
 
 .message-input-box {
   margin: 0 1rem 1rem;
-  box-shadow: 0 0 6px #ccc;
+  box-shadow: 0 1px 8px #cccccc80;
   background-color: white;
   border-radius: var(--border-radius);
   transition: height .3s ease;
