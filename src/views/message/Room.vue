@@ -3,8 +3,10 @@
     <header>
       <div class="left">
         <span>{{ room.name }}</span>
-        <span v-if="!isGroup">[{{ (room.toObject as UserInfo).isOnline ? t('status.online') : t('status.offline')
-        }}]</span>
+        <span v-if="!isGroup">
+          [{{ (room.toObject as UserInfo).isOnline ? t('status.online') : t('status.offline')
+          }}]
+        </span>
       </div>
       <div class="menu">
         <el-icon>
@@ -32,23 +34,27 @@
               :files="waitUploadFiles" />
           </div>
 
-          <div class="message-box">
-            <input type="text" v-model="messageContent" placeholder="Write your message...">
-            <div class="actions">
-              <el-popover ref="iconPopover" placement="top" :width="200" trigger="click">
-                <template #reference>
-                  <button class="icon">
-                    <Icon icon="fluent:emoji-16-filled" />
-                  </button>
-                </template>
-                <EmojiPanel @selected="iconSelectedHandle" />
-              </el-popover>
-              <button class="icon">
-                <Icon icon="bx:link" />
-              </button>
-              <button class="icon send" :disabled="!messageContent" @click="send">
-                <Icon icon="mingcute:send-fill" />
-              </button>
+          <div class="message-input-box">
+            <AudioRecorder class="message-input-audio" v-if="showAudioRecorder" @back="showAudioRecorder = false"
+              @completed="audioRecordCompletedHandle" />
+            <div v-else class="message-input-text">
+              <input type="text" v-model="messageContent" ref="messageInputRef" placeholder="Write your message...">
+              <div class="actions">
+                <el-popover ref="iconPopover" placement="top" :width="200" trigger="click">
+                  <template #reference>
+                    <button class="icon">
+                      <Icon icon="fluent:emoji-16-filled" />
+                    </button>
+                  </template>
+                  <EmojiPanel @selected="iconSelectedHandle" />
+                </el-popover>
+                <button class="icon" @click="showAudioRecorder = true">
+                  <Icon icon="typcn:microphone" />
+                </button>
+                <button class="icon send" :disabled="!messageContent" @click="send">
+                  <Icon icon="mingcute:send-fill" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -111,9 +117,7 @@ const { isActive, pause, resume } = watchPausable(
   () => messageBoxScrollDown(false),
 )
 
-const loadMoreData = useThrottleFn(() => {
-  loadData()
-}, 1000)
+const loadMoreData = useThrottleFn(() => loadData(), 1000)
 
 const messageEditor = ref<HTMLDivElement>()
 
@@ -177,12 +181,30 @@ watchThrottled(
   { throttle: 500 },
 )
 
+const messageInputRef = ref<HTMLInputElement>()
+
 const iconPopover = ref<InstanceType<typeof ElPopover>>()
 
 const iconSelectedHandle = (emoji: string) => {
   messageContent.value += emoji
   iconPopover.value?.hide()
+  nextTick(() => {
+    messageInputRef.value?.focus()
+  })
 }
+
+const showAudioRecorder = ref(false)
+const audioRecordCompletedHandle = (file: File) => {
+  showAudioRecorder.value = false
+  waitUploadFiles.push({
+    file,
+    id: generateUUID()
+  })
+}
+
+watch(() => showAudioRecorder.value, () => nextTick(() => messageListBox.value?.update()))
+
+const messageInputBoxHeight = computed(() => showAudioRecorder.value ? '140px' : '54px')
 
 </script>
 
@@ -240,16 +262,27 @@ header .el-icon:hover {
   bottom: 0.5rem;
 }
 
-.message-box {
+.message-input-box {
+  margin: 0 1rem 1rem;
+  box-shadow: 0 0 6px #ccc;
+  background-color: white;
+  border-radius: var(--border-radius);
+  transition: height .3s ease;
+  height: v-bind(messageInputBoxHeight);
+  overflow: hidden;
+}
+
+.message-input-audio {
+  padding: 1rem;
+  height: 140px;
+}
+
+.message-input-text {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
   height: 52px;
-  margin: 0 16px 16px;
   padding: 6px;
-  box-shadow: 0 0 6px #ccc;
-  background-color: white;
-  border-radius: var(--border-radius);
 
   &>input {
     height: 100%;
@@ -260,6 +293,7 @@ header .el-icon:hover {
 
   &>.actions {
     display: flex;
+    gap: 8px;
 
     &>.icon {
       display: flex;

@@ -21,17 +21,18 @@
     "dexie": "^3.2.4",
     "element-plus": "^2.3.9",
     "howler": "^2.2.3",
-    "js-audio-recorder": "^1.0.7",
     "js-md5": "^0.7.3",
     "mitt": "^3.0.1",
     "normalize.css": "^8.0.1",
     "pinia": "^2.1.6",
     "pinia-plugin-persistedstate": "^3.2.0",
+    "recorder-core": "^1.2.23070100",
     "tus-js-client": "^3.1.1",
     "vue": "^3.3.4",
     "vue-i18n": "9",
     "vue-router": "^4.2.4",
-    "vue3-lottie": "^3.1.0"
+    "vue3-lottie": "^3.1.0",
+    "wavesurfer.js": "^7.3.2"
   },
   "devDependencies": {
     "@intlify/unplugin-vue-i18n": "^0.12.3",

@@ -1,2 +1,2 @@
 // declare module 'element-plus'
-declare module 'js-md5'
+declare module 'js-md5';

@@ -35,9 +35,6 @@ dependencies:
   howler:
     specifier: ^2.2.3
     version: registry.npmmirror.com/howler@2.2.3
-  js-audio-recorder:
-    specifier: ^1.0.7
-    version: registry.npmmirror.com/js-audio-recorder@1.0.7
   js-md5:
     specifier: ^0.7.3
     version: 0.7.3
@@ -53,6 +50,9 @@ dependencies:
   pinia-plugin-persistedstate:
     specifier: ^3.2.0
     version: 3.2.0(pinia@2.1.6)
+  recorder-core:
+    specifier: ^1.2.23070100
+    version: registry.npmmirror.com/recorder-core@1.2.23070100
   tus-js-client:
     specifier: ^3.1.1
     version: registry.npmmirror.com/tus-js-client@3.1.1
@@ -68,6 +68,9 @@ dependencies:
   vue3-lottie:
     specifier: ^3.1.0
     version: registry.npmmirror.com/vue3-lottie@3.1.0(vue@3.3.4)
+  wavesurfer.js:
+    specifier: ^7.3.2
+    version: registry.npmmirror.com/wavesurfer.js@7.3.2
 
 devDependencies:
   '@intlify/unplugin-vue-i18n':
@@ -2087,12 +2090,6 @@ packages:
     version: 2.0.0
     dev: true
 
-  registry.npmmirror.com/js-audio-recorder@1.0.7:
-    resolution: {integrity: sha512-JiDODCElVHGrFyjGYwYyNi7zCbKk9va9C77w+zCPMmi4C6ix7zsX2h3ddHugmo4dOTOTCym9++b/wVW9nC0IaA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/js-audio-recorder/-/js-audio-recorder-1.0.7.tgz}
-    name: js-audio-recorder
-    version: 1.0.7
-    dev: false
-
   registry.npmmirror.com/js-base64@3.7.5:
     resolution: {integrity: sha512-3MEt5DTINKqfScXKfJFrRbxkrnk2AxPWGBL/ycjz4dK8iqiSJ06UxD8jh8xuh6p10TX4t2+7FsBYVxxQbMg+qA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/js-base64/-/js-base64-3.7.5.tgz}
     name: js-base64
@@ -2305,6 +2302,12 @@ packages:
       picomatch: 2.3.1
     dev: true
 
+  registry.npmmirror.com/recorder-core@1.2.23070100:
+    resolution: {integrity: sha512-R9S2taKj8Q2aePJdoLzSD784WW++VIpWhOgYw+IiM03SdyOVZV2osYgGj/l6yD7BJ8uwo4bl75d3Pg+WMp3Z1A==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/recorder-core/-/recorder-core-1.2.23070100.tgz}
+    name: recorder-core
+    version: 1.2.23070100
+    dev: false
+
   registry.npmmirror.com/requires-port@1.0.0:
     resolution: {integrity: sha512-KigOCHcocU3XODJxsu8i/j8T9tzT4adHiecwORRQ0ZZFcp7ahwXuRU1m+yuO90C5ZUyGeGfocHDI14M3L3yDAQ==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/requires-port/-/requires-port-1.0.0.tgz}
     name: requires-port
@@ -2460,6 +2463,12 @@ packages:
       lodash-es: registry.npmmirror.com/lodash-es@4.17.21
       lottie-web: registry.npmmirror.com/lottie-web@5.12.2
       vue: 3.3.4
+    dev: false
+
+  registry.npmmirror.com/wavesurfer.js@7.3.2:
+    resolution: {integrity: sha512-CPi7qC0OcTE6HoQYIzwyWiJSl+Q+pcUa7jZOzlFcGt8kyOEdmPM2uo8IyGRQbJN/jzMdOgJKOwHxQ9akZhdOuw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/wavesurfer.js/-/wavesurfer.js-7.3.2.tgz}
+    name: wavesurfer.js
+    version: 7.3.2
     dev: false
 
   registry.npmmirror.com/webpack-sources@3.2.3:
