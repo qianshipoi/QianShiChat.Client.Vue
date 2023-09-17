@@ -38,24 +38,24 @@ export const useRichText = (messageEditor: Ref<HTMLElement | null | undefined>) 
     console.log(file);
   })
 
-  function getFileFromEntryRecursively(entry: FileSystemEntry) {
-    if (entry.isFile) {
-      (entry as FileSystemFileEntry).file(
-        file => {
-          console.log(file.name);
-        },
-        e => console.error(e))
-    } else {
-      let reader = (entry as FileSystemDirectoryEntry).createReader()
-      console.log(entry.name);
-      reader.readEntries(
-        entries => {
-          entries.forEach(enrty => getFileFromEntryRecursively(enrty))
-        }, e => {
-          console.log(e);
-        })
-    }
-  }
+  // function getFileFromEntryRecursively(entry: FileSystemEntry) {
+  //   if (entry.isFile) {
+  //     (entry as FileSystemFileEntry).file(
+  //       file => {
+  //         console.log(file.name);
+  //       },
+  //       e => console.error(e))
+  //   } else {
+  //     let reader = (entry as FileSystemDirectoryEntry).createReader()
+  //     console.log(entry.name);
+  //     reader.readEntries(
+  //       entries => {
+  //         entries.forEach(enrty => getFileFromEntryRecursively(enrty))
+  //       }, e => {
+  //         console.log(e);
+  //       })
+  //   }
+  // }
 
   const includeFolder = (items: DataTransferItemList | null | undefined) => {
     if (!items) return

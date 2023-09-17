@@ -31,9 +31,9 @@
 
 <script setup lang='ts'>
 import ChatMessage from '../components/ChatMessage/index.vue'
-import { ApplyStatus, Attachment, ChatMessageStatus, FriendApply, UserInfo } from '../types/Types';
+import { Attachment, ChatMessageStatus, UserInfo } from '../types/Types';
 import { ChatMessageSendType, ChatMessage as ChatMessageClass, ChatMessageType } from '../types/Types';
-import { ElImage, ElNotification } from 'element-plus';
+import { ElNotification } from 'element-plus';
 import DropFilePanel from '../components/DropFilePanel/DropFilePanel.vue';
 import UploadFileControl from '../components/UploadFileControl/UploadFileControl.vue';
 
@@ -73,20 +73,21 @@ const imageMessage: ChatMessageClass = {
     size: 209904
   },
 }
-const auidoMessage: ChatMessageClass = {
-  ...imageMessage,
-  messageType: ChatMessageType.Audio,
-  status: ChatMessageStatus.Succeeded,
-  content: {
-    id: 1,
-    name: "1551470082826313728.mp3",
-    rawPath: "http://localhost:5224/files/461201462808645.mp3",
-    previewPath: undefined,
-    hash: "8d3186c00a453ca11a169d1a575692a4",
-    contentType: "audio/mpeg",
-    size: 2772823
-  }
-}
+// const auidoMessage: ChatMessageClass = {
+//   ...imageMessage,
+//   messageType: ChatMessageType.Audio,
+//   status: ChatMessageStatus.Succeeded,
+//   content: {
+//     id: 1,
+//     name: "1551470082826313728.mp3",
+//     rawPath: "http://localhost:5224/files/461201462808645.mp3",
+//     previewPath: undefined,
+//     hash: "8d3186c00a453ca11a169d1a575692a4",
+//     contentType: "audio/mpeg",
+//     size: 2772823
+//   },
+//   attachments: []
+// }
 
 const otherFileMessage: ChatMessageClass = {
   ...imageMessage,
@@ -94,34 +95,34 @@ const otherFileMessage: ChatMessageClass = {
   status: ChatMessageStatus.Failed
 }
 
-const showFriendApplyNotification = () => {
-  const apply: FriendApply = {
-    id: 0,
-    userId: userinfo.id,
-    friendId: userinfo.id,
-    createTime: Date.now(),
-    remark: "测试",
-    status: ApplyStatus.Applied,
-    user: userinfo,
-    friend: userinfo
-  }
+// const showFriendApplyNotification = () => {
+//   const apply: FriendApply = {
+//     id: 0,
+//     userId: userinfo.id,
+//     friendId: userinfo.id,
+//     createTime: Date.now(),
+//     remark: "测试",
+//     status: ApplyStatus.Applied,
+//     user: userinfo,
+//     friend: userinfo
+//   }
 
-  ElNotification({
-    title: "好友申请",
-    duration: 10000,
-    message: h('div', { class: 'apply-notification' }, [
-      h(ElImage, { src: apply.friend.avatar }),
-      h('div', { class: 'apply-notification-content' }, [
-        h('p', `收到来自[${apply.friend.nickName}]的好友申请，备注：${apply.remark}`),
-        h('div', { class: 'apply-notification-actions' }, [
-          h('button', { class: 'success' }, "同意"),
-          h('button', { class: 'warning' }, "驳回"),
-          h('button', "详情")
-        ])
-      ])
-    ])
-  })
-}
+//   ElNotification({
+//     title: "好友申请",
+//     duration: 10000,
+//     message: h('div', { class: 'apply-notification' }, [
+//       h(ElImage, { src: apply.friend.avatar }),
+//       h('div', { class: 'apply-notification-content' }, [
+//         h('p', `收到来自[${apply.friend.nickName}]的好友申请，备注：${apply.remark}`),
+//         h('div', { class: 'apply-notification-actions' }, [
+//           h('button', { class: 'success' }, "同意"),
+//           h('button', { class: 'warning' }, "驳回"),
+//           h('button', "详情")
+//         ])
+//       ])
+//     ])
+//   })
+// }
 
 const showUploadFileControl = ref(false);
 
