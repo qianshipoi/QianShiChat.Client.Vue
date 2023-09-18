@@ -1,4 +1,4 @@
-import { GlobalResult, Group } from "../types/Types";
+import { GlobalResult, Group, GroupApply, PagedList } from "../types/Types";
 import instance from "./index";
 
 export function create(friendIds: number[], name?: string): Promise<GlobalResult<Group>> {
@@ -25,3 +25,17 @@ export function del(id: number): Promise<any> {
 export function leave(id: number): Promise<any> {
   return instance.delete(`/group/${id}/leave`)
 }
+
+interface PendingQuery {
+  size: number;
+  beforeLastTime?: number;
+}
+
+export function pending(query: PendingQuery): Promise<GlobalResult<PagedList<GroupApply>>> {
+  return instance.get('/group/apply/pending', { params: query })
+}
+
+export function approval(id: number, status: 'pass' | 'reject' | 'ignore'): Promise<any> {
+  return instance.put(`/group/approval/${id}/${status}`)
+}
+
