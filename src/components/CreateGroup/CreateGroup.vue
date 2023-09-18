@@ -23,8 +23,7 @@
 import { useArrayFilter } from '@vueuse/core';
 import { useFriendStore } from '../../store/useFriendStore';
 import { UserInfo } from '../../types/Types';
-import { create } from '../../api/group';
-import { ElNotification } from 'element-plus';
+import { useGroupStore } from '../../store/useGroupStore';
 
 const friendStore = useFriendStore()
 const visible = defineModel<boolean>()
@@ -37,6 +36,7 @@ interface SelectableUserInfo extends UserInfo {
 }
 
 const friends = reactive<SelectableUserInfo[]>([])
+const groupStore = useGroupStore()
 
 watch(() => friendStore.friends, () => {
   friendStore.friends.map(friend => {
@@ -48,23 +48,12 @@ watch(() => friendStore.friends, () => {
 
 const results = useArrayFilter(friends, friend => friend.nickName?.includes(searchText.value) ?? false)
 
-const loading = ref(false);
-
-const canSubmit = computed(() => !loading.value && friends.findIndex(x => x.selected) !== -1)
+const canSubmit = computed(() => !groupStore.loading && friends.findIndex(x => x.selected) !== -1)
 
 const submitHandle = async () => {
-  loading.value = true;
-  try {
-    const { succeeded, errors } = await create(friends.filter(x => x.selected).map(item => item.id));
-    if (!succeeded) {
-      throw new Error(errors as string);
-    }
-    ElNotification.success('create succeeded.')
-    visible.value = false;
-  } catch (error: any) {
-    ElNotification.error(error)
-  } finally {
-    loading.value = false
+  if (groupStore.loading) return;
+  if (await groupStore.createGroup(friends.filter(x => x.selected))) {
+    visible.value = false
   }
 }
 

@@ -1,3 +1,4 @@
+import { CancelToken } from "axios";
 import { GlobalResult, Group, GroupApply, PagedList } from "../types/Types";
 import instance from "./index";
 
@@ -37,5 +38,15 @@ export function pending(query: PendingQuery): Promise<GlobalResult<PagedList<Gro
 
 export function approval(id: number, status: 'pass' | 'reject' | 'ignore'): Promise<any> {
   return instance.put(`/group/approval/${id}/${status}`)
+}
+
+interface SearchRequest {
+  page: number;
+  size: number;
+  search: string;
+}
+
+export function search(search: SearchRequest, cancelToken?: CancelToken): Promise<GlobalResult<PagedList<Group>>> {
+  return instance.get('/group/search', { params: search, cancelToken })
 }
 

@@ -1,7 +1,7 @@
 <template>
   <div class="friend-apply">
     <header>
-      <h4>好友通知</h4>
+      <h4>群通知</h4>
       <div class="actions">
         <el-icon>
           <Filter />
@@ -14,11 +14,11 @@
     <el-scrollbar>
       <main>
         <section v-for="apply in applies" :key="apply.id">
-          <el-image :src="apply.friend.avatar" style="width: 42px; height: 42px; border-radius: 50%;" fit="cover"
+          <el-image :src="apply.user!.avatar" style="width: 42px; height: 42px; border-radius: 50%;" fit="cover"
             :lazy="true"></el-image>
           <div class="base-info">
             <div class="up">
-              <span class="name">{{ apply.friend.nickName }}</span>
+              <span class="name">{{ apply.user!.nickName }}</span>
               <span>请求加为好友</span>
               <span class="time">{{ timeFormat(apply.createTime) }}</span>
             </div>
@@ -44,14 +44,13 @@
 
 <script setup lang='ts'>
 import { useI18n } from 'vue-i18n';
-import { ApplyStatus, FriendApply } from '../../types/Types';
+import { ApplyStatus, GroupApply } from '../../types/Types';
 import { Filter, Delete } from '@element-plus/icons-vue'
-import { getFriendApplies } from '../../api/friend'
-import {  } from '../../api/group'
+import { pending } from '../../api/group'
 import { ElNotification } from 'element-plus';
 import { timeFormat } from '../../utils/timeUtils';
 
-const applies = reactive<FriendApply[]>([])
+const applies = reactive<GroupApply[]>([])
 
 const { t } = useI18n()
 const loading = ref<boolean>(false)
@@ -60,7 +59,10 @@ let lastTime = 0;
 const loadData = async () => {
   loading.value = true;
   try {
-    const result = await getFriendApplies(10, lastTime)
+    const result = await pending({
+      size: 10,
+      beforeLastTime: lastTime
+    })
     if (!result.succeeded) {
       throw new Error(result.errors as string)
     }

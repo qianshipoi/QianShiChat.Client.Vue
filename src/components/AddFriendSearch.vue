@@ -34,7 +34,7 @@
           <ul class="list" v-if="displayGroupResult">
             <li class="list-item" v-for="group in groupResult" :key="group.id">
               <group-base :group="group" use-highlight :highlight-text="searchText"></group-base>
-              <button>添加</button>
+              <button @click="selectedGroup = group">添加</button>
             </li>
           </ul>
         </div>
@@ -50,6 +50,17 @@
           <button @click="selectedUser = null; applyRemark = ''">返回</button>
         </div>
       </div>
+      <div class="apply" v-if="selectedGroup" v-loading="loading">
+        <group-base :group="selectedGroup"></group-base>
+        <el-input type="textarea" :maxlenght="255" show-word-limit resize="none" :rows="4"
+          v-model="applyRemark"></el-input>
+        <div class="action">
+          <button class="primary" @click="applyGroup(selectedGroup)" type="button"
+            :disabled="!(applyRemark && applyRemark.length > 0)">
+            申请</button>
+          <button @click="selectedGroup = null; applyRemark = ''">返回</button>
+        </div>
+      </div>
     </div>
   </el-dialog>
 </template>
@@ -59,29 +70,38 @@ import { Search } from '@element-plus/icons-vue'
 import { UserInfo, Group } from '../types/Types';
 import { friendApply, search as searchApi } from '../api/user'
 import { ElNotification } from 'element-plus';
-import axios, { CancelTokenSource } from 'axios'
+import axios, { CancelToken, CancelTokenSource } from 'axios'
 import { useThrottleFn } from '@vueuse/core';
 import { useFriendStore } from '../store/useFriendStore';
+import { search as groupSearchApi, join } from '../api/group'
+import { useGroupStore } from '../store/useGroupStore'
 
 const visible = defineModel<boolean>()
 const searchText = ref<string>('')
 
 const userResult = ref<UserResult[]>([]);
-const groupResult = ref<Group[]>([])
+const groupResult = ref<GroupResult[]>([])
 const loading = ref<boolean>(false);
 
 const selectedUser = ref<UserResult | null>(null)
+const selectedGroup = ref<GroupResult | null>(null)
 
 let cancelTokenSource: CancelTokenSource;
 
 const throttledSearch = useThrottleFn(() => search(), 1000)
 
 const friendStore = useFriendStore()
+const groupStore = useGroupStore()
 
 enum UserRelation {
   None,
   Friend,
+  Joined,
   Applied
+}
+
+interface GroupResult extends Group {
+  relation: UserRelation
 }
 
 interface UserResult extends UserInfo {
@@ -97,25 +117,49 @@ const search = async () => {
   loading.value = true;
   try {
     cancelTokenSource = axios.CancelToken.source()
-    const result = await searchApi(searchText.value, 1, 5, cancelTokenSource.token);
-    if (!result.succeeded) {
-      throw new Error(result.errors as string)
-    }
-
-    const data: UserResult[] = []
-    result.data!.items.forEach((user: UserInfo) => {
-      data.push(reactive({
-        ...user,
-        relation: friendStore.isFriend(user.id) ? UserRelation.Friend : UserRelation.None
-      }))
-    });
-
-    userResult.value = data
+    await Promise.all([searchUser(cancelTokenSource.token), searchGroup(cancelTokenSource.token)])
   } catch (err: any) {
     ElNotification.error(err)
   } finally {
     loading.value = false;
   }
+}
+
+const searchUser = async (cancelToken: CancelToken) => {
+  const result = await searchApi(searchText.value, 1, 5, cancelToken);
+  if (!result.succeeded) {
+    throw new Error(result.errors as string)
+  }
+
+  const data: UserResult[] = []
+  result.data!.items.forEach((user: UserInfo) => {
+    data.push(reactive({
+      ...user,
+      relation: friendStore.isFriend(user.id) ? UserRelation.Friend : UserRelation.None
+    }))
+  });
+
+  userResult.value = data
+}
+
+const searchGroup = async (cancelToken: CancelToken) => {
+  const { succeeded, data, errors } = await groupSearchApi({
+    page: 1,
+    size: 5,
+    search: searchText.value,
+  }, cancelToken)
+  if (!succeeded) {
+    ElNotification.error(errors as string)
+    return;
+  }
+  const items: GroupResult[] = []
+  data!.items.forEach((group: Group) => {
+    items.push(reactive({
+      ...group,
+      relation: groupStore.joinedGroup(group.id) ? UserRelation.Joined : UserRelation.None
+    }))
+  });
+  groupResult.value = items
 }
 
 const displayUserResult = computed(() => userResult.value && userResult.value.length > 0)
@@ -125,14 +169,11 @@ const displayGroupResult = computed(() => groupResult.value && groupResult.value
 const applyRemark = ref<string>('')
 const apply = async (user: UserResult) => {
   loading.value = true
-
   try {
     const result = await friendApply(user.id, applyRemark.value);
-
     if (!result.succeeded) {
       throw new Error(result.errors as string)
     }
-
     ElNotification.success('已发送申请')
     selectedUser.value = null;
     applyRemark.value = ''
@@ -143,6 +184,25 @@ const apply = async (user: UserResult) => {
     loading.value = false
   }
 }
+
+const applyGroup = async (group: GroupResult) => {
+  loading.value = true
+  try {
+    const result = await join(group.id, applyRemark.value);
+    if (!result.succeeded) {
+      throw new Error(result.errors as string)
+    }
+    ElNotification.success('已发送申请')
+    selectedUser.value = null;
+    applyRemark.value = ''
+    group.relation = UserRelation.Applied
+  } catch (error: any) {
+    ElNotification.error(error);
+  } finally {
+    loading.value = false
+  }
+}
+
 </script>
 
 <style lang="scss" scoped>

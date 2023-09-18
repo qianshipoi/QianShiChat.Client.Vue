@@ -7,7 +7,6 @@ import { ElNotification, NotificationHandle } from "element-plus";
 import ApplyNotification from "../components/Notification/ApplyNotification.vue";
 import { create, del, getAll, join, leave } from "../api/group";
 
-
 interface ApplyNotificationHandle {
   apply: GroupApply;
   handle: NotificationHandle;
@@ -152,6 +151,7 @@ export const useGroupStore = defineStore("group", () => {
   return {
     groups: readonly(groups),
     loading: readonly(loading),
+    joinedGroup: (id: number) => groups.some(item => item.id === id),
     loadData,
     createGroup,
     leaveGroup,
