@@ -51,7 +51,7 @@ import { useChatStore } from '../store/useChatStore';
 import { useI18n } from 'vue-i18n';
 import { useFriendStore } from '../store/useFriendStore';
 import { SwitchButton, Switch } from '@element-plus/icons-vue'
-
+import { useGroupStore } from '../store/useGroupStore';
 
 const { t } = useI18n()
 
@@ -62,6 +62,8 @@ const chatStore = useChatStore();
 chatStore.start();
 const friendStore = useFriendStore();
 friendStore.loadData();
+const groupStore = useGroupStore();
+groupStore.loadData();
 </script>
 
 <style scoped>

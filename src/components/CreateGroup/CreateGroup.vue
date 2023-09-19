@@ -4,8 +4,9 @@
     <div class="create-group">
       <el-input v-model="searchText" placeholder="搜索" clearable @change="serachHandle"></el-input>
       <ul class="friend-list">
-        <li class="friend-item" v-for="friend in results" :key="friend.id" @click="friend.selected = !friend.selected">
-          <el-checkbox v-model="friend.selected" :indeterminate="false"></el-checkbox>
+        <li :class="['friend-item', { 'selected': friend.selected }]" v-for="friend in results" :key="friend.id"
+          @click="friend.selected = !friend.selected">
+          <el-checkbox :checked="friend.selected"></el-checkbox>
           <el-image :src="friend.avatar" fit="cover" :lazy="true"
             style="width: 28px; height: 28px; border-radius: 50%; overflow: hidden;"></el-image>
           <span class="name">{{ friend.nickName }}</span>
@@ -84,6 +85,7 @@ const submitHandle = async () => {
     border-radius: 4px;
     transition: all .3s ease;
 
+    &.selected,
     &:hover {
       background-color: var(--primary);
       color: white;

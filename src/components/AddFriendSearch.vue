@@ -21,7 +21,7 @@
             <li class="list-item" v-for="user in userResult" :key="user.id">
               <user-base :user="user" use-highlight :highlight-text="searchText"></user-base>
               <button v-if="user.relation === UserRelation.None" @click="selectedUser = user">添加</button>
-              <button v-else-if="user.relation === UserRelation.Friend">发消息</button>
+              <button v-else-if="user.relation === UserRelation.Friend" @click="sendMessage('user', user)">发消息</button>
               <button v-else disabled>已申请</button>
             </li>
           </ul>
@@ -34,7 +34,9 @@
           <ul class="list" v-if="displayGroupResult">
             <li class="list-item" v-for="group in groupResult" :key="group.id">
               <group-base :group="group" use-highlight :highlight-text="searchText"></group-base>
-              <button @click="selectedGroup = group">添加</button>
+              <button v-if="group.relation === UserRelation.None" @click="selectedGroup = group">添加</button>
+              <button v-else-if="group.relation === UserRelation.Joined" @click="sendMessage('group', group)">发消息</button>
+              <button v-else disabled>已申请</button>
             </li>
           </ul>
         </div>
@@ -67,7 +69,7 @@
 
 <script setup lang='ts'>
 import { Search } from '@element-plus/icons-vue'
-import { UserInfo, Group } from '../types/Types';
+import { UserInfo, Group, ChatMessageSendType } from '../types/Types';
 import { friendApply, search as searchApi } from '../api/user'
 import { ElNotification } from 'element-plus';
 import axios, { CancelToken, CancelTokenSource } from 'axios'
@@ -75,6 +77,11 @@ import { useThrottleFn } from '@vueuse/core';
 import { useFriendStore } from '../store/useFriendStore';
 import { search as groupSearchApi, join } from '../api/group'
 import { useGroupStore } from '../store/useGroupStore'
+import { useChatStore } from '../store/useChatStore';
+import { useRoomStore } from '../store/useRoomStore';
+import { useCurrentUserStore } from '../store/useCurrentUserStore';
+import { useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 const visible = defineModel<boolean>()
 const searchText = ref<string>('')
@@ -201,6 +208,43 @@ const applyGroup = async (group: GroupResult) => {
   } finally {
     loading.value = false
   }
+}
+
+interface GroupParams {
+  type: 'group',
+  value: GroupResult
+}
+
+interface UserParams {
+  type: 'user',
+  value: UserResult
+}
+type Params = GroupParams | UserParams
+
+const chatStore = useChatStore()
+
+const roomsStore = useRoomStore()
+const currentUserStore = useCurrentUserStore()
+const route = useRoute();
+const router = useRouter()
+
+
+async function sendMessage<TType extends Params['type']>(
+  type: TType,
+  value: Extract<Params, { type: TType }>['value']
+): Promise<void> {
+  const room = await chatStore.getRoom(value.id, type === 'user' ? ChatMessageSendType.Personal : ChatMessageSendType.Group)
+  if (!room) {
+    ElNotification.error('get room error.')
+    return
+  }
+  room.toObject = value;
+  room.fromUser = currentUserStore.userInfo
+  roomsStore.addRoom(room);
+  roomsStore.openRoom(room.id);
+
+  // join to message room.
+  route.name !== 'Message' && router.push({ name: "Message" })
 }
 
 </script>
