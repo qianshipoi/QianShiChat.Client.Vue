@@ -1,5 +1,6 @@
 <template>
-  <div :class="['room-item', isSelected ? 'selected' : '']" @click="selected">
+  <div :class="['room-item', isSelected ? 'selected' : '']" @click="$emit('selected', room)"
+    @click.right.native="showContextMenu">
     <div class="avatar">
       <el-image style="width: 100%;height: 100%;" :src="room?.avatar" fit="cover"></el-image>
     </div>
@@ -19,20 +20,28 @@
 <script setup lang='ts'>
 import { Room } from '../types/Types';
 import { timeFormat } from '../utils/timeUtils'
+import contextMenu from './ContextMenu';
+import { MenuAction } from './ContextMenu/ContextMenu.vue';
 
 defineProps<{
   isSelected?: boolean
 }>()
-
 const room = defineModel<Room | undefined>()
-
 const emits = defineEmits<{
   (event: "selected", val: Room): void
+  (event: "delete", val: Room): void
 }>()
 
-
-const selected = () => {
-  emits('selected', room.value!);
+const showContextMenu = (e: MouseEvent) => {
+  e.preventDefault()
+  contextMenu(e, {
+    name: '111',
+    onClick: (action: MenuAction) => {
+      if (action.value === 'delete') {
+        emits('delete', room.value!)
+      }
+    }
+  })
 }
 
 const content = computed(() => {
@@ -42,7 +51,6 @@ const content = computed(() => {
     return room.value?.lastMessageContent?.name
   }
 })
-
 
 </script>
 

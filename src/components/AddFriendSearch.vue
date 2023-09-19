@@ -228,7 +228,6 @@ const currentUserStore = useCurrentUserStore()
 const route = useRoute();
 const router = useRouter()
 
-
 async function sendMessage<TType extends Params['type']>(
   type: TType,
   value: Extract<Params, { type: TType }>['value']
@@ -238,6 +237,8 @@ async function sendMessage<TType extends Params['type']>(
     ElNotification.error('get room error.')
     return
   }
+  room.name = type === 'user' ? (value as UserResult).nickName! : (value as GroupResult).name
+  room.avatar = value.avatar;
   room.toObject = value;
   room.fromUser = currentUserStore.userInfo
   roomsStore.addRoom(room);

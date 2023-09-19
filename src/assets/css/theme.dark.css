@@ -1,5 +1,5 @@
 html.dark{
-    --primary:#0099FF;
+    --primary:#00A389;
     --warning:#F0B86E;
     --danger:#BB2525;
     --success:#A8DF8E;
@@ -11,7 +11,7 @@ html.dark{
     --room-border-color:#2C2C2C;
     --room-bg-color:#111111;
     --item-hover-color:#2D2D2D;
-    --item-active-color:#0099FF;
+    --item-active-color:#00A389;
 
     --text-color-primary:var(--el-text-color-primary);
     --text-color-regular:var(--el-text-color-regular);

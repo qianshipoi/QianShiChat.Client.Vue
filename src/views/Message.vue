@@ -20,8 +20,8 @@
       </div>
       <ul>
         <li v-for="room in rooms" :key="room.id">
-          <RoomItem :model-value="(room as RoomType)" @selected="roomStore.openRoom(room.id)"
-            :is-selected="roomStore.isOpend(room.id)" />
+          <RoomItem @delete="roomStore.removeRoom" :model-value="(room as RoomType)"
+            @selected="roomStore.openRoom(room.id)" :is-selected="roomStore.isOpend(room.id)" />
         </li>
       </ul>
     </div>
@@ -50,9 +50,7 @@ const roomStore = useRoomStore();
 const { rooms } = storeToRefs(roomStore);
 const searchText = ref<string>('')
 const addFriendVisible = ref<boolean>(false)
-
 const displayCreateGroup = ref<boolean>(false)
-
 </script>
 
 <style scoped>

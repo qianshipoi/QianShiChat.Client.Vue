@@ -111,12 +111,25 @@ export const useRoomStore = defineStore("room_store", () => {
     room && (opendRoom.value = room)
   }
 
+  function deleteRoom(room: Room | string) {
+    let index = -1;
+    if (typeof room === 'string') {
+      index = rooms.value.findIndex(x => x.id === room)
+    } else {
+      index = rooms.value.findIndex(x => x.id === room.id);
+    }
+    if (index != -1) {
+      rooms.value.splice(index, 1);
+    }
+  }
+
   return {
     rooms: readonly(rooms),
     addRoom,
     removeRoom,
     clearUnreadCount,
     getRoom,
+    deleteRoom,
     opendRoom: readonly(opendRoom),
     isOpendRoom: computed(() => !!opendRoom.value),
     opendRoomRaw: opendRoom,
