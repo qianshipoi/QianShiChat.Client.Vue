@@ -2,13 +2,6 @@
   <div class="found">
     <div class="search">
       <SearchInput v-model="searchText" @keydown.enter="throttledSearch"></SearchInput>
-
-      <QsTabs selected="标题2">
-        <QsTabPanel label="标题1">内容1</QsTabPanel>
-        <QsTabPanel label="标题2">内容2</QsTabPanel>
-        <QsTabPanel label="标题3">内容3</QsTabPanel>
-      </QsTabs>
-
       <div class="result">
         <div class="title" v-if="displayUserResult">
           <span>查找人</span>

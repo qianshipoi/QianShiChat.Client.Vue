@@ -1,18 +1,22 @@
 <template>
   <div class="container">
     <div class="tabs">
-      <div class="tab" v-for="(tab) in tabs" :key="tab.key ?? tab.title" @click="tabClickHandle(tab)">
+      <div ref="selectedItems" :class="['tab', { 'selected': selected === tab.key }]" v-for="(tab) in tabs"
+        :key="tab.key ?? tab.title" @click="tabClickHandle(tab)">
         {{ tab.title }}
       </div>
-      <span class="glider"></span>
+      <span class="glider" :style="gliderStyle"></span>
     </div>
-    <div class="content">
-      <component v-for="item in defaults" :is="item" />
+    <div :style="{ transform: `translate(-${transform})` }" class="content" ref="indicator">
+      <div :style="{ width: `${width}px` }" v-for="item in defaults" :key="item.props?.key">
+        <component :is="item" />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang='ts'>
+import { useCurrentElement, useElementBounding } from '@vueuse/core';
 import QsTabPanel from './QsTabPanel.vue';
 
 const slots = useSlots()
@@ -40,25 +44,40 @@ defaults?.forEach(tabPanel => {
 });
 
 const props = defineProps<{
-  selected?: string
+  defaultActiveKey?: string
 }>()
-const emits = defineEmits<{
-  (e: 'update:selected', value: string | undefined): void
-}>()
+const indicator = ref<HTMLDivElement>();
+const selectedItems = ref<HTMLElement[]>([])
 
+const selected = ref<string | symbol | number | undefined>(props.defaultActiveKey ?? tabs.length > 0 ? tabs[0].key : '')
 
 const tabClickHandle = (item: TabItem) => {
-  emits('update:selected', item.title)
+  selected.value = item.key
 }
 
-const transform = computed(() => {
-  let index = tabs.findIndex(x => x.title === props.selected);
+const selectedIndex = computed(() => {
+  let index = tabs.findIndex(x => x.key === selected.value);
   if (index === -1) index = 0;
-  return index * 100 + '%';
+  return index
 })
+
+const container = useCurrentElement<HTMLElement>();
+const { width } = useElementBounding(container)
+
+const transform = computed(() => selectedIndex.value * 100 + '%')
+
+const { width: itemWidth } = useElementBounding(computed(() => selectedItems.value[selectedIndex.value]))
+
+const gliderStyle = ref({
+  width: "",
+  transform: `translate(0)`
+})
+
 watchEffect(() => {
-  console.log(props.selected);
+  gliderStyle.value.width = `${itemWidth.value}px`
+  gliderStyle.value.transform = `translate(${transform.value})`
 })
+
 </script>
 
 <style lang="scss" scoped>
@@ -68,6 +87,7 @@ watchEffect(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .tabs {
@@ -75,43 +95,57 @@ watchEffect(() => {
   position: relative;
   background-color: #fff;
   box-shadow: 0 0 1px 0 rgba(#185ee0, 0.15), 0 6px 12px 0 rgba(#185ee0, 0.15);
-  padding: 0.75rem;
-  border-radius: 99px; // just a high number to create pill effect
+  padding: 0.5rem;
+  border-radius: 99px;
 
   * {
     z-index: 2;
   }
 }
 
-
 .tab {
+  padding: 4px 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 54px;
-  width: 200px;
-  font-size: 1.25rem;
-  font-weight: 500;
-  border-radius: 99px; // just a high number to create pill effect
+  height: 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 99px;
   cursor: pointer;
   transition: color 0.15s ease-in;
+}
+
+.selected {
+  color: white;
 }
 
 .glider {
   position: absolute;
   display: flex;
-  height: 54px;
-  width: 200px;
+  height: 32px;
   background-color: var(--primary);
   z-index: 1;
   border-radius: 99px;
   transition: 0.25s ease-out;
-  transform: translate(v-bind(transform));
 }
 
 @media (max-width: 700px) {
   .tabs {
     transform: scale(0.6);
+  }
+}
+
+.content {
+  margin-top: 10px;
+  width: 100%;
+  display: flex;
+  white-space: nowrap;
+  transition: 0.25s ease-out;
+
+  &>div {
+    min-height: 40px;
+    flex-shrink: 0;
   }
 }
 </style>

@@ -25,12 +25,23 @@
           </el-icon>
         </li>
       </ul>
-
-      <ul>
-        <li v-for="friend in friends" :key="friend.id">
-          <UserItem :model-value="friend" @selected="selectedHandle" :is-selected="isSelected(friend)" />
-        </li>
-      </ul>
+      <QsTabs default-active-key="2">
+        <QsTabPanel key="1" label="好友">
+          <ul>
+            <li v-for="friend in friends" :key="friend.id">
+              <UserItem :model-value="friend" @selected="selectedHandle" :is-selected="isSelected(friend)" />
+            </li>
+          </ul>
+        </QsTabPanel>
+        <QsTabPanel key="2" label="群组">
+          <ul>
+            <li v-for="group in groupStore.groups" :key="group.id">
+              <GroupItem v-model="(group as Group)" @selected="selectedHandle"
+                :is-selected="isSelected(group as Group)" />
+            </li>
+          </ul>
+        </QsTabPanel>
+      </QsTabs>
     </div>
     <div class="content">
       <component v-if="opendComponent" v-bind="componentProps" :is="opendComponent" />
@@ -42,7 +53,8 @@
 import { Plus, ArrowRight } from '@element-plus/icons-vue'
 import { useFriendStore } from '../store/useFriendStore';
 import { storeToRefs } from 'pinia';
-import { UserInfo } from '../types/Types';
+import { Group, UserInfo } from '../types/Types';
+import { useGroupStore } from '../store/useGroupStore';
 
 const UserProfile = defineAsyncComponent(() => import('./friend/UserProfile.vue'))
 const FriendApply = defineAsyncComponent(() => import('./friend/FriendApply.vue'))
@@ -50,33 +62,30 @@ const GroupApply = defineAsyncComponent(() => import('./friend/GroupApply.vue'))
 
 const searchText = ref<string>('')
 const opendComponent = shallowRef<any>(null)
-const currentSelectedUser = ref<UserInfo>()
+const currentSelected = ref<UserInfo | Group>()
 const componentProps = ref<any>(null)
 const friendStore = useFriendStore()
 const { friends } = storeToRefs(friendStore)
+const groupStore = useGroupStore()
 
+const isSelected = computed(() => (item: UserInfo | Group) => currentSelected.value === item)
 
-const isSelected = computed(() => (user: UserInfo) => currentSelectedUser.value === user)
-
-const selectedHandle = (user: UserInfo) => {
-  currentSelectedUser.value = user
+const selectedHandle = (item: UserInfo | Group) => {
+  currentSelected.value = item
   opendComponent.value = UserProfile;
-  componentProps.value = {
-    user
-  }
+  componentProps.value = { user: item }
 }
-
 
 const openFriendApply = () => {
   opendComponent.value = FriendApply;
   componentProps.value = null;
-  currentSelectedUser.value = undefined;
+  currentSelected.value = undefined;
 }
 
 const openGroupApply = () => {
   opendComponent.value = GroupApply;
   componentProps.value = null;
-  currentSelectedUser.value = undefined;
+  currentSelected.value = undefined;
 }
 
 </script>
