@@ -2,6 +2,7 @@ export default {
   nav: {
     firends: "FIREND",
     messages: "MESSAGE",
+    found: "FOUND",
     settings: "SETTINGS",
     logout: "LOGOUT",
     expand: "EXPAND",

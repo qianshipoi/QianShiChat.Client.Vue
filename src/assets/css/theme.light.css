@@ -1,5 +1,6 @@
 html{
   --primary:#00A389;
+  --secondary:rgb(0, 163, 137, .6);
   --warning:#F0B86E;
   --danger:#BB2525;
   --success:#A8DF8E;

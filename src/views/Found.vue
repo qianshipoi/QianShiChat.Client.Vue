@@ -1,91 +1,100 @@
 <template>
-  <el-dialog v-model="visible" width="400px" draggable :close-on-press-escape="false" :close-on-click-modal="false">
-    <div class="add-friend-search">
-      <div class="search">
-        <el-input v-model="searchText" clearable @keydown.enter="throttledSearch">
-          <template #prepend>
-            <el-button :icon="Search" />
-          </template>
-          <template #append>
-            <el-button @click="throttledSearch">搜索</el-button>
-          </template>
-        </el-input>
+  <div class="found">
+    <div class="search">
+      <SearchInput v-model="searchText" @keydown.enter="throttledSearch"></SearchInput>
 
-        <div class="result">
-          <div class="title" v-if="displayUserResult">
-            <span>查找人</span>
-            <el-link type="primary" :underline="false" href="javascript:;">更多</el-link>
-          </div>
+      <QsTabs selected="标题2">
+        <QsTabPanel label="标题1">内容1</QsTabPanel>
+        <QsTabPanel label="标题2">内容2</QsTabPanel>
+        <QsTabPanel label="标题3">内容3</QsTabPanel>
+      </QsTabs>
 
-          <ul class="list" v-if="displayUserResult">
-            <li class="list-item" v-for="user in userResult" :key="user.id">
-              <user-base :user="user" use-highlight :highlight-text="searchText"></user-base>
-              <button v-if="user.relation === UserRelation.None" @click="selectedUser = user">添加</button>
-              <button v-else-if="user.relation === UserRelation.Friend" @click="sendMessage('user', user)">发消息</button>
-              <button v-else disabled>已申请</button>
-            </li>
-          </ul>
-
-          <div class="title" v-if="displayGroupResult">
-            <span>查找组</span>
-            <el-link type="primary" :underline="false" href="javascript:;">更多</el-link>
-          </div>
-
-          <ul class="list" v-if="displayGroupResult">
-            <li class="list-item" v-for="group in groupResult" :key="group.id">
-              <group-base :group="group" use-highlight :highlight-text="searchText"></group-base>
-              <button v-if="group.relation === UserRelation.None" @click="selectedGroup = group">添加</button>
-              <button v-else-if="group.relation === UserRelation.Joined" @click="sendMessage('group', group)">发消息</button>
-              <button v-else disabled>已申请</button>
-            </li>
-          </ul>
+      <div class="result">
+        <div class="title" v-if="displayUserResult">
+          <span>查找人</span>
+          <el-link type="primary" :underline="false" href="javascript:;">更多</el-link>
         </div>
-      </div>
-      <div class="apply" v-if="selectedUser" v-loading="loading">
-        <user-base :user="selectedUser"></user-base>
-        <el-input type="textarea" :maxlenght="255" show-word-limit resize="none" :rows="4"
-          v-model="applyRemark"></el-input>
-        <div class="action">
-          <button class="primary" @click="apply(selectedUser)" type="button"
-            :disabled="!(applyRemark && applyRemark.length > 0)">
-            申请</button>
-          <button @click="selectedUser = null; applyRemark = ''">返回</button>
+
+        <ul class="list" v-if="displayUserResult">
+          <li class="list-item" v-for="user in userResult" :key="user.id">
+            <user-base :user="user" use-highlight :highlight-text="searchText"></user-base>
+            <button v-if="user.relation === Relation.None" @click="selectedUser = user">添加</button>
+            <button v-else-if="user.relation === Relation.Friend" @click="sendMessage('user', user)">发消息</button>
+            <button v-else disabled>已申请</button>
+          </li>
+        </ul>
+
+        <div class="title" v-if="displayGroupResult">
+          <span>查找组</span>
+          <el-link type="primary" :underline="false" href="javascript:;">更多</el-link>
         </div>
-      </div>
-      <div class="apply" v-if="selectedGroup" v-loading="loading">
-        <group-base :group="selectedGroup"></group-base>
-        <el-input type="textarea" :maxlenght="255" show-word-limit resize="none" :rows="4"
-          v-model="applyRemark"></el-input>
-        <div class="action">
-          <button class="primary" @click="applyGroup(selectedGroup)" type="button"
-            :disabled="!(applyRemark && applyRemark.length > 0)">
-            申请</button>
-          <button @click="selectedGroup = null; applyRemark = ''">返回</button>
-        </div>
+
+        <ul class="list" v-if="displayGroupResult">
+          <li class="list-item" v-for="group in groupResult" :key="group.id">
+            <group-base :group="group" use-highlight :highlight-text="searchText"></group-base>
+            <button v-if="group.relation === Relation.None" @click="selectedGroup = group">添加</button>
+            <button v-else-if="group.relation === Relation.Joined" @click="sendMessage('group', group)">发消息</button>
+            <button v-else disabled>已申请</button>
+          </li>
+        </ul>
       </div>
     </div>
-  </el-dialog>
+    <div class="apply" v-if="selectedUser" v-loading="loading">
+      <user-base :user="selectedUser"></user-base>
+      <el-input type="textarea" :maxlenght="255" show-word-limit resize="none" :rows="4" v-model="applyRemark"></el-input>
+      <div class="action">
+        <button class="primary" @click="apply(selectedUser)" type="button"
+          :disabled="!(applyRemark && applyRemark.length > 0)">
+          申请</button>
+        <button @click="selectedUser = null; applyRemark = ''">返回</button>
+      </div>
+    </div>
+    <div class="apply" v-if="selectedGroup" v-loading="loading">
+      <group-base :group="selectedGroup"></group-base>
+      <el-input type="textarea" :maxlenght="255" show-word-limit resize="none" :rows="4" v-model="applyRemark"></el-input>
+      <div class="action">
+        <button class="primary" @click="applyGroup(selectedGroup)" type="button"
+          :disabled="!(applyRemark && applyRemark.length > 0)">
+          申请</button>
+        <button @click="selectedGroup = null; applyRemark = ''">返回</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang='ts'>
-import { Search } from '@element-plus/icons-vue'
-import { UserInfo, Group, ChatMessageSendType } from '../types/Types';
-import { friendApply, search as searchApi } from '../api/user'
-import { ElNotification } from 'element-plus';
-import axios, { CancelToken, CancelTokenSource } from 'axios'
-import { useThrottleFn } from '@vueuse/core';
+import { useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useFriendStore } from '../store/useFriendStore';
+import axios, { CancelToken, CancelTokenSource } from 'axios';
+import { useThrottleFn } from '@vueuse/core';
+import { useGroupStore } from '../store/useGroupStore';
+import { ChatMessageSendType, Group, UserInfo } from '../types/Types';
 import { search as groupSearchApi, join } from '../api/group'
-import { useGroupStore } from '../store/useGroupStore'
+import { friendApply, search as searchApi } from '../api/user'
 import { useChatStore } from '../store/useChatStore';
 import { useRoomStore } from '../store/useRoomStore';
 import { useCurrentUserStore } from '../store/useCurrentUserStore';
-import { useRouter } from 'vue-router';
-import { useRoute } from 'vue-router';
 
-const visible = defineModel<boolean>()
+enum Relation {
+  None,
+  Friend,
+  Joined,
+  Applied
+}
+
+type GroupResult = Group & { relation: Relation }
+type UserResult = UserInfo & { relation: Relation }
+
+const chatStore = useChatStore()
+const roomsStore = useRoomStore()
+const currentUserStore = useCurrentUserStore()
+const friendStore = useFriendStore()
+const groupStore = useGroupStore()
+const route = useRoute();
+const router = useRouter()
+
 const searchText = ref<string>('')
-
 const userResult = ref<UserResult[]>([]);
 const groupResult = ref<GroupResult[]>([])
 const loading = ref<boolean>(false);
@@ -96,24 +105,6 @@ const selectedGroup = ref<GroupResult | null>(null)
 let cancelTokenSource: CancelTokenSource;
 
 const throttledSearch = useThrottleFn(() => search(), 1000)
-
-const friendStore = useFriendStore()
-const groupStore = useGroupStore()
-
-enum UserRelation {
-  None,
-  Friend,
-  Joined,
-  Applied
-}
-
-interface GroupResult extends Group {
-  relation: UserRelation
-}
-
-interface UserResult extends UserInfo {
-  relation: UserRelation;
-}
 
 const search = async () => {
   cancelTokenSource?.cancel();
@@ -142,7 +133,7 @@ const searchUser = async (cancelToken: CancelToken) => {
   result.data!.items.forEach((user: UserInfo) => {
     data.push(reactive({
       ...user,
-      relation: friendStore.isFriend(user.id) ? UserRelation.Friend : UserRelation.None
+      relation: friendStore.isFriend(user.id) ? Relation.Friend : Relation.None
     }))
   });
 
@@ -163,7 +154,7 @@ const searchGroup = async (cancelToken: CancelToken) => {
   data!.items.forEach((group: Group) => {
     items.push(reactive({
       ...group,
-      relation: groupStore.joinedGroup(group.id) ? UserRelation.Joined : UserRelation.None
+      relation: groupStore.joinedGroup(group.id) ? Relation.Joined : Relation.None
     }))
   });
   groupResult.value = items
@@ -184,7 +175,7 @@ const apply = async (user: UserResult) => {
     ElNotification.success('已发送申请')
     selectedUser.value = null;
     applyRemark.value = ''
-    user.relation = UserRelation.Applied
+    user.relation = Relation.Applied
   } catch (error: any) {
     ElNotification.error(error);
   } finally {
@@ -200,9 +191,9 @@ const applyGroup = async (group: GroupResult) => {
       throw new Error(result.errors as string)
     }
     ElNotification.success('已发送申请')
-    selectedUser.value = null;
+    selectedGroup.value = null;
     applyRemark.value = ''
-    group.relation = UserRelation.Applied
+    group.relation = Relation.Applied
   } catch (error: any) {
     ElNotification.error(error);
   } finally {
@@ -220,13 +211,6 @@ interface UserParams {
   value: UserResult
 }
 type Params = GroupParams | UserParams
-
-const chatStore = useChatStore()
-
-const roomsStore = useRoomStore()
-const currentUserStore = useCurrentUserStore()
-const route = useRoute();
-const router = useRouter()
 
 async function sendMessage<TType extends Params['type']>(
   type: TType,
@@ -247,13 +231,12 @@ async function sendMessage<TType extends Params['type']>(
   // join to message room.
   route.name !== 'Message' && router.push({ name: "Message" })
 }
-
 </script>
 
 <style lang="scss" scoped>
-.add-friend-search {
-  min-height: 500px;
+.found {
   position: relative;
+  padding: 1rem;
 }
 
 .search {
@@ -290,6 +273,7 @@ async function sendMessage<TType extends Params['type']>(
 
 .apply {
   position: absolute;
+  padding: 1rem;
   top: 0;
   left: 0;
   bottom: 0;

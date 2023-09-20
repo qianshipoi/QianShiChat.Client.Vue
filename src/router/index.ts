@@ -31,6 +31,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import("../views/Settings.vue")
       },
       {
+        name: "Found",
+        path: "/found",
+        component: () => import("../views/Found.vue")
+      },
+      {
         path: "/:pathMatch(.*)",
         redirect: "/home-404"
       },

@@ -2,6 +2,7 @@ export default {
   nav: {
     firends: "朋友",
     messages: "消息",
+    found: "发现",
     settings: "设置",
     logout: "登出",
     expand: "展开",

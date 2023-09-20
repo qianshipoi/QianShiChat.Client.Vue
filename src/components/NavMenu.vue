@@ -12,6 +12,12 @@
       </el-icon>
       <template #title>{{ t('nav.firends') }}</template>
     </el-menu-item>
+    <el-menu-item index="/found">
+      <el-icon>
+        <Search />
+      </el-icon>
+      <template #title>{{ t('nav.found') }}</template>
+    </el-menu-item>
     <el-menu-item index="/settings">
       <el-icon>
         <setting />
@@ -26,6 +32,7 @@ import {
   UserFilled,
   ChatLineSquare,
   Setting,
+  Search,
 } from '@element-plus/icons-vue'
 import { useMenuStore } from '../store/useMenuStore';
 import { storeToRefs } from 'pinia';
