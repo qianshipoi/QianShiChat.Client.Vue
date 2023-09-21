@@ -171,7 +171,6 @@ export interface Room {
   lastMessageContent?: string | Attachment,
   fromUser?: UserInfo,
   toObject?: Group | UserInfo,
-  from: Group | UserInfo
 }
 
 export interface Group {

@@ -5,6 +5,7 @@ import { useChatStore } from "./useChatStore";
 import { useCurrentUserStore } from "./useCurrentUserStore";
 import { useUserStore } from "./useUserStore";
 import emitter from "../utils/mitt";
+import { useGroupStore } from "./useGroupStore";
 
 export const useRoomStore = defineStore("room_store", () => {
   const rooms = useSessionStorage<Room[]>("rooms", [])
@@ -14,6 +15,7 @@ export const useRoomStore = defineStore("room_store", () => {
   const currentUserStore = useCurrentUserStore()
   const userStore = useUserStore();
   const chatStore = useChatStore();
+  const groupStore = useGroupStore();
 
   function moveRoomTop(room: Room) {
     const index = rooms.value.findIndex(s => s.id === room.id);
@@ -40,19 +42,35 @@ export const useRoomStore = defineStore("room_store", () => {
   chatStore.onPrivateChat(async message => {
     let room = rooms.value.find(s => s.id === message.roomId)
     if (!room) {
-      const user = await userStore.getUser(message.fromId)
-      room = {
-        id: message.roomId,
-        toId: message.fromId,
-        type: message.sendType,
-        unreadCount: 1,
-        avatar: user.avatar,
-        name: user.nickName!,
-        lastMessageTime: message.createTime,
-        lastMessageContent: message.content,
-        toObject: user,
-        fromUser: currentUserStore.userInfo,
-        from: user
+      if (message.sendType === ChatMessageSendType.Personal) {
+        const user = await userStore.getUser(message.fromId)
+        room = {
+          id: message.roomId,
+          toId: message.fromId,
+          type: message.sendType,
+          unreadCount: 1,
+          avatar: user.avatar,
+          name: user.nickName!,
+          lastMessageTime: message.createTime,
+          lastMessageContent: message.content,
+          toObject: user,
+          fromUser: currentUserStore.userInfo,
+        }
+      } else {
+        const group = (await groupStore.getGroup(message.toId))!
+        const user = await userStore.getUser(message.fromId)
+        room = {
+          id: message.roomId,
+          toId: message.fromId,
+          type: message.sendType,
+          unreadCount: 1,
+          avatar: group.avatar,
+          name: group.name,
+          lastMessageTime: message.createTime,
+          lastMessageContent: message.content,
+          toObject: group,
+          fromUser: user,
+        }
       }
     } else {
       room.unreadCount++;

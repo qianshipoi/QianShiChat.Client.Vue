@@ -71,10 +71,15 @@ export const useChatMessage = () => {
     chatStore.onPrivateChat(async (message: ChatMessage) => {
       if (message.roomId === roomMessage?.id) {
         message.fromUser = await getUser(message.fromId)
-        roomMessage?.messages.push(message)
-        newMessageCallback.forEach(callback => {
-          callback(message);
-        });
+        // todo: message deduplication.
+        console.log(roomMessage?.messages.map(x => x.id));
+        console.log(message.id);
+        if (!roomMessage?.messages.some(x => x.id === message.id)) {
+          roomMessage?.messages.push(message)
+          newMessageCallback.forEach(callback => {
+            callback(message);
+          });
+        }
       }
     })
     let page = 1;
@@ -136,7 +141,7 @@ export const useChatMessage = () => {
         fromId: currentUserStore.userInfo?.id!,
         toId: roomMessage.room.toId,
         roomId: roomMessage.room.id,
-        sendType: ChatMessageSendType.Personal,
+        sendType: roomMessage.room.type,
         messageType: fileTypeToMessageType(file.type),
         content: attachment,
         createTime: getNextId(),
@@ -149,7 +154,7 @@ export const useChatMessage = () => {
         sendFileApi({
           toId: roomMessage!.room.toId,
           attachmentId: (message.content as Attachment).id,
-          sendType: ChatMessageSendType.Personal
+          sendType: roomMessage.room.type
         }).then(({ succeeded, data }) => {
           if (!succeeded) {
             message.status = ChatMessageStatus.Failed;
@@ -217,7 +222,7 @@ export const useChatMessage = () => {
         fromId: currentUserStore.userInfo?.id!,
         toId: roomMessage.room.toId,
         roomId: roomMessage.room.id,
-        sendType: ChatMessageSendType.Personal,
+        sendType: roomMessage.room.type,
         messageType: fileTypeToMessageType(attachment.contentType),
         content: attachment,
         createTime: getNextId(),
@@ -228,7 +233,7 @@ export const useChatMessage = () => {
       sendFileApi({
         toId: roomMessage!.room.toId,
         attachmentId: attachment.id,
-        sendType: ChatMessageSendType.Personal
+        sendType: roomMessage.room.type
       }).then(({ succeeded, data }) => {
         if (!succeeded) {
           message.status = ChatMessageStatus.Failed;
@@ -251,7 +256,7 @@ export const useChatMessage = () => {
         fromId: currentUserStore.userInfo?.id!,
         toId: roomMessage!.room.toId!,
         roomId: roomMessage!.room.id,
-        sendType: ChatMessageSendType.Personal,
+        sendType: roomMessage.room.type,
         messageType: ChatMessageType.Text,
         content: content,
         createTime: getNextId(),
@@ -262,7 +267,7 @@ export const useChatMessage = () => {
 
       sendTextApi({
         toId: roomMessage.room.toId,
-        sendType: ChatMessageSendType.Personal,
+        sendType: roomMessage.room.type,
         message: content
       }).then(({ succeeded, data }) => {
         if (!succeeded) {

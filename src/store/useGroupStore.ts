@@ -5,7 +5,7 @@ import { useSettingsStore } from "./useSettingsStore";
 import { useI18n } from "vue-i18n";
 import { ElNotification, NotificationHandle } from "element-plus";
 import ApplyNotification from "../components/Notification/ApplyNotification.vue";
-import { create, del, getAll, join, leave, getMembers } from "../api/group";
+import { create, del, getAll, join, leave, getMembers, getGroup as getGroupApi } from "../api/group";
 
 interface ApplyNotificationHandle {
   apply: GroupApply;
@@ -16,6 +16,7 @@ interface ApplyNotificationHandle {
 export const useGroupStore = defineStore("group", () => {
   const groups = reactive<Group[]>([])
   const loading = ref<boolean>(false)
+  const groupsCache: Group[] = []
 
   const chatStore = useChatStore();
   const settingsStore = useSettingsStore()
@@ -165,6 +166,25 @@ export const useGroupStore = defineStore("group", () => {
     }
   }
 
+  const getGroup = async (groupId: number) => {
+    let group = groups.find(x => x.id === groupId)
+    if (group) return group;
+    group = groupsCache.find(x => x.id === groupId)
+    if (group) return group;
+
+    loading.value = true;
+    try {
+      const { succeeded, data, errors } = await getGroupApi(groupId)
+      if (!succeeded) throw new Error(errors as string)
+      data && groupsCache.push(data)
+      return data;
+    } catch (error: any) {
+      ElNotification.error(error)
+    } finally {
+      loading.value = false;
+    }
+  }
+
   return {
     groups: readonly(groups),
     loading: readonly(loading),
@@ -174,6 +194,7 @@ export const useGroupStore = defineStore("group", () => {
     leaveGroup,
     deleteGroup,
     joinGroupApply,
-    loadMembers
+    loadMembers,
+    getGroup
   }
 })

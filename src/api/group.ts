@@ -53,5 +53,8 @@ interface BasePagedRequest {
 }
 
 export function getMembers(groupId: number, query: BasePagedRequest): Promise<GlobalResult<PagedList<UserInfo>>> {
-  return instance.get(`/group/${groupId}`, { params: query })
+  return instance.get(`/group/${groupId}/members`, { params: query })
+}
+export function getGroup(groupId: number): Promise<GlobalResult<Group>> {
+  return instance.get(`/group/${groupId}`)
 }
