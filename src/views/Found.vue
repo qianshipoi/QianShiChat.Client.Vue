@@ -103,6 +103,7 @@ const search = async () => {
   cancelTokenSource?.cancel();
   if (!searchText.value) {
     userResult.value = []
+    groupResult.value = []
     return;
   }
   loading.value = true;

@@ -1,10 +1,10 @@
 <template>
   <div class="user-profile">
     <div class="base-info">
-      <el-image :src="user.avatar" fit="cover" style="width: 100px; height: 100px; border-radius: 50%;" />
+      <el-image :src="value.avatar" fit="cover" style="width: 100px; height: 100px; border-radius: 50%;" />
       <div class="info">
-        <span class="nickname">{{ user.nickName }}</span>
-        <span class="uid">UID: {{ user.id }}</span>
+        <span class="nickname">{{ value.nickName }}</span>
+        <span class="uid">UID: {{ value.id }}</span>
       </div>
       <div class="actions">
         <el-icon @click="sendMessage">
@@ -28,7 +28,7 @@ import { useCurrentUserStore } from '../../store/useCurrentUserStore';
 import { useRouter } from 'vue-router';
 
 const props = defineProps<{
-  user: UserInfo
+  value: UserInfo
 }>()
 
 const chatStore = useChatStore()
@@ -37,15 +37,15 @@ const currentUserStore = useCurrentUserStore()
 const router = useRouter()
 
 const sendMessage = async () => {
-  const room = await chatStore.getRoom(props.user.id, ChatMessageSendType.Personal)
+  const room = await chatStore.getRoom(props.value.id, ChatMessageSendType.Personal)
   if (!room) {
     ElNotification.error('get room error.')
     return
   }
-  room.toObject = props.user;
+  room.toObject = props.value;
   room.fromUser = currentUserStore.userInfo
-  room.name = props.user.nickName ?? ""
-  room.avatar = props.user.avatar
+  room.name = props.value.nickName ?? ""
+  room.avatar = props.value.avatar
   roomsStore.addRoom(room);
   roomsStore.openRoom(room.id);
 
@@ -101,5 +101,3 @@ const sendMessage = async () => {
   cursor: pointer;
 }
 </style>
-
-../../store/useRoomStore

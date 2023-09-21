@@ -1,5 +1,5 @@
 import { CancelToken } from "axios";
-import { GlobalResult, Group, GroupApply, PagedList } from "../types/Types";
+import { GlobalResult, Group, GroupApply, PagedList, UserInfo } from "../types/Types";
 import instance from "./index";
 
 export function create(friendIds: number[], name?: string): Promise<GlobalResult<Group>> {
@@ -40,13 +40,18 @@ export function approval(id: number, status: 'pass' | 'reject' | 'ignore'): Prom
   return instance.put(`/group/approval/${id}/${status}`)
 }
 
-interface SearchRequest {
-  page: number;
-  size: number;
+interface SearchRequest extends BasePagedRequest {
   search: string;
 }
 
 export function search(search: SearchRequest, cancelToken?: CancelToken): Promise<GlobalResult<PagedList<Group>>> {
   return instance.get('/group/search', { params: search, cancelToken })
 }
+interface BasePagedRequest {
+  page: number;
+  size: number;
+}
 
+export function getMembers(groupId: number, query: BasePagedRequest): Promise<GlobalResult<PagedList<UserInfo>>> {
+  return instance.get(`/group/${groupId}`, { params: query })
+}

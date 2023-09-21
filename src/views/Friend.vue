@@ -36,7 +36,7 @@
         <QsTabPanel key="2" label="群组">
           <ul>
             <li v-for="group in groupStore.groups" :key="group.id">
-              <GroupItem v-model="(group as Group)" @selected="selectedHandle"
+              <GroupItem v-model="(group as Group)" @selected="selectedHandle(group as Group, false)"
                 :is-selected="isSelected(group as Group)" />
             </li>
           </ul>
@@ -57,6 +57,7 @@ import { Group, UserInfo } from '../types/Types';
 import { useGroupStore } from '../store/useGroupStore';
 
 const UserProfile = defineAsyncComponent(() => import('./friend/UserProfile.vue'))
+const GroupProfile = defineAsyncComponent(() => import('./friend/GroupProfile.vue'))
 const FriendApply = defineAsyncComponent(() => import('./friend/FriendApply.vue'))
 const GroupApply = defineAsyncComponent(() => import('./friend/GroupApply.vue'))
 
@@ -70,10 +71,10 @@ const groupStore = useGroupStore()
 
 const isSelected = computed(() => (item: UserInfo | Group) => currentSelected.value === item)
 
-const selectedHandle = (item: UserInfo | Group) => {
+const selectedHandle = (item: UserInfo | Group, isUser: boolean = true) => {
   currentSelected.value = item
-  opendComponent.value = UserProfile;
-  componentProps.value = { user: item }
+  opendComponent.value = isUser ? UserProfile : GroupProfile;
+  componentProps.value = { value: item }
 }
 
 const openFriendApply = () => {
