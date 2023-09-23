@@ -42,6 +42,8 @@ export const useChatMessage = () => {
 
   const getRoomMessage = (id: string) => {
     const loading = ref<boolean>(false)
+    let page = 1;
+    let hasMore = ref<boolean>(true);
     let roomMessage = roomMessages.find(x => x.id === id)!
     if (!roomMessage) {
       roomMessage = {
@@ -68,22 +70,19 @@ export const useChatMessage = () => {
       }
     }
 
-    chatStore.onPrivateChat(async (message: ChatMessage) => {
+    const newMessage = async (message: ChatMessage) => {
       if (message.roomId === roomMessage?.id) {
         message.fromUser = await getUser(message.fromId)
-        // todo: message deduplication.
-        console.log(roomMessage?.messages.map(x => x.id));
-        console.log(message.id);
-        if (!roomMessage?.messages.some(x => x.id === message.id)) {
-          roomMessage?.messages.push(message)
-          newMessageCallback.forEach(callback => {
-            callback(message);
-          });
-        }
+        roomMessage?.messages.push(message)
+        newMessageCallback.forEach(callback => {
+          callback(message);
+        });
       }
-    })
-    let page = 1;
-    let hasMore = ref<boolean>(true);
+    }
+
+    chatStore.onPrivateChat(message => newMessage(message))
+
+    chatStore.onGroupChat(message => newMessage(message))
 
     const loadData = async (isFrst: boolean = false) => {
       if (loading.value || !hasMore.value) {

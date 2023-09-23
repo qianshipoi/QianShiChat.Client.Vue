@@ -34,11 +34,22 @@ export const useChatStore = defineStore("chat", () => {
     isReady.value = true;
   })
 
-  const privateChatEventHandler: ((message: ChatMessage) => void)[] = []
+  type MessageCallback = (message: ChatMessage) => void
 
-
+  const privateChatEventHandler: MessageCallback[] = []
   connection.on("PrivateChat", (message: ChatMessage) => {
     privateChatEventHandler.map(item => {
+      item(message)
+    })
+  })
+  connection.on("OwnOtherClientMessage", (message: ChatMessage) => {
+    privateChatEventHandler.map(item => {
+      item(message)
+    })
+  })
+  const groupMessageEventHandle: MessageCallback[] = []
+  connection.on("GroupMessage", (message: ChatMessage) => {
+    groupMessageEventHandle.map(item => {
       item(message)
     })
   })
@@ -115,6 +126,10 @@ export const useChatStore = defineStore("chat", () => {
     privateChatEventHandler.push(callback)
   }
 
+  const onGroupChat = (callback: MessageCallback) => {
+    groupMessageEventHandle.push(callback);
+  }
+
   const onNotification = (callback: (notification: NotificationMessage) => void) => {
     notificationEventHandler.push(callback);
   }
@@ -168,6 +183,7 @@ export const useChatStore = defineStore("chat", () => {
     getRoom,
     onNotification,
     userIsOnline,
-    onlineFile
+    onlineFile,
+    onGroupChat
   }
 })

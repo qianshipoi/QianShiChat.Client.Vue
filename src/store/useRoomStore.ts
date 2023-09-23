@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ChatMessageSendType, NotificationMessage, NotificationType, Room, UserInfo } from "../types/Types";
+import { ChatMessage, ChatMessageSendType, NotificationMessage, NotificationType, Room, UserInfo } from "../types/Types";
 import { useSessionStorage } from "@vueuse/core";
 import { useChatStore } from "./useChatStore";
 import { useCurrentUserStore } from "./useCurrentUserStore";
@@ -39,7 +39,7 @@ export const useRoomStore = defineStore("room_store", () => {
     }
   }
 
-  chatStore.onPrivateChat(async message => {
+  const newMessage = async (message: ChatMessage) => {
     let room = rooms.value.find(s => s.id === message.roomId)
     if (!room) {
       if (message.sendType === ChatMessageSendType.Personal) {
@@ -76,7 +76,10 @@ export const useRoomStore = defineStore("room_store", () => {
       room.unreadCount++;
     }
     moveRoomTop(room)
-  });
+  }
+
+  chatStore.onPrivateChat(message => newMessage(message));
+  chatStore.onGroupChat(message => newMessage(message));
 
   chatStore.onNotification((notification: NotificationMessage) => {
     if (notification.type === NotificationType.FriendOffline || notification.type === NotificationType.FriendOnline) {
