@@ -42,7 +42,7 @@ export const useGroupStore = defineStore("group", () => {
         }, settingsStore.notifceDuration);
       } else {
         const handle = ElNotification({
-          title: "好友申请",
+          title: "加群申请",
           duration: 0,
           message: h(ApplyNotification, {
             apply,

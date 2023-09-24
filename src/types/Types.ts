@@ -65,25 +65,6 @@ export enum NotificationType {
   /// 新好友
   /// </summary>
   NewFriend,
-  /**
-   * 强制注销
-   */
-  Signed,
-
-  /// <summary>
-  /// 询问在线文件传输
-  /// </summary>
-  OnlineTransmissionConfirm,
-
-  /// <summary>
-  /// 确认在线传呼文件
-  /// </summary>
-  OnlineTransmissionPassed,
-
-  /// <summary>
-  /// 取消在线传呼文件
-  /// </summary>
-  OnlineTransmissionCancel,
   /// <summary>
   /// 进群申请
   /// </summary>
@@ -91,7 +72,23 @@ export enum NotificationType {
   /// <summary>
   /// 新群
   /// </summary>
-  NewGroup
+  NewGroup,
+  /**
+   * 强制注销
+   */
+  Signed,
+  /// <summary>
+  /// 询问在线文件传输
+  /// </summary>
+  OnlineTransmissionConfirm,
+  /// <summary>
+  /// 确认在线传呼文件
+  /// </summary>
+  OnlineTransmissionPassed,
+  /// <summary>
+  /// 取消在线传呼文件
+  /// </summary>
+  OnlineTransmissionCancel,
 }
 
 export interface NotificationMessage {
