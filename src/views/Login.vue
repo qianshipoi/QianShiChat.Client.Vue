@@ -1,171 +1,306 @@
 <template>
   <div class="login">
-    <Draggable :initial-value="initialValue" @end="moveEnd" ref="draggable" :handle="handle" class="login-main">
-      <div ref="handle" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; cursor: move;"></div>
-      <div style="position: absolute; left: 28px; top: 40px; right: 28px; bottom: 28px; z-index: 2; ">
-        <el-form :model="baseInfo" ref="formInstance" :rules="rules" :inline="false">
-          <el-form-item prop="account">
-            <login-select v-model="baseInfo.account" :placeholder="t('login.accountPlaceholder')" clearable>
-              asdsd
-            </login-select>
-          </el-form-item>
-          <el-form-item prop="password">
-            <login-input v-model="baseInfo.password" type="password" :placeholder="t('login.passwordPlaceholder')"
-              clearable></login-input>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" style="width: 100%; height: 40px;" @click="onSubmit"
-              :loading="userStore.loading">{{ t("login.login") }}</el-button>
-          </el-form-item>
-        </el-form>
+    <div class="wrapper">
+      <div class="card-switch">
+        <label class="switch">
+          <input type="checkbox" class="toggle">
+          <span class="slider"></span>
+          <span class="card-side"></span>
+          <div class="flip-card__inner">
+            <div class="flip-card__front">
+              <div class="title">Log in</div>
+              <form class="flip-card__form" action="">
+                <input class="flip-card__input" v-model="baseInfo.account" name="email" placeholder="Email" type="email">
+                <input class="flip-card__input" v-model="baseInfo.password" name="password" placeholder="Password"
+                  type="password">
+                <button type="button" @click="onSubmit" class="flip-card__btn">Let`s go!</button>
+              </form>
+            </div>
+            <div class="flip-card__back">
+              <div class="title">Sign up</div>
+              <form class="flip-card__form" action="">
+                <input class="flip-card__input" placeholder="Name" type="name">
+                <input class="flip-card__input" name="email" placeholder="Email" type="email">
+                <input class="flip-card__input" name="password" placeholder="Password" type="password">
+                <button class="flip-card__btn">Confirm!</button>
+              </form>
+            </div>
+          </div>
+        </label>
       </div>
-    </Draggable>
+    </div>
+
+    <span>style from: <el-link type="primary" href="https://uiverse.io/andrew-demchenk0/afraid-cougar-9"
+        target="_blank">uiverse.io</el-link>
+    </span>
   </div>
 </template>
 
 <script setup lang='ts'>
-import { ElMessage, FormInstance, FormRules } from 'element-plus';
-import { reactive, ref } from 'vue';
+import { ElMessage } from 'element-plus';
 import { useRoute, useRouter } from "vue-router";
 import { useCurrentUserStore } from '../store/useCurrentUserStore';
-import { Position, useEventListener, useSessionStorage, useThrottleFn, useWindowSize } from '@vueuse/core';
-import LoginInput from '../components/LoginInput.vue';
-import { UseDraggable as Draggable } from "@vueuse/components"
-import { useI18n } from 'vue-i18n';
 
 interface BaseInfo {
   account: string
   password: string
 }
 
-const { t } = useI18n()
-
 const route = useRoute()
 const router = useRouter()
-const { width, height } = useWindowSize()
-const loginTop = useSessionStorage("login-top", -1)
-const loginLeft = useSessionStorage("login-left", -1)
 
-const moveEnd = (position: Position) => {
-  loginTop.value = position.y
-  loginLeft.value = position.x
-}
-
-const initialValue = reactive({
-  x: loginLeft.value,
-  y: loginTop.value
-})
-
-const handle = ref<HTMLElement | null>(null)
-
-watch(() => handle.value, () => {
-  const boxWidth = handle.value!.clientWidth;
-  const boxHeight = handle.value!.clientHeight;
-
-  if (initialValue.x < 0 || initialValue.y < 0 || initialValue.x > width.value - boxWidth || initialValue.y > height.value - boxHeight) {
-    initialValue.x = (width.value / 2) - handle.value!.clientWidth / 2
-    initialValue.y = (height.value / 2) - handle.value!.clientHeight / 2
-    loginTop.value = initialValue.y
-    loginLeft.value = initialValue.x
-  }
-})
-
-const windowResize = useThrottleFn(() => {
-  const boxWidth = handle.value!.clientWidth;
-  const boxHeight = handle.value!.clientHeight;
-  if (initialValue.x < 0 || initialValue.y < 0 || initialValue.x > width.value - boxWidth || initialValue.y > height.value - boxHeight) {
-    initialValue.x = (width.value / 2) - handle.value!.clientWidth / 2
-    initialValue.y = (height.value / 2) - handle.value!.clientHeight / 2
-    loginTop.value = initialValue.y
-    loginLeft.value = initialValue.x
-  }
-}, 1000)
-
-useEventListener(window, "resize", windowResize)
-
-useEventListener(window, "keydown", (e: KeyboardEvent) => {
-  e.key === "Enter" && onSubmit()
-})
 
 const baseInfo = reactive<BaseInfo>({
   account: 'admin',
   password: '123456'
 })
-
-const rules: FormRules<BaseInfo> = {
-  account: [
-    { required: true, message: 'Please input account', trigger: 'blur' },
-    { min: 3, max: 12, message: 'Length should be 3 to 12', trigger: 'blur' },
-  ],
-  password: [
-    { required: true, message: 'Please input password', trigger: 'blur' },
-    { min: 3, max: 12, message: 'Length should be 3 to 12', trigger: 'blur' },
-  ]
-}
-
-const formInstance = ref<FormInstance>()
 const userStore = useCurrentUserStore();
 
 const onSubmit = async () => {
-  if (!formInstance.value) return;
-  await formInstance.value?.validate(async (valid, fields) => {
-    if (!valid) {
-      console.log('error submit', fields);
-      return;
-    }
 
-    const result = await userStore.login(baseInfo.account, baseInfo.password)
-    if (!result) {
-      return;
-    }
+  if (!baseInfo.account || !baseInfo.password) return;
+  const result = await userStore.login(baseInfo.account, baseInfo.password)
+  if (!result) {
+    return;
+  }
 
-    ElMessage.success('login succeeded.')
-    // redirect
-    const redirectUrl = route.query['redirect'] as string
-    if (redirectUrl) {
-      router.push(redirectUrl);
-    } else {
-      router.push({ name: 'Home' })
-    }
-  })
+  ElMessage.success('login succeeded.')
+  // redirect
+  const redirectUrl = route.query['redirect'] as string
+  if (redirectUrl) {
+    router.push(redirectUrl);
+  } else {
+    router.push({ name: 'Home' })
+  }
 }
 
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .login {
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   height: 100%;
+  background-color: #DBDBFF;
+
+  &>span {
+    position: absolute;
+    bottom: 1rem;
+  }
 }
 
 .login-main {
-  position: fixed;
-  width: 320px;
-  height: 448px;
-  background-color: #D2EBFC;
-  box-shadow: 0 0 10px gray;
-  padding: 2em;
+  position: relative;
+  display: flex;
+  width: 800px;
+  height: 600px;
+  background-color: #FFFFFF;
+  box-shadow: 0 0 6px rgba(255, 255, 255, .4);
+  padding: 1rem;
+  border-radius: 2rem;
+
 }
 
-:deep(.el-select) {
-  width: 100%;
-  height: 44px;
-  background-color: rgba(255, 255, 255, .6);
+.wrapper {
+  --input-focus: #2d8cf0;
+  --font-color: #323232;
+  --font-color-sub: #666;
+  --bg-color: #fff;
+  --bg-color-alt: #666;
+  --main-color: #323232;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-:deep(.select-trigger),
-:deep(.select-trigger > .el-input) {
-  height: 100%;
+/* switch card */
+.switch {
+  transform: translateY(-200px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  width: 50px;
+  height: 20px;
 }
 
-:deep(.select-trigger > .el-input),
-:deep(.select-trigger .el-input__wrapper) {
-  outline: none;
-  border: none;
+.card-side::before {
+  position: absolute;
+  content: 'Log in';
+  left: -70px;
+  top: 0;
+  width: 100px;
+  text-decoration: underline;
+  color: var(--font-color);
+  font-weight: 600;
+}
+
+.card-side::after {
+  position: absolute;
+  content: 'Sign up';
+  left: 70px;
+  top: 0;
+  width: 100px;
+  text-decoration: none;
+  color: var(--font-color);
+  font-weight: 600;
+}
+
+.toggle {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  box-sizing: border-box;
+  border-radius: 5px;
+  border: 2px solid var(--main-color);
+  box-shadow: 4px 4px var(--main-color);
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-colorcolor);
+  transition: 0.3s;
+}
+
+.slider:before {
+  box-sizing: border-box;
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  border: 2px solid var(--main-color);
+  border-radius: 5px;
+  left: -2px;
+  bottom: 2px;
+  background-color: var(--bg-color);
+  box-shadow: 0 3px 0 var(--main-color);
+  transition: 0.3s;
+}
+
+.toggle:checked+.slider {
+  background-color: var(--input-focus);
+}
+
+.toggle:checked+.slider:before {
+  transform: translateX(30px);
+}
+
+.toggle:checked~.card-side:before {
+  text-decoration: none;
+}
+
+.toggle:checked~.card-side:after {
+  text-decoration: underline;
+}
+
+/* card */
+
+.flip-card__inner {
+  width: 300px;
+  height: 350px;
+  position: relative;
+  background-color: transparent;
+  perspective: 1000px;
+  /* width: 100%;
+    height: 100%; */
+  text-align: center;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+}
+
+.toggle:checked~.flip-card__inner {
+  transform: rotateY(180deg);
+}
+
+.toggle:checked~.flip-card__front {
   box-shadow: none;
 }
 
-:deep(.select-trigger .el-input__wrapper:hover) {
-  border: none;
+.flip-card__front,
+.flip-card__back {
+  padding: 20px;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  background: lightgrey;
+  gap: 20px;
+  border-radius: 5px;
+  border: 2px solid var(--main-color);
+  box-shadow: 4px 4px var(--main-color);
+}
+
+.flip-card__back {
+  width: 100%;
+  transform: rotateY(180deg);
+}
+
+.flip-card__form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.title {
+  margin: 20px 0 20px 0;
+  font-size: 25px;
+  font-weight: 900;
+  text-align: center;
+  color: var(--main-color);
+}
+
+.flip-card__input {
+  width: 250px;
+  height: 40px;
+  border-radius: 5px;
+  border: 2px solid var(--main-color);
+  background-color: var(--bg-color);
+  box-shadow: 4px 4px var(--main-color);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--font-color);
+  padding: 5px 10px;
+  outline: none;
+}
+
+.flip-card__input::placeholder {
+  color: var(--font-color-sub);
+  opacity: 0.8;
+}
+
+.flip-card__input:focus {
+  border: 2px solid var(--input-focus);
+}
+
+.flip-card__btn:active,
+.button-confirm:active {
+  box-shadow: 0px 0px var(--main-color);
+  transform: translate(3px, 3px);
+}
+
+.flip-card__btn {
+  margin: 20px 0 20px 0;
+  width: 120px;
+  height: 40px;
+  border-radius: 5px;
+  border: 2px solid var(--main-color);
+  background-color: var(--bg-color);
+  box-shadow: 4px 4px var(--main-color);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--font-color);
+  cursor: pointer;
 }
 </style>
