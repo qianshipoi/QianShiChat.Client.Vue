@@ -102,10 +102,13 @@ export const useChatMessage = () => {
         }
         hasMore.value = paged.data.hasNext
         page++;
-        paged.data.items.forEach(async (item: ChatMessage) => {
-          item.fromUser = await getUser(item.fromId)
-          roomMessage?.messages.unshift(item)
-        })
+
+        for (let index = 0;index < paged.data.items.length;index++) {
+          const element = paged.data.items[index];
+          element.fromUser = await getUser(element.fromId)
+          roomMessage?.messages.unshift(element)
+        }
+
         const maxId = Math.max(...paged.data.items.map((item: ChatMessage) => item.id));
         roomStore.clearUnreadCount(roomMessage.room.id);
         if (isFrst && maxId > 0)
