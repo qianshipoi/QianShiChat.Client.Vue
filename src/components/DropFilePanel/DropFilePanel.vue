@@ -102,7 +102,7 @@ useEventListener(dropPanel, 'drop', (event: DragEvent) => {
 }
 
 .drop-panel-modal {
-  --padding: 20px;
+  --padding: 1rem;
   position: absolute;
   z-index: 999;
   top: var(--padding);
