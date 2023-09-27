@@ -15,10 +15,18 @@ export type PagedList<T> = {
   hasNext: boolean
 }
 
+export type Avatar = {
+  id: number
+  path: string
+  size: number
+  createTime: number
+}
+
 export enum ChatMessageSendType {
   Personal = 1,
   Group
 }
+
 
 export enum ChatMessageType {
   Text = 1,

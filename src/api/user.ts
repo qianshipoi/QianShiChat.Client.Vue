@@ -2,6 +2,18 @@ import { CancelToken } from "axios";
 import { ApplyStatus, FriendApply, GlobalResult, PagedList, UserInfo } from "../types/Types";
 import instance from "./index";
 
+
+export interface RegisterRequest {
+  defaultAvatarId: number;
+  account: string;
+  password: string;
+  nickName: string;
+}
+
+export function register(request: RegisterRequest): Promise<GlobalResult<UserInfo>> {
+  return instance.post('/user', request)
+}
+
 export function getUserById(id: number): Promise<GlobalResult<UserInfo>> {
   return instance.get(`/user/${id}`);
 }

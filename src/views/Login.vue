@@ -3,7 +3,7 @@
     <div class="wrapper">
       <div class="card-switch">
         <label class="switch">
-          <input type="checkbox" class="toggle">
+          <input type="checkbox" v-model="isRegister" class="toggle">
           <span class="slider"></span>
           <span class="card-side"></span>
           <div class="flip-card__inner">
@@ -19,10 +19,13 @@
             <div class="flip-card__back">
               <div class="title">Sign up</div>
               <form class="flip-card__form" action="">
-                <input class="flip-card__input" placeholder="Name" type="name">
-                <input class="flip-card__input" name="email" placeholder="Email" type="email">
-                <input class="flip-card__input" name="password" placeholder="Password" type="password">
-                <button class="flip-card__btn">Confirm!</button>
+                <img v-if="avatarPath" :src="avatarPath" @click.prevent="avatarDrawer = true" alt="">
+                <input class="flip-card__input" name="nickName" placeholder="NickName" v-model="registerForm.nickName"
+                  type="text">
+                <input class="flip-card__input" placeholder="Account" v-model="registerForm.account" type="name">
+                <input class="flip-card__input" name="password" placeholder="Password" type="password"
+                  v-model="registerForm.password">
+                <button class="flip-card__btn" type="button" @click="registerHandle">Confirm!</button>
               </form>
             </div>
           </div>
@@ -30,6 +33,15 @@
       </div>
     </div>
 
+    <el-drawer v-model="avatarDrawer" title="Select your avatar" direction="rtl">
+      <div>
+        <ul class="default-avatar-list">
+          <li @click="avatarSelected(avatar)" v-for="avatar in defaultAvatars" :key="avatar.id">
+            <img :src="avatar.path" :alt="avatar.path">
+          </li>
+        </ul>
+      </div>
+    </el-drawer>
     <span>style from: <el-link type="primary" href="https://uiverse.io/andrew-demchenk0/afraid-cougar-9"
         target="_blank">uiverse.io</el-link>
     </span>
@@ -40,6 +52,10 @@
 import { ElMessage } from 'element-plus';
 import { useRoute, useRouter } from "vue-router";
 import { useCurrentUserStore } from '../store/useCurrentUserStore';
+import { defaults } from '../api/avatar';
+import { Avatar } from '../types/Types';
+import { RegisterRequest } from '../api/user';
+import { register } from '../api/user';
 
 interface BaseInfo {
   account: string
@@ -48,16 +64,69 @@ interface BaseInfo {
 
 const route = useRoute()
 const router = useRouter()
-
+const isRegister = ref(false)
 
 const baseInfo = reactive<BaseInfo>({
   account: 'admin',
   password: '123456'
 })
+
 const userStore = useCurrentUserStore();
 
-const onSubmit = async () => {
+const defaultAvatars = ref<Avatar[]>([]);
+const avatarDrawer = ref(false);
+const loading = ref(false)
 
+const avatarPath = computed(() => {
+  const avatar = defaultAvatars.value.find(item => item.id === registerForm.defaultAvatarId);
+  return avatar?.path ?? '';
+})
+
+const registerForm: RegisterRequest = reactive({
+  account: '',
+  password: '',
+  nickName: '',
+  defaultAvatarId: 1
+});
+
+(function () {
+  defaults(100).then(({ succeeded, data, errors }) => {
+    if (succeeded) {
+      defaultAvatars.value = data?.items ?? [];
+    } else {
+      ElNotification.error(errors as string);
+    }
+  })
+})()
+
+const avatarSelected = (avatar: Avatar) => {
+  registerForm.defaultAvatarId = avatar.id;
+  avatarDrawer.value = false;
+}
+
+const registerHandle = async () => {
+  if (loading.value) return;
+
+  if(registerForm.account === '' || registerForm.password === '' || registerForm.nickName === '') {
+    return ElMessage.warning('please fill in the form.')
+  }
+
+  loading.value = true;
+  try {
+    const { succeeded, data, errors } = await register(registerForm);
+    if (!succeeded)
+      return ElNotification.error(errors as string);
+    ElMessage.success('register succeeded.')
+    baseInfo.account = data?.account ?? '';
+    isRegister.value = false;
+  } catch (error) {
+    ElNotification.error(error as string);
+  } finally {
+    loading.value = false;
+  }
+}
+
+const onSubmit = async () => {
   if (!baseInfo.account || !baseInfo.password) return;
   const result = await userStore.login(baseInfo.account, baseInfo.password)
   if (!result) {
@@ -78,6 +147,12 @@ const onSubmit = async () => {
 
 <style lang="scss" scoped>
 .login {
+  --input-focus: #2d8cf0;
+  --font-color: #323232;
+  --font-color-sub: #666;
+  --bg-color: #fff;
+  --bg-color-alt: #666;
+  --main-color: #323232;
   position: relative;
   display: flex;
   justify-content: center;
@@ -104,12 +179,6 @@ const onSubmit = async () => {
 }
 
 .wrapper {
-  --input-focus: #2d8cf0;
-  --font-color: #323232;
-  --font-color-sub: #666;
-  --bg-color: #fff;
-  --bg-color-alt: #666;
-  --main-color: #323232;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -253,6 +322,14 @@ const onSubmit = async () => {
   gap: 20px;
 }
 
+.flip-card__form>img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  box-shadow: 4px 4px var(--main-color);
+  cursor: pointer;
+}
+
 .title {
   margin: 20px 0 20px 0;
   font-size: 25px;
@@ -302,5 +379,27 @@ const onSubmit = async () => {
   font-weight: 600;
   color: var(--font-color);
   cursor: pointer;
+}
+
+.default-avatar-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+
+  &>li {
+    display: block;
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 4px 4px var(--main-color);
+
+    &>img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
 }
 </style>
