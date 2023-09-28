@@ -19,7 +19,7 @@
           <div class="base-info">
             <div class="up">
               <span class="name">{{ apply.user!.nickName }}</span>
-              <span>请求加为好友</span>
+              <span>申请加群</span>
               <span class="time">{{ timeFormat(apply.createTime) }}</span>
             </div>
             <span class="remark" v-show="apply.remark">留言：{{ apply.remark }}</span>
@@ -27,12 +27,12 @@
           <span class="action-text" v-if="apply.status === ApplyStatus.Ignored">经忽略</span>
           <span class="action-text" v-else-if="apply.status === ApplyStatus.Rejected">已拒绝</span>
           <span class="action-text" v-else-if="apply.status === ApplyStatus.Passed">已同意</span>
-          <el-dropdown v-else split-button size="small" type="default">
+          <el-dropdown v-else split-button size="small" type="default" @click="approvalHandle(apply, 'pass')">
             {{ t('actions.pass') }}
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item>{{ t('actions.ignore') }}</el-dropdown-item>
-                <el-dropdown-item>{{ t('actions.reject') }}</el-dropdown-item>
+                <el-dropdown-item @click="approvalHandle(apply, 'ignore')">{{ t('actions.ignore') }}</el-dropdown-item>
+                <el-dropdown-item @click="approvalHandle(apply, 'reject')">{{ t('actions.reject') }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -46,7 +46,7 @@
 import { useI18n } from 'vue-i18n';
 import { ApplyStatus, GroupApply } from '../../types/Types';
 import { Filter, Delete } from '@element-plus/icons-vue'
-import { pending } from '../../api/group'
+import { pending, approval } from '../../api/group'
 import { ElNotification } from 'element-plus';
 import { timeFormat } from '../../utils/timeUtils';
 
@@ -75,6 +75,35 @@ const loadData = async () => {
 }
 
 loadData();
+
+const approvalHandle = async (apply: GroupApply, status: 'pass' | 'reject' | 'ignore') => {
+  loading.value = true;
+  try {
+    const { succeeded, errors } = await approval(
+      apply.id,
+      status
+    )
+    if (succeeded) {
+      switch (status) {
+        case 'pass':
+          apply.status = ApplyStatus.Passed;
+          break;
+        case 'reject':
+          apply.status = ApplyStatus.Rejected;
+          break;
+        case 'ignore':
+          apply.status = ApplyStatus.Ignored;
+          break;
+      }
+    } else {
+      ElNotification.error(errors as string);
+    }
+  } catch (error) {
+    ElNotification.error(error as string);
+  } finally {
+    loading.value = false
+  }
+}
 
 </script>
 

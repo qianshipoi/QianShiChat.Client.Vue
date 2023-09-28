@@ -6,6 +6,11 @@ import { useRouter } from "vue-router";
 import { StorageSerializers, useFavicon, useSessionStorage, useTitle } from "@vueuse/core";
 import { useChatStore } from "./useChatStore";
 
+export interface LoginParams {
+  account: string
+  password: string
+}
+
 export const useCurrentUserStore = defineStore("current_user", () => {
   const token = useSessionStorage("token", "")
   const userInfo = useSessionStorage<UserInfo>("user", null, {
@@ -25,10 +30,10 @@ export const useCurrentUserStore = defineStore("current_user", () => {
     favicon.value = userInfo.value?.avatar
   })
 
-  const login = async (account: string, password: string): Promise<boolean> => {
+  const login = async (params: LoginParams): Promise<boolean> => {
     loading.value = true;
     try {
-      const result = await loginApi(account, password)
+      const result = await loginApi(params.account, params.password)
       if (!result.succeeded) {
         return false
       }

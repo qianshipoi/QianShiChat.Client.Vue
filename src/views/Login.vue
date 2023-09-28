@@ -2,38 +2,38 @@
   <div class="login">
     <div class="wrapper">
       <div class="card-switch">
-        <label class="switch">
-          <input type="checkbox" v-model="isRegister" class="toggle">
-          <span class="slider"></span>
-          <span class="card-side"></span>
-          <div class="flip-card__inner">
-            <div class="flip-card__front">
-              <div class="title">Log in</div>
-              <form class="flip-card__form" action="">
-                <input class="flip-card__input" v-model="baseInfo.account" name="email" placeholder="Email" type="email">
-                <input class="flip-card__input" v-model="baseInfo.password" name="password" placeholder="Password"
-                  type="password">
-                <button type="button" @click="onSubmit" class="flip-card__btn">Let`s go!</button>
-              </form>
-            </div>
-            <div class="flip-card__back">
-              <div class="title">Sign up</div>
-              <form class="flip-card__form" action="">
-                <img v-if="avatarPath" :src="avatarPath" @click.prevent="avatarDrawer = true" alt="">
-                <input class="flip-card__input" name="nickName" placeholder="NickName" v-model="registerForm.nickName"
-                  type="text">
-                <input class="flip-card__input" placeholder="Account" v-model="registerForm.account" type="name">
-                <input class="flip-card__input" name="password" placeholder="Password" type="password"
-                  v-model="registerForm.password">
-                <button class="flip-card__btn" type="button" @click="registerHandle">Confirm!</button>
-              </form>
-            </div>
-          </div>
-        </label>
+        <comic-flip-card v-model="isRegister">
+          <template #front>
+            <div class="title">Log in</div>
+            <form class="flip-card__form" action="">
+              <comic-input v-model="baseInfo.account" name="email" placeholder="Email" type="email"></comic-input>
+              <comic-input v-model="baseInfo.password" name="password" placeholder="Password"
+                type="password"></comic-input>
+              <comic-button @click="loginHandle">Let`s go!</comic-button>
+            </form>
+          </template>
+          <template #back>
+            <div class="title">Sign up</div>
+            <form class="flip-card__form" action="">
+              <img v-if="avatarPath" :src="avatarPath" @click.prevent="avatarDrawer = true" alt="">
+              <comic-input v-model="registerForm.nickName" name="nickName" placeholder="NickName"
+                type="text"></comic-input>
+              <comic-input v-model="registerForm.account" name="account" placeholder="Account" type="name"></comic-input>
+              <comic-input v-model="registerForm.password" name="password" placeholder="Password"
+                type="password"></comic-input>
+              <comic-button @click="registerHandle">Confirm!</comic-button>
+            </form>
+          </template>
+        </comic-flip-card>
       </div>
     </div>
 
-    <el-drawer v-model="avatarDrawer" title="Select your avatar" direction="rtl">
+    <div class="loading" v-if="loading">
+      <img src="https://chat-api.kuriyama.top/Raw/DefaultAvatar/12.gif" alt="loading">
+      <span style="color: white; font-size:larger; font-weight: bold;"> Loading...</span>
+    </div>
+
+    <el-drawer :size="300" v-model="avatarDrawer" title="Select your avatar" direction="rtl">
       <div>
         <ul class="default-avatar-list">
           <li @click="avatarSelected(avatar)" v-for="avatar in defaultAvatars" :key="avatar.id">
@@ -42,6 +42,7 @@
         </ul>
       </div>
     </el-drawer>
+
     <span>style from: <el-link type="primary" href="https://uiverse.io/andrew-demchenk0/afraid-cougar-9"
         target="_blank">uiverse.io</el-link>
     </span>
@@ -51,31 +52,26 @@
 <script setup lang='ts'>
 import { ElMessage } from 'element-plus';
 import { useRoute, useRouter } from "vue-router";
-import { useCurrentUserStore } from '../store/useCurrentUserStore';
+import { LoginParams, useCurrentUserStore } from '../store/useCurrentUserStore';
 import { defaults } from '../api/avatar';
 import { Avatar } from '../types/Types';
 import { RegisterRequest } from '../api/user';
 import { register } from '../api/user';
-
-interface BaseInfo {
-  account: string
-  password: string
-}
+import ComicInput from '../components/Uiverse/ComicInput.vue';
 
 const route = useRoute()
 const router = useRouter()
+const defaultAvatars = ref<Avatar[]>([]);
+const avatarDrawer = ref(false);
+const loading = ref(false)
 const isRegister = ref(false)
 
-const baseInfo = reactive<BaseInfo>({
+const baseInfo = reactive<LoginParams>({
   account: 'admin',
   password: '123456'
 })
 
 const userStore = useCurrentUserStore();
-
-const defaultAvatars = ref<Avatar[]>([]);
-const avatarDrawer = ref(false);
-const loading = ref(false)
 
 const avatarPath = computed(() => {
   const avatar = defaultAvatars.value.find(item => item.id === registerForm.defaultAvatarId);
@@ -107,7 +103,7 @@ const avatarSelected = (avatar: Avatar) => {
 const registerHandle = async () => {
   if (loading.value) return;
 
-  if(registerForm.account === '' || registerForm.password === '' || registerForm.nickName === '') {
+  if (registerForm.account === '' || registerForm.password === '' || registerForm.nickName === '') {
     return ElMessage.warning('please fill in the form.')
   }
 
@@ -126,9 +122,9 @@ const registerHandle = async () => {
   }
 }
 
-const onSubmit = async () => {
+const loginHandle = async () => {
   if (!baseInfo.account || !baseInfo.password) return;
-  const result = await userStore.login(baseInfo.account, baseInfo.password)
+  const result = await userStore.login(baseInfo)
   if (!result) {
     return;
   }
@@ -145,14 +141,12 @@ const onSubmit = async () => {
 
 </script>
 
+<style lang="css">
+@import url(../assets/css/comicGlobal.css);
+</style>
+
 <style lang="scss" scoped>
 .login {
-  --input-focus: #2d8cf0;
-  --font-color: #323232;
-  --font-color-sub: #666;
-  --bg-color: #fff;
-  --bg-color-alt: #666;
-  --main-color: #323232;
   position: relative;
   display: flex;
   justify-content: center;
@@ -175,144 +169,12 @@ const onSubmit = async () => {
   box-shadow: 0 0 6px rgba(255, 255, 255, .4);
   padding: 1rem;
   border-radius: 2rem;
-
 }
 
 .wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-/* switch card */
-.switch {
-  transform: translateY(-200px);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 30px;
-  width: 50px;
-  height: 20px;
-}
-
-.card-side::before {
-  position: absolute;
-  content: 'Log in';
-  left: -70px;
-  top: 0;
-  width: 100px;
-  text-decoration: underline;
-  color: var(--font-color);
-  font-weight: 600;
-}
-
-.card-side::after {
-  position: absolute;
-  content: 'Sign up';
-  left: 70px;
-  top: 0;
-  width: 100px;
-  text-decoration: none;
-  color: var(--font-color);
-  font-weight: 600;
-}
-
-.toggle {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  box-sizing: border-box;
-  border-radius: 5px;
-  border: 2px solid var(--main-color);
-  box-shadow: 4px 4px var(--main-color);
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: var(--bg-colorcolor);
-  transition: 0.3s;
-}
-
-.slider:before {
-  box-sizing: border-box;
-  position: absolute;
-  content: "";
-  height: 20px;
-  width: 20px;
-  border: 2px solid var(--main-color);
-  border-radius: 5px;
-  left: -2px;
-  bottom: 2px;
-  background-color: var(--bg-color);
-  box-shadow: 0 3px 0 var(--main-color);
-  transition: 0.3s;
-}
-
-.toggle:checked+.slider {
-  background-color: var(--input-focus);
-}
-
-.toggle:checked+.slider:before {
-  transform: translateX(30px);
-}
-
-.toggle:checked~.card-side:before {
-  text-decoration: none;
-}
-
-.toggle:checked~.card-side:after {
-  text-decoration: underline;
-}
-
-/* card */
-
-.flip-card__inner {
-  width: 300px;
-  height: 350px;
-  position: relative;
-  background-color: transparent;
-  perspective: 1000px;
-  /* width: 100%;
-    height: 100%; */
-  text-align: center;
-  transition: transform 0.8s;
-  transform-style: preserve-3d;
-}
-
-.toggle:checked~.flip-card__inner {
-  transform: rotateY(180deg);
-}
-
-.toggle:checked~.flip-card__front {
-  box-shadow: none;
-}
-
-.flip-card__front,
-.flip-card__back {
-  padding: 20px;
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-  background: lightgrey;
-  gap: 20px;
-  border-radius: 5px;
-  border: 2px solid var(--main-color);
-  box-shadow: 4px 4px var(--main-color);
-}
-
-.flip-card__back {
-  width: 100%;
-  transform: rotateY(180deg);
 }
 
 .flip-card__form {
@@ -326,7 +188,7 @@ const onSubmit = async () => {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  box-shadow: 4px 4px var(--main-color);
+  box-shadow: 4px 4px var(--comic-main-color);
   cursor: pointer;
 }
 
@@ -335,50 +197,7 @@ const onSubmit = async () => {
   font-size: 25px;
   font-weight: 900;
   text-align: center;
-  color: var(--main-color);
-}
-
-.flip-card__input {
-  width: 250px;
-  height: 40px;
-  border-radius: 5px;
-  border: 2px solid var(--main-color);
-  background-color: var(--bg-color);
-  box-shadow: 4px 4px var(--main-color);
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--font-color);
-  padding: 5px 10px;
-  outline: none;
-}
-
-.flip-card__input::placeholder {
-  color: var(--font-color-sub);
-  opacity: 0.8;
-}
-
-.flip-card__input:focus {
-  border: 2px solid var(--input-focus);
-}
-
-.flip-card__btn:active,
-.button-confirm:active {
-  box-shadow: 0px 0px var(--main-color);
-  transform: translate(3px, 3px);
-}
-
-.flip-card__btn {
-  margin: 20px 0 20px 0;
-  width: 120px;
-  height: 40px;
-  border-radius: 5px;
-  border: 2px solid var(--main-color);
-  background-color: var(--bg-color);
-  box-shadow: 4px 4px var(--main-color);
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--font-color);
-  cursor: pointer;
+  color: var(--comic-main-color);
 }
 
 .default-avatar-list {
@@ -388,18 +207,38 @@ const onSubmit = async () => {
 
   &>li {
     display: block;
-    width: 68px;
-    height: 68px;
     border-radius: 50%;
     overflow: hidden;
     cursor: pointer;
-    box-shadow: 4px 4px var(--main-color);
+    box-shadow: 4px 4px var(--comic-main-color);
 
     &>img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
+  }
+}
+
+.loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, .5);
+  z-index: 999;
+
+  &>img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    box-shadow: 4px 4px var(--comic-main-color);
   }
 }
 </style>

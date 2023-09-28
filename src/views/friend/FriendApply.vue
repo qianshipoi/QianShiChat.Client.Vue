@@ -27,12 +27,14 @@
           <span class="action-text" v-if="apply.status === ApplyStatus.Ignored">经忽略</span>
           <span class="action-text" v-else-if="apply.status === ApplyStatus.Rejected">已拒绝</span>
           <span class="action-text" v-else-if="apply.status === ApplyStatus.Passed">已同意</span>
-          <el-dropdown v-else split-button size="small" type="default">
+          <el-dropdown v-else split-button size="small" type="default" @click="approvalHandle(apply, ApplyStatus.Passed)">
             {{ t('actions.pass') }}
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item>{{ t('actions.ignore') }}</el-dropdown-item>
-                <el-dropdown-item>{{ t('actions.reject') }}</el-dropdown-item>
+                <el-dropdown-item
+                  @click="approvalHandle(apply, ApplyStatus.Ignored)">{{ t('actions.ignore') }}</el-dropdown-item>
+                <el-dropdown-item
+                  @click="approvalHandle(apply, ApplyStatus.Rejected)">{{ t('actions.reject') }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -46,7 +48,7 @@
 import { useI18n } from 'vue-i18n';
 import { ApplyStatus, FriendApply } from '../../types/Types';
 import { Filter, Delete } from '@element-plus/icons-vue'
-import { getFriendApplies } from '../../api/friend'
+import { getFriendApplies, approval } from '../../api/friend'
 import { ElNotification } from 'element-plus';
 import { timeFormat } from '../../utils/timeUtils';
 
@@ -66,6 +68,22 @@ const loadData = async () => {
     result.data && applies.push(...result.data.items);
   } catch (error: any) {
     ElNotification.error(error);
+  } finally {
+    loading.value = false
+  }
+}
+
+const approvalHandle = async (apply: FriendApply, type: ApplyStatus) => {
+  loading.value = true;
+  try {
+    const { succeeded, errors } = await approval(apply.id, type)
+    if (succeeded) {
+      apply.status = type
+    } else {
+      ElNotification.error(errors as string);
+    }
+  } catch (error) {
+    ElNotification.error(error as string);
   } finally {
     loading.value = false
   }

@@ -5,7 +5,6 @@ export function getFriends(): Promise<GlobalResult<UserInfo[]>> {
   return instance.get('/friend')
 }
 
-
 export function getFriendApplies(size: number, beforeLastTime?: number): Promise<GlobalResult<PagedList<FriendApply>>> {
   return instance.get('/FriendApply/Pending', {
     params: {
