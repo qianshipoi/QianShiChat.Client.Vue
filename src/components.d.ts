@@ -16,7 +16,6 @@ declare module 'vue' {
     ComicFlipCard: typeof import('./components/Uiverse/ComicFlipCard.vue')['default']
     ComicInput: typeof import('./components/Uiverse/ComicInput.vue')['default']
     ComicSwitch: typeof import('./components/Uiverse/ComicSwitch.vue')['default']
-    ComicToggle: typeof import('./components/Uiverse/ComicToggle.vue')['default']
     ContextMenu: typeof import('./components/ContextMenu/ContextMenu.vue')['default']
     CreateGroup: typeof import('./components/CreateGroup/CreateGroup.vue')['default']
     DeleteButton: typeof import('./components/Uiverse/DeleteButton.vue')['default']

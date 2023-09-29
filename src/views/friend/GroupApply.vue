@@ -19,12 +19,12 @@
           <div class="base-info">
             <div class="up">
               <span class="name">{{ apply.user!.nickName }}</span>
-              <span>申请加群</span>
+              <span>申请加入群:[{{ apply.group.name }}]</span>
               <span class="time">{{ timeFormat(apply.createTime) }}</span>
             </div>
             <span class="remark" v-show="apply.remark">留言：{{ apply.remark }}</span>
           </div>
-          <span class="action-text" v-if="apply.status === ApplyStatus.Ignored">经忽略</span>
+          <span class="action-text" v-if="apply.status === ApplyStatus.Ignored">已忽略</span>
           <span class="action-text" v-else-if="apply.status === ApplyStatus.Rejected">已拒绝</span>
           <span class="action-text" v-else-if="apply.status === ApplyStatus.Passed">已同意</span>
           <el-dropdown v-else split-button size="small" type="default" @click="approvalHandle(apply, 'pass')">
