@@ -4,19 +4,12 @@
       <div class="search">
         <el-input v-model="searchText" style="background-color: var(--input-bg-color);" size="small"
           placeholder="搜索"></el-input>
-        <el-popover placement="bottom" trigger="click">
-          <template #reference>
-            <button style="padding: 8px; font-weight: 600; background-color: var(--input-bg-color); border-radius: 4px;">
-              <el-icon>
-                <Plus />
-              </el-icon>
-            </button>
-          </template>
-          <ul class="menu-actions">
-            <li @click="addFriendVisible = true">add friend</li>
-            <li @click="displayCreateGroup = true">create group</li>
-          </ul>
-        </el-popover>
+        <button @click="moreActionHandle"
+          style="padding: 8px; font-weight: 600; background-color: var(--input-bg-color); border-radius: 4px;">
+          <el-icon>
+            <Plus />
+          </el-icon>
+        </button>
       </div>
       <ul>
         <li v-for="room in rooms" :key="room.id">
@@ -45,12 +38,28 @@ import RoomItem from '../components/RoomItem.vue';
 import CreateGroup from '../components/CreateGroup/CreateGroup.vue'
 import { Vue3Lottie } from 'vue3-lottie';
 import messagesJSON from '../assets/json/messages.json'
+import contextMenu from '../components/ContextMenu';
 
 const roomStore = useRoomStore();
 const { rooms } = storeToRefs(roomStore);
 const searchText = ref<string>('')
 const addFriendVisible = ref<boolean>(false)
 const displayCreateGroup = ref<boolean>(false)
+
+const moreActionHandle = (e: MouseEvent) => {
+  e.preventDefault()
+  contextMenu(e, [
+    { label: 'add friend', value: 'addFriend' },
+    { label: 'create group', value: 'createGroup' }
+  ], (action) => {
+    if (action.value === 'addFriend') {
+      addFriendVisible.value = true
+    } else if (action.value === 'createGroup') {
+      displayCreateGroup.value = true
+    }
+  }, true)
+}
+
 </script>
 
 <style scoped>

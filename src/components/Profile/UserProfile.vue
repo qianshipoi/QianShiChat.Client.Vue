@@ -61,12 +61,11 @@ const sendMessage = () => {
   width: 300px;
   padding: 2rem 1rem;
   border-radius: 6px;
-  border: 1px solid rgba(222, 222, 222, 0.5);
   background-color: #ffffff;
   font-size: 14px;
   font-weight: 500;
   user-select: none;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--el-box-shadow);
 
   &>.base {
     display: flex;

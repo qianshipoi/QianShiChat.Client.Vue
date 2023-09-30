@@ -26,19 +26,14 @@ export const showUserProfile = (e: MouseEvent, user: UserInfo) => {
   render(vnode, container)
   appendTo.appendChild(container.firstElementChild!);
   const curMenu = vnode.el as HTMLElement
-
   const { offsetWidth, offsetHeight } = curMenu
-
   const { clientWidth } = appendTo
-
   const { clientX, clientY } = e
-
   const leftOrRight = clientWidth - clientX > offsetWidth ? 'left' : 'right'
   const topOrBottom = window.innerHeight - clientY > offsetHeight ? 'top' : 'bottom'
   const offsetLeft = Math.abs(clientWidth - clientX)
   curMenu!.style[leftOrRight] = leftOrRight === 'left' ? `${clientX + 20}px` : `${offsetLeft}px`
   curMenu!.style[topOrBottom] = topOrBottom === 'bottom' ? '2px' : `${clientY}px`
-
   const instance = {
     id,
     destroy: () => {

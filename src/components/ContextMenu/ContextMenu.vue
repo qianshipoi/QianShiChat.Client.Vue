@@ -38,13 +38,12 @@ const clickFunc = (action: MenuAction) => {
 .context-menu {
   position: fixed;
   border-radius: 6px;
-  border: 1px solid rgba(222, 222, 222, 0.5);
   background-color: #ffffff;
   font-size: 14px;
   font-weight: 500;
   user-select: none;
   z-index: 1000;
-  box-shadow: 0 0 6px rgba(0, 0, 0, .1);
+  box-shadow: var(--el-box-shadow);
 
   &:focus {
     outline: none;

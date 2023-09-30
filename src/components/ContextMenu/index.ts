@@ -8,7 +8,7 @@ type Cur = {
 
 let curInstance: Cur | null = null
 let seed = 1
-const contextMenu = (e: MouseEvent, actions: MenuAction[], onClick: (action: MenuAction) => void) => {
+const contextMenu = (e: MouseEvent, actions: MenuAction[], onClick: (action: MenuAction) => void, bottomCenter: boolean = false) => {
   curInstance && curInstance.destroy()
   curInstance = null;
   let id = seed++
@@ -25,24 +25,23 @@ const contextMenu = (e: MouseEvent, actions: MenuAction[], onClick: (action: Men
   }
 
   const vnode = h(ContextMenu, props)
-
   render(vnode, container)
-
   appendTo.appendChild(container.firstElementChild!);
-
-  const curMenu = vnode.el as HTMLElement
-
+  const curMenu = (vnode.el as HTMLElement)!
   const { offsetWidth, offsetHeight } = curMenu
-
   const { clientWidth } = appendTo
-
   const { clientX, clientY } = e
 
-  const leftOrRight = clientWidth - clientX > offsetWidth ? 'left' : 'right'
-  const topOrBottom = window.innerHeight - clientY > offsetHeight ? 'top' : 'bottom'
-  const offsetLeft = Math.abs(clientWidth - clientX)
-  curMenu!.style[leftOrRight] = leftOrRight === 'left' ? `${clientX + 20}px` : `${offsetLeft}px`
-  curMenu!.style[topOrBottom] = topOrBottom === 'bottom' ? '2px' : `${clientY}px`
+  if (bottomCenter) {
+    curMenu.style.left = `${clientX - offsetWidth / 2}px`
+    curMenu.style.top = `${clientY + 10}px`
+  } else {
+    const leftOrRight = clientWidth - clientX > offsetWidth ? 'left' : 'right'
+    const topOrBottom = window.innerHeight - clientY > offsetHeight ? 'top' : 'bottom'
+    const offsetLeft = Math.abs(clientWidth - clientX)
+    curMenu.style[leftOrRight] = leftOrRight === 'left' ? `${clientX + 20}px` : `${offsetLeft}px`
+    curMenu.style[topOrBottom] = topOrBottom === 'bottom' ? '2px' : `${clientY}px`
+  }
 
   const instance = {
     id,
