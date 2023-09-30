@@ -72,7 +72,5 @@ const clickFunc = (action: MenuAction) => {
       }
     }
   }
-
-
 }
 </style>

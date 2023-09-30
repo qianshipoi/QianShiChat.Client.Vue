@@ -7,13 +7,12 @@
         <el-aside style="width: auto; background-color: var(--nav-bar-bg-color);">
           <div
             style="display: flex; height: 100%; flex-direction: column; align-items: center; justify-content: space-between;">
-            <div>
+            <div @click="showCurrentUserProfile">
               <el-image style="width: 40px;height: 40px;margin: 20px 0; border-radius: 50%;"
                 :src="userStore.userInfo?.avatar" fit="cover" :lazy="true"></el-image>
               <nav-menu></nav-menu>
             </div>
             <el-space alignment="stretch" direction="vertical" style="width: 100%; outline: none;">
-
               <el-tooltip :content="t('nav.logout')" placement="right">
                 <button @click="userStore.logout">
                   <el-icon>
@@ -21,7 +20,6 @@
                   </el-icon>
                 </button>
               </el-tooltip>
-
               <el-tooltip :content="isCollapse ? t('nav.expand') : t('nav.close')" placement="right">
                 <button @click="isCollapse = !isCollapse"><el-icon>
                     <Switch />
@@ -52,6 +50,7 @@ import { useI18n } from 'vue-i18n';
 import { useFriendStore } from '../store/useFriendStore';
 import { SwitchButton, Switch } from '@element-plus/icons-vue'
 import { useGroupStore } from '../store/useGroupStore';
+import { showUserProfile } from '../components/Profile';
 
 const { t } = useI18n()
 
@@ -64,6 +63,11 @@ const friendStore = useFriendStore();
 friendStore.loadData();
 const groupStore = useGroupStore();
 groupStore.loadData();
+
+const showCurrentUserProfile = (e: MouseEvent) => {
+  showUserProfile(e, userStore.userInfo);
+}
+
 </script>
 
 <style scoped>

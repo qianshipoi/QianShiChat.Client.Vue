@@ -68,6 +68,7 @@ declare module 'vue' {
     UploadFileList: typeof import('./components/UploadFileList/UploadFileList.vue')['default']
     UserBase: typeof import('./components/UserBase.vue')['default']
     UserItem: typeof import('./components/UserItem.vue')['default']
+    UserProfile: typeof import('./components/Profile/UserProfile.vue')['default']
     VideoMessage: typeof import('./components/ChatMessage/VideoMessage.vue')['default']
   }
   export interface ComponentCustomProperties {
