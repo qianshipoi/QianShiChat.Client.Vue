@@ -1,72 +1,87 @@
 <template>
   <div class="room">
-    <header>
-      <div class="left">
-        <span>{{ room.name }}</span>
-        <span v-if="!isGroup">
-          [{{ (room.toObject as UserInfo).isOnline ? t('status.online') : t('status.offline')
-          }}]
-        </span>
-      </div>
-      <div class="menu">
-        <el-icon>
-          <MoreFilled />
-        </el-icon>
-      </div>
-    </header>
-    <div style="flex: 1; overflow: hidden;">
-      <DropFilePanel @drop="fileDropHandle" :close-rect="closeRect">
-        <div class="content">
-          <div class="message-content" style="position: relative;">
-            <el-scrollbar @scroll="messageListScrollHandle" ref="messageListBox">
-              <div ref="messageBox">
-                <div v-for="message in messages" :key="message.id" style="margin-bottom: 8px;">
-                  <ChatMessage :model-value="message" :is-self="isSelf(message.fromId)" />
-                </div>
-              </div>
-            </el-scrollbar>
-            <button v-if="!isActive" class="goto-bottom" @click="messageBoxScrollDown()">
-              <el-icon>
-                <ArrowDownBold />
-              </el-icon>
-            </button>
-            <UploadFileList ref="uploadFileList" class="upload-file-list" @completed="sendAttachment"
-              :files="waitUploadFiles" />
-          </div>
+    <div style="overflow: hidden; height: 100%; padding: 1rem;">
+      <DropFilePanel style="" @drop="fileDropHandle" :close-rect="closeRect">
+        <div class="message-box">
 
-          <div class="message-input-box">
-            <AudioRecorder class="message-input-audio" v-if="showAudioRecorder" @back="showAudioRecorder = false"
-              @completed="audioRecordCompletedHandle" />
-            <div v-else class="message-input-text">
-              <input type="text" v-model="messageContent" ref="messageInputRef" placeholder="Write your message...">
-              <div class="actions">
-                <el-popover ref="iconPopover" placement="top" :width="200" trigger="click">
-                  <template #reference>
-                    <button class="icon">
-                      <Icon icon="fluent:emoji-16-filled" />
-                    </button>
-                  </template>
-                  <EmojiPanel @selected="iconSelectedHandle" />
-                </el-popover>
-                <button class="icon" @click="showAudioRecorder = true">
-                  <Icon icon="typcn:microphone" />
-                </button>
-                <button class="icon send" :disabled="!messageContent" @click="send">
-                  <Icon icon="mingcute:send-fill" />
-                </button>
+          <header>
+            <div class="left">
+              <span>{{ room.name }}</span>
+              <span v-if="!isGroup">
+                [{{ (room.toObject as UserInfo).isOnline ? t('status.online') : t('status.offline')
+                }}]
+              </span>
+            </div>
+          </header>
+
+          <div class="content">
+            <div class="message-content" style="position: relative;">
+              <el-scrollbar @scroll="messageListScrollHandle" ref="messageListBox">
+                <div ref="messageBox" style="margin-top: 68px;">
+                  <div v-for="message in messages" :key="message.id" style="margin-bottom: 8px;">
+                    <ChatMessage :model-value="message" :is-self="isSelf(message.fromId)" />
+                  </div>
+                </div>
+              </el-scrollbar>
+              <button v-if="!isActive" class="goto-bottom" @click="messageBoxScrollDown()">
+                <el-icon>
+                  <ArrowDownBold />
+                </el-icon>
+              </button>
+              <UploadFileList ref="uploadFileList" class="upload-file-list" @completed="sendAttachment"
+                :files="waitUploadFiles" />
+            </div>
+            <div class="message-input-box">
+              <AudioRecorder class="message-input-audio" v-if="showAudioRecorder" @back="showAudioRecorder = false"
+                @completed="audioRecordCompletedHandle" />
+              <div v-else class="message-input-text">
+                <input type="text" v-model="messageContent" ref="messageInputRef" placeholder="Write your message...">
+                <div class="actions">
+                  <el-popover ref="iconPopover" placement="top" :width="200" trigger="click">
+                    <template #reference>
+                      <button class="icon">
+                        <Icon icon="fluent:emoji-16-filled" />
+                      </button>
+                    </template>
+                    <EmojiPanel @selected="iconSelectedHandle" />
+                  </el-popover>
+                  <button class="icon" @click="showAudioRecorder = true">
+                    <Icon icon="typcn:microphone" />
+                  </button>
+                  <button class="icon" @click="() => addAttachmentHandle()">
+                    <Icon icon="ri:attachment-2" />
+                  </button>
+                  <button class="icon send" :disabled="!messageContent" @click="send">
+                    <Icon icon="mingcute:send-fill" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </DropFilePanel>
     </div>
+
+    <div class="profile" :style="{ width: profileWidth }">
+      <button @click="expandProfile = true" v-if="!expandProfile">
+        <Icon icon="icon-park-solid:expand-left"></Icon>
+      </button>
+      <button @click="expandProfile = false" v-else>
+        <Icon icon="icon-park-solid:expand-right"></Icon>
+      </button>
+      <img class="avatar" :src="room.avatar" alt="user avatar">
+      <div v-if="expandProfile" class="name animate__animated animate__slideInUp">
+        {{ room.name }}
+      </div>
+
+    </div>
   </div>
 </template>
 
 <script setup lang='ts'>
 import { Icon } from '@iconify/vue';
-import { MoreFilled, ArrowDownBold } from '@element-plus/icons-vue';
-import { useElementBounding, useElementSize, useThrottleFn, watchPausable, watchThrottled } from '@vueuse/core';
+import { ArrowDownBold } from '@element-plus/icons-vue';
+import { useElementBounding, useElementSize, useFileDialog, useThrottleFn, watchPausable, watchThrottled } from '@vueuse/core';
 import { useChatMessage } from './useChatMessage';
 import ChatMessage from '../../components/ChatMessage/index.vue';
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
@@ -93,6 +108,9 @@ const messageContent = ref<string>("")
 const messageListBox = ref<InstanceType<typeof ElScrollbar> | null>(null)
 const messageBox = ref<HTMLDivElement | null>(null)
 const { height: messageBoxHeight } = useElementSize(messageBox)
+
+const expandProfile = ref(false)
+const profileWidth = computed(() => expandProfile.value ? '240px' : '60px')
 
 const {
   loadData,
@@ -162,6 +180,23 @@ const fileDropHandle = async (files: File[] | null) => {
   })
 }
 
+const { open: addAttachmentHandle, onChange } = useFileDialog({
+  accept: '*',
+  multiple: true,
+  reset: true
+})
+
+onChange(files => {
+  if (!files) {
+    return;
+  }
+  const f: File[] = []
+  for (const file of files) {
+    f.push(file)
+  }
+  fileDropHandle(f);
+})
+
 const uploadFileList = ref<HTMLElement>()
 
 const { bottom, left, width } = useElementBounding(uploadFileList)
@@ -211,49 +246,98 @@ const messageInputBoxHeight = computed(() => showAudioRecorder.value ? '140px' :
 <style lang="scss" scoped>
 .room {
   --border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  background-color: #EDF0F5;
+  display: grid;
+  grid-template-columns: 1fr auto;
   height: 100%;
 }
 
-header {
+.message-box {
+  position: relative;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 4px 18px;
-  height: 68px;
-  border-bottom: 1px solid var(--room-border-color);
+  flex-direction: column;
+  height: 100%;
+  background-color: #EDF0F5;
+  border-radius: var(--border-radius);
+  overflow: hidden;
 
-  .left {
+  header {
+    position: absolute;
+    width: 100%;
     display: flex;
+    justify-content: space-between;
     align-items: center;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    overflow: hidden;
+    padding: 4px 18px;
+    height: 68px;
+    z-index: 2;
+
+    backdrop-filter: blur(30px);
+    background-color: rgba(255, 255, 255, 0.088);
+    border: 1px solid rgba(255, 255, 255, 0.089);
+
+    .left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+
+  header .el-icon {
+    cursor: pointer;
+    font-size: 26px;
+    padding: 4px;
+  }
+
+  header .el-icon:hover {
+    color: var(--primary);
+  }
+
+  .content {
+    display: grid;
+    grid-template-rows: 1fr auto;
     gap: 8px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .message-content {
+    position: relative;
+    overflow: hidden;
   }
 }
 
-header .el-icon {
-  cursor: pointer;
-  font-size: 26px;
-  padding: 4px;
-}
-
-header .el-icon:hover {
-  color: var(--primary);
-}
-
-.content {
-  display: grid;
-  grid-template-rows: 1fr auto;
-  gap: 8px;
+.profile {
+  padding: 1rem 1rem 1rem 0;
+  width: 60px;
   height: 100%;
-  overflow: hidden;
+  transition: width .3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+
+  &>button {
+    padding: 0.5rem;
+    border-radius: 4px;
+  }
+
+  &>.avatar {
+    width: 100%;
+    max-width: 120px;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  &>.name {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+  }
 }
 
-.message-content {
-  position: relative;
-  overflow: hidden;
-}
 
 .upload-file-list {
   position: absolute;

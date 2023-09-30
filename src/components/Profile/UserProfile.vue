@@ -55,7 +55,7 @@ const sendMessage = () => {
 }
 </script>
 
-<style  lang="scss">
+<style lang="scss" scoped>
 .profile {
   position: fixed;
   width: 300px;

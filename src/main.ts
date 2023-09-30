@@ -10,6 +10,7 @@ import './assets/css/style.css'
 import './assets/css/global.scss'
 import './assets/css/theme.light.css'
 import './assets/css/theme.dark.css'
+import 'animate.css';
 
 const app = createApp(App)
 app.use(router)

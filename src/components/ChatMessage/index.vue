@@ -1,7 +1,7 @@
 <template>
   <div class="chat-message" :style="{ flexDirection: props.isSelf ? 'row-reverse' : 'row' }">
     <div class="avatar" @click="displayProfile">
-      <el-image :src="message?.fromUser?.avatar" fit="cover" :lazy="true"></el-image>
+      <el-image :src="message?.fromUser?.avatar" fit="cover" :lazy="true" alt="user avatar"></el-image>
     </div>
     <div style="display: flex; align-items: end; gap: 8px;"
       :style="{ flexDirection: props.isSelf ? 'row-reverse' : 'row' }">
@@ -60,19 +60,24 @@ const displayProfile = (e: MouseEvent) => {
 
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .chat-message {
   display: flex;
   gap: 20px;
   padding: 4px 16px;
 }
 
-.avatar {
+:deep(.avatar) {
   width: 32px;
   height: 32px;
   border-radius: 50%;
   overflow: hidden;
   cursor: pointer;
+
+  & img {
+    user-select: none;
+    -webkit-user-drag: none;
+  }
 }
 
 .content {

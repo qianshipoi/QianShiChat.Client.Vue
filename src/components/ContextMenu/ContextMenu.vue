@@ -34,7 +34,7 @@ const clickFunc = (action: MenuAction) => {
 
 </script>
 
-<style >
+<style scoped>
 .context-menu {
   position: fixed;
   border-radius: 6px;

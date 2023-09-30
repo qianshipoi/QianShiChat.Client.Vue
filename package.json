@@ -16,6 +16,7 @@
     "@microsoft/signalr": "^7.0.10",
     "@vueuse/components": "^10.3.0",
     "@vueuse/core": "^10.3.0",
+    "animate.css": "^4.1.1",
     "axios": "^1.4.0",
     "dayjs": "^1.11.9",
     "dexie": "^3.2.4",

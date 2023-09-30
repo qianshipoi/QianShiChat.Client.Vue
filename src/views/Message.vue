@@ -87,7 +87,6 @@ const moreActionHandle = (e: MouseEvent) => {
 .content {
   flex: 1;
   height: 100%;
-  background-color: var(--room-bg-color);
 }
 
 

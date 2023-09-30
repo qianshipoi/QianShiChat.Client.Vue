@@ -13,6 +13,7 @@
 import { useDropZone, useElementBounding, useEventListener } from '@vueuse/core';
 import { Vue3Lottie } from 'vue3-lottie';
 import uploadJSON from '../../assets/json/upload.json'
+import { CSSProperties } from 'vue';
 
 export type Rectangle = {
   x: number;
@@ -21,9 +22,12 @@ export type Rectangle = {
   height: number;
 }
 
-const props = defineProps<{
-  closeRect?: Rectangle
-}>()
+export type DropFilePanelProps = {
+  closeRect?: Rectangle;
+  style?: CSSProperties;
+}
+
+const props = defineProps<DropFilePanelProps>()
 
 const dropPanel = ref<HTMLDivElement>()
 
