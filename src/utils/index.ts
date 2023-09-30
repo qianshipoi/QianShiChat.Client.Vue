@@ -22,6 +22,7 @@ function pow1024(num: number): number {
 export const downloadFile = (url: string, filename?: string): void => {
   const a = document.createElement('a');
   a.href = url;
+  a.target = "_blank";
   a.download = filename ?? "true";
   a.style.display = "none";
 

@@ -1,30 +1,35 @@
 <template>
-  <el-popover ref="popover" placement="top" :width="200" trigger="contextmenu">
-    <template #reference>
-      <div class="file-message">
-        <span class="name">{{ content.name }}</span>
-        <div class="icon">
-          {{ fileExt }}
-        </div>
-        <span class="description">{{ filterSize(content.size) }}</span>
-      </div>
-    </template>
-    <ul class="menu-actions">
-      <li @click="download">下载</li>
-      <li>转发</li>
-    </ul>
-  </el-popover>
+  <div class="file-message" @click.right.native="showContextMenu">
+    <span class="name">{{ content.name }}</span>
+    <div class="icon">
+      {{ fileExt }}
+    </div>
+    <span class="description">{{ filterSize(content.size) }}</span>
+  </div>
 </template>
 
 <script setup lang='ts'>
 import { downloadFile, filterSize, getFileExt } from '../../utils/index'
 import { Attachment } from '../../types/Types';
-import { PopoverInstance } from 'element-plus'
+import contextMenu from '../ContextMenu';
+import { MenuAction } from '../ContextMenu/ContextMenu.vue';
 const props = defineProps<{
   content: Attachment
 }>()
 
-const popover = ref<PopoverInstance | null>()
+const showContextMenu = (e: MouseEvent) => {
+  e.preventDefault()
+  contextMenu(e,
+    [
+      { label: '下载', value: 'download' },
+      { label: '转发', value: 'share' }
+    ],
+    (action: MenuAction) => {
+      if (action.value === 'download') {
+        download()
+      }
+    })
+}
 
 const fileExt = computed(() => {
   let ext = getFileExt(props.content.rawPath)
@@ -39,7 +44,6 @@ const fileExt = computed(() => {
 })
 
 const download = () => {
-  popover.value?.hide();
   const rawPath = toRaw(props.content).rawPath;
   downloadFile(rawPath);
 }

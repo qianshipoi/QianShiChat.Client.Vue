@@ -7,9 +7,10 @@
         <el-aside style="width: auto; background-color: var(--nav-bar-bg-color);">
           <div
             style="display: flex; height: 100%; flex-direction: column; align-items: center; justify-content: space-between;">
-            <div @click="showCurrentUserProfile">
-              <el-image style="width: 40px;height: 40px;margin: 20px 0; border-radius: 50%;"
-                :src="userStore.userInfo?.avatar" fit="cover" :lazy="true"></el-image>
+            <div>
+              <el-image @click="showCurrentUserProfile"
+                style="width: 40px;height: 40px;margin: 20px 0; border-radius: 50%;" :src="userStore.userInfo?.avatar"
+                fit="cover" :lazy="true"></el-image>
               <nav-menu></nav-menu>
             </div>
             <el-space alignment="stretch" direction="vertical" style="width: 100%; outline: none;">

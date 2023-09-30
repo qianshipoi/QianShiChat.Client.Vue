@@ -1,4 +1,4 @@
-import ContextMenu from "./ContextMenu.vue";
+import ContextMenu, { ContextMenuProps, MenuAction } from "./ContextMenu.vue";
 import { h, render } from 'vue'
 
 type Cur = {
@@ -8,15 +8,17 @@ type Cur = {
 
 let curInstance: Cur | null = null
 let seed = 1
-const contextMenu = (e: MouseEvent, data: any) => {
+const contextMenu = (e: MouseEvent, actions: MenuAction[], onClick: (action: MenuAction) => void) => {
   curInstance && curInstance.destroy()
   curInstance = null;
   let id = seed++
   const container = document.createElement('div')
   const appendTo = document.body;
 
-  const props = {
-    data,
+  const props: ContextMenuProps = {
+    actions,
+    visible: true,
+    onClick,
     onClose: () => {
       curInstance && curInstance.destroy()
     }

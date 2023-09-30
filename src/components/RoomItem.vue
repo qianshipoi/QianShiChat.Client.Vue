@@ -1,5 +1,5 @@
 <template>
-  <div :class="['room-item', isSelected ? 'selected' : '']" @click="$emit('selected', room)"
+  <div :class="['room-item', isSelected ? 'selected' : '']" @click="$emit('selected', room!)"
     @click.right.native="showContextMenu">
     <div class="avatar">
       <el-image style="width: 100%;height: 100%;" :src="room?.avatar" fit="cover"></el-image>
@@ -26,7 +26,7 @@ import { MenuAction } from './ContextMenu/ContextMenu.vue';
 defineProps<{
   isSelected?: boolean
 }>()
-const room = defineModel<Room | undefined>()
+const room = defineModel<Room>()
 const emits = defineEmits<{
   (event: "selected", val: Room): void
   (event: "delete", val: Room): void
@@ -34,14 +34,15 @@ const emits = defineEmits<{
 
 const showContextMenu = (e: MouseEvent) => {
   e.preventDefault()
-  contextMenu(e, {
-    name: '111',
-    onClick: (action: MenuAction) => {
+  contextMenu(e,
+    [
+      { label: '删除', value: 'delete' }
+    ],
+    (action: MenuAction) => {
       if (action.value === 'delete') {
         emits('delete', room.value!)
       }
-    }
-  })
+    })
 }
 
 const content = computed(() => {

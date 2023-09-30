@@ -1,5 +1,5 @@
 <template>
-  <div class="context-menu" ref="contextMenu" v-if="showData.name" tabindex="-1" @blur="onClose">
+  <div class="context-menu" ref="contextMenu" v-if="visible" tabindex="-1" @blur="onClose">
     <ul class="actions">
       <li v-for="action in actions" @click="clickFunc(action)" :key="action.value">{{ action.label }}</li>
     </ul>
@@ -7,28 +7,19 @@
 </template>
 
 <script setup lang='ts'>
-const props = defineProps<{
-  data?: any;
-  onClose: () => void;
-}>();
-
 export type MenuAction = {
   label: string;
-  value: string
+  value: string;
 }
 
-const actions: MenuAction[] = [
-  { label: '删除', value: 'delete' }
-]
+export type ContextMenuProps = {
+  visible: boolean;
+  actions: MenuAction[];
+  onClick: (action: MenuAction) => void;
+  onClose: () => void;
+}
 
-const showData = computed(() => {
-  let data: any = {},
-    pd = props.data
-  if (pd) {
-    data.name = pd.name
-  }
-  return data;
-})
+const props = defineProps<ContextMenuProps>();
 
 const contextMenu = ref<HTMLDivElement>()
 onMounted(async () => {
@@ -37,7 +28,7 @@ onMounted(async () => {
 })
 
 const clickFunc = (action: MenuAction) => {
-  props.data.onClick(action)
+  props.onClick(action)
   props.onClose();
 }
 
@@ -52,6 +43,8 @@ const clickFunc = (action: MenuAction) => {
   font-size: 14px;
   font-weight: 500;
   user-select: none;
+  z-index: 1000;
+  box-shadow: 0 0 6px rgba(0, 0, 0, .1);
 
   &:focus {
     outline: none;
@@ -62,7 +55,7 @@ const clickFunc = (action: MenuAction) => {
 
     &>li {
       border-radius: 4px;
-      padding: 4px 8px;
+      padding: 4px 2rem;
       cursor: pointer;
       transition: all .3s ease;
 
