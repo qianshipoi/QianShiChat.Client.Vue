@@ -1,6 +1,6 @@
 // from 'https://codepen.io/jheung/pen/jxgbLr'
 <template>
-  <div class="search-box">
+  <div :style="style" class="search-box">
     <input class="search-box__input" type="text" v-model="value" @keydown="$emit('keydown', $event)"
       oninput="this.setAttribute('value',this.value)">
     <i></i>
@@ -8,10 +8,16 @@
 </template>
 
 <script setup lang='ts'>
+import { CSSProperties } from 'vue';
+
 defineEmits<{
   (e: 'keydown', event: KeyboardEvent): void
 }>()
 const value = defineModel<string>()
+
+defineProps<{
+  style?: CSSProperties
+}>()
 
 </script>
 
@@ -40,6 +46,7 @@ $animation-bounce: cubic-bezier(0.4, -1, 0.6, 2);
 
 .search-box {
   position: relative;
+  height: 3rem;
 
   &__input {
     width: 100%;
@@ -49,7 +56,7 @@ $animation-bounce: cubic-bezier(0.4, -1, 0.6, 2);
     color: $input-text-color;
     border: 0;
     border-radius: 0.4em;
-    padding: 0.25em 0.8em;
+    padding: 0.25em 1.2rem;
     font-size: 1em;
     box-shadow: 0 0 0.75em 0.25em rgba($input-bg-color, 0.2);
     transition: box-shadow 0.5s ease;
@@ -64,12 +71,12 @@ $animation-bounce: cubic-bezier(0.4, -1, 0.6, 2);
     // Display Search Icon
     +i {
       position: absolute;
-      width: 0.125em;
+      width: 0.25em;
       height: 70%;
       border-radius: 0.2em;
       background-color: $input-text-color;
 
-      left: 0.8em;
+      left: 1.4rem;
       top: 50%;
       transform: rotateZ(-45deg) translateY(-50%);
       transform-origin: top;
@@ -80,9 +87,9 @@ $animation-bounce: cubic-bezier(0.4, -1, 0.6, 2);
         display: block;
         position: relative;
         top: 0em;
-        left: -0.3em;
-        width: 0.5em;
-        height: 0.5em;
+        left: -0.5em;
+        width: 1rem;
+        height: 1rem;
         border-radius: 100%;
         border: 0.125em solid $input-text-color;
         background-color: $input-bg-color;

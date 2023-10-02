@@ -1,6 +1,5 @@
 import { defineStore } from "pinia";
 import { ChatMessage, ChatMessageSendType, NotificationMessage, NotificationType, Room, UserInfo } from "../types/Types";
-import { useSessionStorage } from "@vueuse/core";
 import { useChatStore } from "./useChatStore";
 import { useCurrentUserStore } from "./useCurrentUserStore";
 import { useUserStore } from "./useUserStore";
