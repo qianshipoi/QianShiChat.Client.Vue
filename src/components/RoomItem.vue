@@ -30,17 +30,21 @@ const room = defineModel<Room>()
 const emits = defineEmits<{
   (event: "selected", val: Room): void
   (event: "delete", val: Room): void
+  (event: "read", val: Room): void
 }>()
 
 const showContextMenu = (e: MouseEvent) => {
   e.preventDefault()
   contextMenu(e,
     [
-      { label: '删除', value: 'delete' }
+      { label: '删除', value: 'delete' },
+      { label: '标记已读', value: 'read' }
     ],
     (action: MenuAction) => {
       if (action.value === 'delete') {
         emits('delete', room.value!)
+      } else if (action.value === 'read') {
+        emits('read', room.value!)
       }
     })
 }
@@ -55,7 +59,7 @@ const content = computed(() => {
 
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .room-item {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -63,18 +67,20 @@ const content = computed(() => {
   align-items: center;
   height: 70px;
   gap: 10px;
+  border-radius: 10px;
   overflow: hidden;
   transition: all .3s ease;
+
+  &:hover {
+    background-color: var(--item-hover-color);
+  }
+
+  &.selected {
+    background-color: var(--item-active-color);
+    color: white;
+  }
 }
 
-.room-item:hover {
-  background-color: var(--item-hover-color);
-}
-
-.room-item.selected {
-  background-color: var(--item-active-color);
-  color: white;
-}
 
 .room-item.selected .message,
 .room-item.selected .time {

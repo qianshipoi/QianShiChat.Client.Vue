@@ -1,13 +1,13 @@
 <template>
   <div class="main">
     <el-alert v-if="!chatStore.isReady" style="position: absolute; top:0" type="error" effect="dark" :closable="false"
-      title="连接中断" show-icon />
+      title="connection error" show-icon />
     <el-container class="container">
       <el-container>
         <el-aside style="width: auto; background-color: var(--nav-bar-bg-color);">
           <div
             style="display: flex; height: 100%; flex-direction: column; align-items: center; justify-content: space-between;">
-            <div>
+            <div style="display: flex; align-items: center; flex-direction: column;">
               <el-image @click="showCurrentUserProfile"
                 style="width: 40px;height: 40px;margin: 20px 0; border-radius: 50%;" :src="userStore.userInfo?.avatar"
                 fit="cover" :lazy="true"></el-image>

@@ -6,6 +6,7 @@ import { useI18n } from "vue-i18n";
 import { ElNotification, NotificationHandle } from "element-plus";
 import ApplyNotification from "../components/Notification/ApplyNotification.vue";
 import { create, del, getAll, join, leave, getMembers, getGroup as getGroupApi } from "../api/group";
+import { useGroupDb } from "./db/useGroupDb";
 
 interface ApplyNotificationHandle {
   apply: GroupApply;
@@ -16,11 +17,11 @@ interface ApplyNotificationHandle {
 export const useGroupStore = defineStore("group", () => {
   const groups = reactive<Group[]>([])
   const loading = ref<boolean>(false)
-  const groupsCache: Group[] = []
 
   const chatStore = useChatStore();
   const settingsStore = useSettingsStore()
   const { t } = useI18n()
+  const groupDb = useGroupDb()
 
   const applyNotice: ApplyNotificationHandle[] = []
 
@@ -166,23 +167,26 @@ export const useGroupStore = defineStore("group", () => {
     }
   }
 
-  const getGroup = async (groupId: number) => {
+  const getGroup = async (groupId: number): Promise<Group> => {
     let group = groups.find(x => x.id === groupId)
     if (group) return group;
-    group = groupsCache.find(x => x.id === groupId)
+
+    group = await groupDb.get(groupId);
     if (group) return group;
 
     loading.value = true;
     try {
       const { succeeded, data, errors } = await getGroupApi(groupId)
       if (!succeeded) throw new Error(errors as string)
-      data && groupsCache.push(data)
-      return data;
+      groupDb.addOrUpdate(data!)
+      return data!;
     } catch (error: any) {
       ElNotification.error(error)
     } finally {
       loading.value = false;
     }
+
+    return Promise.reject()
   }
 
   return {

@@ -12,8 +12,8 @@
         </button>
       </div>
       <ul>
-        <li v-for="room in rooms" :key="room.id">
-          <RoomItem @delete="roomStore.removeRoom" :model-value="(room as RoomType)"
+        <li style="padding: 0 10px;" v-for="room in rooms" :key="room.id">
+          <RoomItem @delete="roomStore.deleteRoom" :model-value="(room as RoomType)"
             @selected="roomStore.openRoom(room.id)" :is-selected="roomStore.isOpend(room.id)" />
         </li>
       </ul>

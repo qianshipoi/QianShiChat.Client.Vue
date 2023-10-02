@@ -6,16 +6,18 @@ import { useCurrentUserStore } from "./useCurrentUserStore";
 import { useUserStore } from "./useUserStore";
 import emitter from "../utils/mitt";
 import { useGroupStore } from "./useGroupStore";
+import { useRoomDb } from "./db/useRoomDb";
 
 export const useRoomStore = defineStore("room_store", () => {
-  const rooms = useSessionStorage<Room[]>("rooms", [])
+  const rooms = ref<Room[]>([])
 
-  const opendRoom = ref<Room | null>(null)
+  const opendRoom = ref<Room>()
 
   const currentUserStore = useCurrentUserStore()
   const userStore = useUserStore();
   const chatStore = useChatStore();
   const groupStore = useGroupStore();
+  const roomDb = useRoomDb()
 
   function moveRoomTop(room: Room) {
     const index = rooms.value.findIndex(s => s.id === room.id);
@@ -37,6 +39,7 @@ export const useRoomStore = defineStore("room_store", () => {
       oldRoom.name = room.name
       rooms.value.unshift(oldRoom);
     }
+    roomDb.addOrUpdate(room)
   }
 
   const newMessage = async (message: ChatMessage) => {
@@ -80,7 +83,6 @@ export const useRoomStore = defineStore("room_store", () => {
 
   chatStore.onPrivateChat(message => newMessage(message));
   chatStore.onGroupChat(message => newMessage(message));
-
   chatStore.onNotification((notification: NotificationMessage) => {
     if (notification.type === NotificationType.FriendOffline || notification.type === NotificationType.FriendOnline) {
       const userId = notification.message as number;
@@ -96,15 +98,30 @@ export const useRoomStore = defineStore("room_store", () => {
     moveRoomTop(room);
   }
 
-  const removeRoom = (room: Room) => {
-    const index = rooms.value.findIndex(s => s.id === room.id);
-    if (index !== -1) {
-      rooms.value.splice(index, 1);
-    }
-  }
-
   watch(() => chatStore.isReady, (isReady: boolean) => {
-    if (isReady) {
+    if (isReady) loadRooms()
+  })
+
+  const loadRooms = async () => {
+    if (currentUserStore.isAuthenticated) {
+      const dbRooms = await roomDb.getAll()
+      rooms.value = dbRooms ?? []
+      for (const room of rooms.value) {
+        if (room.type === ChatMessageSendType.Personal) {
+          const user = await userStore.getUser(room.toId)
+          room.fromUser = currentUserStore.userInfo
+          room.toObject = user
+          room.avatar = user.avatar
+          room.name = user.nickName ?? user.account
+        } else {
+          const group = await groupStore.getGroup(room.toId)
+          room.fromUser = currentUserStore.userInfo
+          room.toObject = group
+          room.avatar = group!.avatar
+          room.name = group!.name
+        }
+      }
+
       chatStore.subscribeRooms({
         next: async (item) => {
           const user = await userStore.getUser(item.toId)
@@ -116,7 +133,7 @@ export const useRoomStore = defineStore("room_store", () => {
         }
       })
     }
-  })
+  }
 
   const clearUnreadCount = (roomId: string) => {
     const room = rooms.value.find(x => x.id === roomId)
@@ -140,21 +157,21 @@ export const useRoomStore = defineStore("room_store", () => {
       index = rooms.value.findIndex(x => x.id === room.id);
     }
     if (index != -1) {
+      roomDb.del(rooms.value[index].id)
       rooms.value.splice(index, 1);
     }
   }
 
   return {
     rooms: readonly(rooms),
-    addRoom,
-    removeRoom,
-    clearUnreadCount,
-    getRoom,
-    deleteRoom,
     opendRoom: readonly(opendRoom),
     isOpendRoom: computed(() => !!opendRoom.value),
     opendRoomRaw: opendRoom,
     isOpend: computed(() => (roomId: string) => (!!opendRoom.value && opendRoom.value.id === roomId)),
-    openRoom
+    openRoom,
+    addRoom,
+    clearUnreadCount,
+    getRoom,
+    deleteRoom,
   }
 })

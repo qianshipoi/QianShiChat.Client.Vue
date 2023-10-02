@@ -1,3 +1,7 @@
+import { ApplyStatus, ChatMessageSendType, ChatMessageStatus, ChatMessageType, NotificationType, TransmissionStatus } from "./Enums"
+
+export * from "./Enums"
+
 export type GlobalResult<T> = {
   statusCode: number
   data?: T
@@ -22,25 +26,6 @@ export type Avatar = {
   createTime: number
 }
 
-export enum ChatMessageSendType {
-  Personal = 1,
-  Group
-}
-
-
-export enum ChatMessageType {
-  Text = 1,
-  Image = 2,
-  Video = 3,
-  Audio = 4,
-  OtherFile = 127
-}
-
-export enum ChatMessageStatus {
-  Sending,
-  Succeeded,
-  Failed
-}
 
 export interface ChatMessage {
   id: number;
@@ -56,48 +41,6 @@ export interface ChatMessage {
   attachments: Attachment[];
 }
 
-export enum NotificationType {
-  /// <summary>
-  /// 好友上线
-  /// </summary>
-  FriendOnline,
-  /// <summary>
-  /// 好友下线
-  /// </summary>
-  FriendOffline,
-  /// <summary>
-  /// 好友申请
-  /// </summary>
-  FriendApply,
-  /// <summary>
-  /// 新好友
-  /// </summary>
-  NewFriend,
-  /// <summary>
-  /// 进群申请
-  /// </summary>
-  GroupApply,
-  /// <summary>
-  /// 新群
-  /// </summary>
-  NewGroup,
-  /**
-   * 强制注销
-   */
-  Signed,
-  /// <summary>
-  /// 询问在线文件传输
-  /// </summary>
-  OnlineTransmissionConfirm,
-  /// <summary>
-  /// 确认在线传呼文件
-  /// </summary>
-  OnlineTransmissionPassed,
-  /// <summary>
-  /// 取消在线传呼文件
-  /// </summary>
-  OnlineTransmissionCancel,
-}
 
 export interface NotificationMessage {
   type: NotificationType;
@@ -113,13 +56,6 @@ export interface FileOnlineTransmission {
   ClientType?: string
 }
 
-export enum TransmissionStatus {
-  Confirm,
-  Passed,
-  Reject,
-  Cancel,
-  Transmitting,
-}
 
 export interface FileBaseInfo {
   name: string;
@@ -134,13 +70,6 @@ export interface UserInfo {
   avatar: string;
   createTime: number;
   isOnline?: boolean | undefined;
-}
-
-export enum ApplyStatus {
-  Applied = 1,
-  Passed,
-  Rejected,
-  Ignored
 }
 
 export interface FriendApply {

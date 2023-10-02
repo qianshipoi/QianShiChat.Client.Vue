@@ -15,7 +15,6 @@ interface ApplyNotificationHandle {
 
 export const useFriendStore = defineStore("friend", () => {
   const friends = reactive<UserInfo[]>([])
-
   const chatStore = useChatStore();
   const settingsStore = useSettingsStore()
   const { t } = useI18n()
@@ -97,9 +96,14 @@ export const useFriendStore = defineStore("friend", () => {
     return friends.some(friend => friend.id === id);
   }
 
+  const getFriendById = (id: number): UserInfo | undefined => {
+    return friends.find(x => x.id === id)
+  }
+
   return {
     friends: readonly(friends),
     isFriend,
     loadData,
+    getFriendById
   }
 })

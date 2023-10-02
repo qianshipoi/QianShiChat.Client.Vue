@@ -1,20 +1,28 @@
 import { defineStore } from "pinia";
 import { UserInfo } from "../types/Types";
 import { getUserById } from "../api/user";
+import { useUserDb } from "./db/useUserDb";
+import { useFriendStore } from "./useFriendStore";
 
 export const useUserStore = defineStore("user", () => {
-  const users = reactive<UserInfo[]>([]);
   const loading = ref<boolean>(false)
+  const friendStore = useFriendStore()
+  const userDb = useUserDb()
 
   const getUser = async (id: number): Promise<UserInfo> => {
-    let user = users.find(x => x.id === id);
+    let user = friendStore.getFriendById(id);
     if (user) return user;
 
+    // from db cache
+    user = await userDb.getById(id)
+    if (user) return user
+
+    // from api
     try {
       loading.value = true
       const { succeeded, data } = await getUserById(id);
       if (succeeded) {
-        users.push(data!)
+        await userDb.addOrUpdate(data!)
         return data!
       }
     } catch (err) {

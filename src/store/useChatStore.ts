@@ -5,6 +5,7 @@ import { Action, ElMessageBox, ElNotification } from "element-plus";
 import { HubConnectionBuilder, LogLevel, Subject } from "@microsoft/signalr";
 import { useI18n } from "vue-i18n";
 import { base64ToFile, fileToBase64 } from "../utils";
+import { ChatDatabase } from "../utils/db";
 
 type SubscribeCallback<T> = {
   next: (item: T) => void,
@@ -141,9 +142,11 @@ export const useChatStore = defineStore("chat", () => {
   const userIsOnline = async (id: number) => {
     return await connection.invoke<boolean>("UserIsOnline", id);
   }
+  const chatDatabase = shallowRef<ChatDatabase>()
 
   const start = async () => {
     await connection.start();
+    chatDatabase.value = new ChatDatabase(currentUserStore.userInfo?.id ?? 0);
     isReady.value = true;
   }
 
@@ -174,6 +177,7 @@ export const useChatStore = defineStore("chat", () => {
 
   return {
     isReady: readonly(isReady),
+    chatDatabase,
     start,
     close,
     onPrivateChat,
