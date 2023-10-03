@@ -1,5 +1,5 @@
 <template>
-  <div class="user-profile">
+  <div class="user-profile" v-if="value">
     <div class="base-info">
       <el-image :src="value.avatar" fit="cover" style="width: 100px; height: 100px; border-radius: 50%;" />
       <div class="info">
@@ -26,26 +26,35 @@ import { ChatMessageSendType, UserInfo } from '../../types/Types';
 import { Message } from '@element-plus/icons-vue'
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '../../store/useUserStore';
+import { useRoute } from 'vue-router';
 
-const props = defineProps<{
-  value: UserInfo
-}>()
+// const props = defineProps<{
+//   value: UserInfo
+// }>()
 
 const chatStore = useChatStore()
 const roomsStore = useRoomStore()
 const currentUserStore = useCurrentUserStore()
+const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
+const value = ref<UserInfo | null>(null)
+
+  ; (async () => {
+    value.value = await userStore.getUser(Number.parseInt(route.params.id as string))
+  })()
 
 const sendMessage = async () => {
-  const room = await chatStore.getRoom(props.value.id, ChatMessageSendType.Personal)
+  const room = await chatStore.getRoom(value.value!.id, ChatMessageSendType.Personal)
   if (!room) {
     ElNotification.error('get room error.')
     return
   }
-  room.toObject = props.value;
+  room.toObject = value.value!;
   room.fromUser = currentUserStore.userInfo
-  room.name = props.value.nickName ?? ""
-  room.avatar = props.value.avatar
+  room.name = value.value!.nickName ?? ""
+  room.avatar = value.value!.avatar
   roomsStore.addRoom(room);
   roomsStore.openRoom(room.id);
 

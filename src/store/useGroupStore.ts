@@ -1,17 +1,19 @@
 import { defineStore } from "pinia";
-import { Group, GroupApply, NotificationMessage, NotificationType, UserInfo } from "../types/Types";
+import { ApplyStatus, Group, GroupApply, NotificationMessage, NotificationType, UserInfo } from "../types/Types";
 import { useChatStore } from "./useChatStore";
 import { useSettingsStore } from "./useSettingsStore";
 import { useI18n } from "vue-i18n";
 import { ElNotification, NotificationHandle } from "element-plus";
 import ApplyNotification from "../components/Notification/ApplyNotification.vue";
-import { create, del, getAll, join, leave, getMembers, getGroup as getGroupApi } from "../api/group";
+import { create, del, getAll, join, leave, getMembers, getGroup as getGroupApi, approval as approvalApi } from "../api/group";
 import { useGroupDb } from "./db/useGroupDb";
+import { VNode } from "vue";
+import { useRouter } from "vue-router";
 
 interface ApplyNotificationHandle {
   apply: GroupApply;
   handle: NotificationHandle;
-  timer: number;
+  instance: VNode;
 }
 
 export const useGroupStore = defineStore("group", () => {
@@ -20,7 +22,7 @@ export const useGroupStore = defineStore("group", () => {
 
   const chatStore = useChatStore();
   const settingsStore = useSettingsStore()
-  const { t } = useI18n()
+  const router = useRouter()
   const groupDb = useGroupDb()
 
   const applyNotice: ApplyNotificationHandle[] = []
@@ -34,49 +36,77 @@ export const useGroupStore = defineStore("group", () => {
     if (notification.type === NotificationType.GroupApply) {
       const apply = reactive(notification.message as GroupApply);
       const cache = applyNotice.find(x => x.apply.id === apply.id)
-
       if (cache) {
         cache.apply.remark = apply.remark;
-        cache.timer && clearTimeout(cache.timer)
-        cache.timer = setTimeout(() => {
-          cache.handle.close()
-        }, settingsStore.notifceDuration);
-      } else {
-        const handle = ElNotification({
-          title: "加群申请",
-          duration: 0,
-          message: h(ApplyNotification, {
-            apply,
-            applyType: "group",
-            onSuccess: () => {
-              console.log(t('actions.pass'));
-              handle.close();
-            },
-            onReject: () => {
-              console.log(t('actions.reject'));
-            },
-            onDetail: () => {
-              console.log(t('actions.detail'));
-            },
-          }),
-          onClose: () => {
-            removeApplyNotice(handle);
-          }
-        })
-        const timer = setTimeout(() => {
-          handle.close()
-        }, settingsStore.notifceDuration)
-        applyNotice.push({
-          timer,
-          apply,
-          handle
-        })
+        cache.instance.component?.exposed?.reset();
+        return;
       }
-
+      const instance = h(ApplyNotification, {
+        apply,
+        duration: settingsStore.notifceDuration,
+        applyType: "group",
+        onSuccess: () => {
+          approval(apply, 'pass')
+          handle.close();
+        },
+        onReject: () => {
+          approval(apply, 'reject')
+          handle.close();
+        },
+        onDetail: () => {
+          router.push({ name: "GroupApply" })
+          handle.close()
+        },
+        onClose: () => {
+          handle.close()
+        }
+      });
+      const handle = ElNotification({
+        title: "加群申请",
+        duration: 0,
+        message: instance,
+        onClose: () => {
+          removeApplyNotice(handle);
+        }
+      })
+      applyNotice.push({
+        instance,
+        apply,
+        handle
+      })
     } else if (notification.type === NotificationType.NewGroup) {
       // add group.
     }
   });
+
+  const approval = async (apply: GroupApply, status: 'pass' | 'reject' | 'ignore') => {
+    loading.value = true;
+    try {
+      const { succeeded, errors } = await approvalApi(
+        apply.id,
+        status
+      )
+      if (succeeded) {
+        switch (status) {
+          case 'pass':
+            apply.status = ApplyStatus.Passed;
+            break;
+          case 'reject':
+            apply.status = ApplyStatus.Rejected;
+            break;
+          case 'ignore':
+            apply.status = ApplyStatus.Ignored;
+            break;
+        }
+      } else {
+        ElNotification.error(errors as string);
+      }
+    } catch (error) {
+      ElNotification.error(error as string);
+    } finally {
+      loading.value = false
+    }
+  }
 
   const loadData = async () => {
     const result = await getAll()
@@ -199,6 +229,7 @@ export const useGroupStore = defineStore("group", () => {
     deleteGroup,
     joinGroupApply,
     loadMembers,
-    getGroup
+    getGroup,
+    approval
   }
 })

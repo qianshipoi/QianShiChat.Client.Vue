@@ -27,14 +27,15 @@
           <span class="action-text" v-if="apply.status === ApplyStatus.Ignored">经忽略</span>
           <span class="action-text" v-else-if="apply.status === ApplyStatus.Rejected">已拒绝</span>
           <span class="action-text" v-else-if="apply.status === ApplyStatus.Passed">已同意</span>
-          <el-dropdown v-else split-button size="small" type="default" @click="approvalHandle(apply, ApplyStatus.Passed)">
+          <el-dropdown v-loading="storeLoading" v-else split-button size="small" type="default"
+            @click="friendStore.approval(apply, ApplyStatus.Passed)">
             {{ t('actions.pass') }}
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item
-                  @click="approvalHandle(apply, ApplyStatus.Ignored)">{{ t('actions.ignore') }}</el-dropdown-item>
+                  @click="friendStore.approval(apply, ApplyStatus.Ignored)">{{ t('actions.ignore') }}</el-dropdown-item>
                 <el-dropdown-item
-                  @click="approvalHandle(apply, ApplyStatus.Rejected)">{{ t('actions.reject') }}</el-dropdown-item>
+                  @click="friendStore.approval(apply, ApplyStatus.Rejected)">{{ t('actions.reject') }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -48,17 +49,20 @@
 import { useI18n } from 'vue-i18n';
 import { ApplyStatus, FriendApply } from '../../types/Types';
 import { Filter, Delete } from '@element-plus/icons-vue'
-import { getFriendApplies, approval } from '../../api/friend'
+import { getFriendApplies } from '../../api/friend'
 import { ElNotification } from 'element-plus';
 import { timeFormat } from '../../utils/timeUtils';
+import { useFriendStore } from '../../store/useFriendStore';
+import { storeToRefs } from 'pinia';
 
 const applies = reactive<FriendApply[]>([])
-
 const { t } = useI18n()
 const loading = ref<boolean>(false)
 let lastTime = 0;
+const friendStore = useFriendStore()
+const { loading: storeLoading } = storeToRefs(friendStore);
 
-const loadData = async () => {
+(async () => {
   loading.value = true;
   try {
     const result = await getFriendApplies(10, lastTime)
@@ -71,25 +75,7 @@ const loadData = async () => {
   } finally {
     loading.value = false
   }
-}
-
-const approvalHandle = async (apply: FriendApply, type: ApplyStatus) => {
-  loading.value = true;
-  try {
-    const { succeeded, errors } = await approval(apply.id, type)
-    if (succeeded) {
-      apply.status = type
-    } else {
-      ElNotification.error(errors as string);
-    }
-  } catch (error) {
-    ElNotification.error(error as string);
-  } finally {
-    loading.value = false
-  }
-}
-
-loadData();
+})()
 
 </script>
 

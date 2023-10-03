@@ -27,12 +27,15 @@
           <span class="action-text" v-if="apply.status === ApplyStatus.Ignored">已忽略</span>
           <span class="action-text" v-else-if="apply.status === ApplyStatus.Rejected">已拒绝</span>
           <span class="action-text" v-else-if="apply.status === ApplyStatus.Passed">已同意</span>
-          <el-dropdown v-else split-button size="small" type="default" @click="approvalHandle(apply, 'pass')">
+          <el-dropdown v-loading="storeLoading" v-else split-button size="small" type="default"
+            @click="groupStore.approval(apply, 'pass')">
             {{ t('actions.pass') }}
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="approvalHandle(apply, 'ignore')">{{ t('actions.ignore') }}</el-dropdown-item>
-                <el-dropdown-item @click="approvalHandle(apply, 'reject')">{{ t('actions.reject') }}</el-dropdown-item>
+                <el-dropdown-item
+                  @click="groupStore.approval(apply, 'ignore')">{{ t('actions.ignore') }}</el-dropdown-item>
+                <el-dropdown-item
+                  @click="groupStore.approval(apply, 'reject')">{{ t('actions.reject') }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -46,15 +49,20 @@
 import { useI18n } from 'vue-i18n';
 import { ApplyStatus, GroupApply } from '../../types/Types';
 import { Filter, Delete } from '@element-plus/icons-vue'
-import { pending, approval } from '../../api/group'
+import { pending } from '../../api/group'
 import { ElNotification } from 'element-plus';
 import { timeFormat } from '../../utils/timeUtils';
+import { useGroupStore } from '../../store/useGroupStore';
+import { storeToRefs } from 'pinia';
 
 const applies = reactive<GroupApply[]>([])
 
 const { t } = useI18n()
 const loading = ref<boolean>(false)
 let lastTime = 0;
+const groupStore = useGroupStore();
+
+const { loading: storeLoading } = storeToRefs(groupStore)
 
 const loadData = async () => {
   loading.value = true;
@@ -75,35 +83,6 @@ const loadData = async () => {
 }
 
 loadData();
-
-const approvalHandle = async (apply: GroupApply, status: 'pass' | 'reject' | 'ignore') => {
-  loading.value = true;
-  try {
-    const { succeeded, errors } = await approval(
-      apply.id,
-      status
-    )
-    if (succeeded) {
-      switch (status) {
-        case 'pass':
-          apply.status = ApplyStatus.Passed;
-          break;
-        case 'reject':
-          apply.status = ApplyStatus.Rejected;
-          break;
-        case 'ignore':
-          apply.status = ApplyStatus.Ignored;
-          break;
-      }
-    } else {
-      ElNotification.error(errors as string);
-    }
-  } catch (error) {
-    ElNotification.error(error as string);
-  } finally {
-    loading.value = false
-  }
-}
 
 </script>
 

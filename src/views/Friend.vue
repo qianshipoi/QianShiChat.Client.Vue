@@ -25,7 +25,8 @@
           </el-icon>
         </li>
       </ul>
-      <QsTabs default-active-key="2">
+
+      <QsTabs default-active-key="1">
         <QsTabPanel key="1" label="好友">
           <ul>
             <li v-for="friend in friends" :key="friend.id">
@@ -44,7 +45,11 @@
       </QsTabs>
     </div>
     <div class="content">
-      <component v-if="opendComponent" v-bind="componentProps" :is="opendComponent" />
+      <RouterView v-slot="{ Component }">
+        <KeepAlive>
+          <component :is="Component" :key="$route.fullPath" />
+        </KeepAlive>
+      </RouterView>
     </div>
   </div>
 </template>
@@ -55,37 +60,33 @@ import { useFriendStore } from '../store/useFriendStore';
 import { storeToRefs } from 'pinia';
 import { Group, UserInfo } from '../types/Types';
 import { useGroupStore } from '../store/useGroupStore';
-
-const UserProfile = defineAsyncComponent(() => import('./friend/UserProfile.vue'))
-const GroupProfile = defineAsyncComponent(() => import('./friend/GroupProfile.vue'))
-const FriendApply = defineAsyncComponent(() => import('./friend/FriendApply.vue'))
-const GroupApply = defineAsyncComponent(() => import('./friend/GroupApply.vue'))
+import { useRouter } from 'vue-router';
 
 const searchText = ref<string>('')
-const opendComponent = shallowRef<any>(null)
 const currentSelected = ref<UserInfo | Group>()
-const componentProps = ref<any>(null)
 const friendStore = useFriendStore()
 const { friends } = storeToRefs(friendStore)
 const groupStore = useGroupStore()
+const router = useRouter()
 
 const isSelected = computed(() => (item: UserInfo | Group) => currentSelected.value === item)
 
 const selectedHandle = (item: UserInfo | Group, isUser: boolean = true) => {
   currentSelected.value = item
-  opendComponent.value = isUser ? UserProfile : GroupProfile;
-  componentProps.value = { value: item }
+  if (isUser) {
+    router.push({ name: "FriendProfile", params: { id: item.id } })
+  } else {
+    router.push({ name: "GroupProfile", params: { id: item.id } })
+  }
 }
 
 const openFriendApply = () => {
-  opendComponent.value = FriendApply;
-  componentProps.value = null;
+  router.push({ name: "FriendApply" })
   currentSelected.value = undefined;
 }
 
 const openGroupApply = () => {
-  opendComponent.value = GroupApply;
-  componentProps.value = null;
+  router.push({ name: "GroupApply" })
   currentSelected.value = undefined;
 }
 

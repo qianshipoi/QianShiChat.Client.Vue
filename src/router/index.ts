@@ -23,7 +23,28 @@ const routes: RouteRecordRaw[] = [
       {
         name: "Friend",
         path: "/friend",
-        component: () => import("../views/Friend.vue")
+        component: () => import("../views/Friend.vue"),
+        children: [
+          {
+            name: "FriendApply",
+            path: "/friend/new-friends",
+            component: () => import("../views/friend/FriendApply.vue"),
+          },
+          {
+            name: "GroupApply",
+            path: "/friend/new-groups",
+            component: () => import("../views/friend/GroupApply.vue"),
+          },
+          {
+            name: "FriendProfile",
+            path: "/friend/friends/:id",
+            component: () => import("../views/friend/UserProfile.vue"),
+          }, {
+            name: "GroupProfile",
+            path: "/friend/groups/:id",
+            component: () => import("../views/friend/GroupProfile.vue"),
+          }
+        ]
       },
       {
         name: "Settings",

@@ -1,5 +1,5 @@
 <template>
-  <div class="group-profile">
+  <div class="group-profile" v-if="value">
     <div class="base-info">
       <el-image :src="value.avatar" fit="cover"
         style="width: 100px;height: 100px;border-radius: 50%;overflow: hidden;"></el-image>
@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang='ts'>
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useChatStore } from '../../store/useChatStore';
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
 import { useRoomStore } from '../../store/useRoomStore';
@@ -35,33 +35,34 @@ import { ChatMessageSendType, Group } from '../../types/Types';
 import { Message } from '@element-plus/icons-vue'
 import { useGroupStore } from '../../store/useGroupStore';
 
-const props = defineProps<{
-  value: Group
-}>()
-
 const chatStore = useChatStore()
 const roomsStore = useRoomStore()
 const currentUserStore = useCurrentUserStore()
+const route = useRoute()
 const router = useRouter()
 const groupStore = useGroupStore();
 
+const value = ref<Group | null>(null)
+  ; (async () => {
+    value.value = await groupStore.getGroup(Number.parseInt(route.params.id as string))
+  })();
 
-watch(() => props.value, (newVal: Group | null) => {
+watch(() => value.value, (newVal: Group | null) => {
   if (newVal && (!newVal.users || newVal.users.length === 0)) {
     groupStore.loadMembers(newVal.id)
   }
 })
 
 const sendMessage = async () => {
-  const room = await chatStore.getRoom(props.value.id, ChatMessageSendType.Group)
+  const room = await chatStore.getRoom(value.value!.id, ChatMessageSendType.Group)
   if (!room) {
     ElNotification.error('get room error.')
     return
   }
-  room.toObject = props.value;
+  room.toObject = value.value!;
   room.fromUser = currentUserStore.userInfo
-  room.name = props.value.name ?? ""
-  room.avatar = props.value.avatar
+  room.name = value.value!.name ?? ""
+  room.avatar = value.value!.avatar
   roomsStore.addRoom(room);
   roomsStore.openRoom(room.id);
 

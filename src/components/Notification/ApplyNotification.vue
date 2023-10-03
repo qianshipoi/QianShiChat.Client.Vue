@@ -15,17 +15,78 @@
 <script setup lang='ts'>
 import { FriendApply, GroupApply } from '../../types/Types'
 import i18n from '../../lang/index'
+import { useCurrentElement, useElementHover } from '@vueuse/core';
 
-defineProps<{
+const props = withDefaults(defineProps<{
   apply: FriendApply | GroupApply,
-  applyType: "friend" | "group"
-}>();
+  applyType: "friend" | "group",
+  duration?: number
+}>(), {
+  duration: 5000
+});
 
 const emits = defineEmits<{
-  (e: 'success'): void,
-  (e: 'reject'): void,
-  (e: 'detail'): void
+  (e: 'success'): void;
+  (e: 'reject'): void;
+  (e: 'detail'): void;
+  (e: 'close'): void;
 }>()
+
+const currentElement = useCurrentElement<HTMLDivElement>()
+
+let timer: number | null = null
+
+let startTime: number = 0;
+let duration = props.duration;
+
+onMounted(() => {
+  start();
+})
+
+const close = () => {
+  emits('close')
+}
+
+const start = () => {
+  if (duration <= 0) {
+    close()
+    return
+  }
+  startTime = Date.now()
+  timer = setTimeout(() => {
+    close()
+  }, duration);
+}
+
+const pause = () => {
+  if (timer) {
+    duration = duration - (Date.now() - startTime)
+    clearTimeout(timer)
+  }
+}
+
+const reset = () => {
+  duration = props.duration
+  timer && clearTimeout(timer)
+  start()
+}
+
+const isHover = useElementHover(currentElement)
+
+watch(() => isHover.value, (isHover) => {
+  isHover ? pause() : start()
+})
+
+onUnmounted(() => {
+  if (timer) {
+    clearTimeout(timer)
+  }
+})
+
+defineExpose({
+  reset,
+  close
+})
 
 </script>
 
@@ -44,7 +105,7 @@ const emits = defineEmits<{
   &>.apply-notification-content {
     display: flex;
     flex-direction: column;
-    align-items: start;
+    align-items: startTime;
     gap: 4px;
 
     .apply-notification-actions {
