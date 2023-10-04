@@ -3,11 +3,11 @@ import { ApplyStatus, FriendApply, NotificationMessage, NotificationType, UserIn
 import { getFriends, approval as approvalApi } from "../api/friend";
 import { useChatStore } from "./useChatStore";
 import { ElNotification, NotificationHandle } from "element-plus";
-import { useI18n } from "vue-i18n";
 import ApplyNotification from "../components/Notification/ApplyNotification.vue";
 import { useSettingsStore } from "./useSettingsStore";
 import { VNode } from "vue";
 import { useRouter } from "vue-router";
+import { useContactsStore } from "./useContactsStore";
 
 interface ApplyNotificationHandle {
   apply: FriendApply;
@@ -20,8 +20,8 @@ export const useFriendStore = defineStore("friend", () => {
   const chatStore = useChatStore();
   const settingsStore = useSettingsStore()
   const router = useRouter()
-  const { t } = useI18n()
   const loading = ref(false)
+  const contactsStore = useContactsStore()
 
   const applyNotice: ApplyNotificationHandle[] = []
 
@@ -65,7 +65,8 @@ export const useFriendStore = defineStore("friend", () => {
           handle.close();
         },
         onDetail: () => {
-          router.push({ name: "FriendApply" })
+          router.push({ name: "Friend" })
+          contactsStore.openFriendApply()
           handle.close()
         },
         onClose: () => {

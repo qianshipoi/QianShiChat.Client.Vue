@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang='ts'>
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { useChatStore } from '../../store/useChatStore';
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
 import { useRoomStore } from '../../store/useRoomStore';
@@ -35,17 +35,19 @@ import { ChatMessageSendType, Group } from '../../types/Types';
 import { Message } from '@element-plus/icons-vue'
 import { useGroupStore } from '../../store/useGroupStore';
 
+export type GroupProfileProps = {
+  group: Group
+}
+
+const props = defineProps<GroupProfileProps>()
+
 const chatStore = useChatStore()
 const roomsStore = useRoomStore()
 const currentUserStore = useCurrentUserStore()
-const route = useRoute()
 const router = useRouter()
 const groupStore = useGroupStore();
 
-const value = ref<Group | null>(null)
-  ; (async () => {
-    value.value = await groupStore.getGroup(Number.parseInt(route.params.id as string))
-  })();
+const value = ref<Group | null>(props.group)
 
 watch(() => value.value, (newVal: Group | null) => {
   if (newVal && (!newVal.users || newVal.users.length === 0)) {

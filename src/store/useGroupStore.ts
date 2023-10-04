@@ -2,13 +2,13 @@ import { defineStore } from "pinia";
 import { ApplyStatus, Group, GroupApply, NotificationMessage, NotificationType, UserInfo } from "../types/Types";
 import { useChatStore } from "./useChatStore";
 import { useSettingsStore } from "./useSettingsStore";
-import { useI18n } from "vue-i18n";
 import { ElNotification, NotificationHandle } from "element-plus";
 import ApplyNotification from "../components/Notification/ApplyNotification.vue";
 import { create, del, getAll, join, leave, getMembers, getGroup as getGroupApi, approval as approvalApi } from "../api/group";
 import { useGroupDb } from "./db/useGroupDb";
 import { VNode } from "vue";
 import { useRouter } from "vue-router";
+import { useContactsStore } from "./useContactsStore";
 
 interface ApplyNotificationHandle {
   apply: GroupApply;
@@ -24,6 +24,7 @@ export const useGroupStore = defineStore("group", () => {
   const settingsStore = useSettingsStore()
   const router = useRouter()
   const groupDb = useGroupDb()
+  const contactsStore = useContactsStore()
 
   const applyNotice: ApplyNotificationHandle[] = []
 
@@ -54,7 +55,8 @@ export const useGroupStore = defineStore("group", () => {
           handle.close();
         },
         onDetail: () => {
-          router.push({ name: "GroupApply" })
+          router.push({ name: "Friend" })
+          contactsStore.openGroupApply()
           handle.close()
         },
         onClose: () => {

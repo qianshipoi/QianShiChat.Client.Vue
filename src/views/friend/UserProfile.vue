@@ -26,24 +26,19 @@ import { ChatMessageSendType, UserInfo } from '../../types/Types';
 import { Message } from '@element-plus/icons-vue'
 import { useCurrentUserStore } from '../../store/useCurrentUserStore';
 import { useRouter } from 'vue-router';
-import { useUserStore } from '../../store/useUserStore';
-import { useRoute } from 'vue-router';
 
-// const props = defineProps<{
-//   value: UserInfo
-// }>()
+export type UserProfileProps = {
+  user: UserInfo
+}
+
+const props = defineProps<UserProfileProps>()
 
 const chatStore = useChatStore()
 const roomsStore = useRoomStore()
 const currentUserStore = useCurrentUserStore()
-const route = useRoute()
 const router = useRouter()
-const userStore = useUserStore()
-const value = ref<UserInfo | null>(null)
+const value = ref<UserInfo | null>(props.user)
 
-  ; (async () => {
-    value.value = await userStore.getUser(Number.parseInt(route.params.id as string))
-  })()
 
 const sendMessage = async () => {
   const room = await chatStore.getRoom(value.value!.id, ChatMessageSendType.Personal)
