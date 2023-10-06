@@ -5,7 +5,7 @@
         <comic-flip-card v-model="isRegister">
           <template #front>
             <div class="title">Log in</div>
-            <form class="flip-card__form" action="">
+            <form class="flip-card__form" @keydown.enter="loginHandle" action="">
               <comic-input v-model="baseInfo.account" name="email" placeholder="Email" type="email"></comic-input>
               <comic-input v-model="baseInfo.password" name="password" placeholder="Password"
                 type="password"></comic-input>
