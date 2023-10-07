@@ -12,10 +12,10 @@
       <span>状态</span>
       <span>{{ user?.isOnline ? 'online' : 'offline' }}</span>
       <span>备注</span>
-      <span v-if="isEdit">{{ diaplayName }}</span>
+      <span @click="editAlias" v-if="!isEdit">{{ diaplayName }}</span>
       <el-input v-else v-model="alias" @blur="aliasBlurHandle" placeholder="输入备注"></el-input>
       <span>签名</span>
-      <span>description</span>
+      <span>{{user.description}}</span>
     </div>
 
     <div class="actions">
@@ -29,11 +29,17 @@ import { computedAsync, onClickOutside, useCurrentElement } from '@vueuse/core';
 import { useFriendStore } from '../../store/useFriendStore';
 import { UserInfo } from '../../types/Types';
 import { setAlias } from '../../api/friend';
+import { useCurrentUserStore } from '../../store/useCurrentUserStore'
 
 export type UserProfileProps = {
   user?: UserInfo;
   onClose: () => void;
 }
+
+const props = defineProps<UserProfileProps>()
+const friendStore = useFriendStore()
+const currentUserStore = useCurrentUserStore()
+
 const isEdit = ref(false)
 const alias = ref('')
 
@@ -48,12 +54,14 @@ const aliasBlurHandle = async () => {
   }
 }
 
+const editAlias = () => {
+  if(props.user.id === currentUserStore.userInfo.id) return
+  isEdit.value = true
+}
+
 const diaplayName = computed(() => {
   return props.user?.alias || props.user?.nickName
 })
-
-const props = defineProps<UserProfileProps>()
-const friendStore = useFriendStore()
 
 const current = useCurrentElement<HTMLElement>();
 

@@ -1,5 +1,5 @@
 <template>
-  <input class="flip-card__input" v-model="value" :style="style" :name="name" :placeholder="placeholder" :type="type">
+  <input class="flip-card__input" :autofocus="autofocus" v-model="value" :style="style" :name="name" :placeholder="placeholder" :type="type">
 </template>
 
 <script setup lang='ts'>
@@ -10,6 +10,7 @@ interface Props {
   name?: string
   placeholder?: string
   type?: string
+  autofocus?: boolean
 }
 
 defineProps<Props>();
