@@ -55,6 +55,15 @@ interface BasePagedRequest {
 export function getMembers(groupId: number, query: BasePagedRequest): Promise<GlobalResult<PagedList<UserInfo>>> {
   return instance.get(`/group/${groupId}/members`, { params: query })
 }
+
 export function getGroup(groupId: number): Promise<GlobalResult<Group>> {
   return instance.get(`/group/${groupId}`)
+}
+
+export function setAlias(groupId: number, alias: string): Promise<any> {
+  return instance.put(`/group/${groupId}/alias`, { alias })
+}
+
+export function setName(groupId: number, name: string): Promise<any> {
+  return instance.put(`/group/${groupId}/name`, { name })
 }

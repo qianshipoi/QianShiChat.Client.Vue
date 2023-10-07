@@ -12,7 +12,8 @@
       <span>状态</span>
       <span>{{ user?.isOnline ? 'online' : 'offline' }}</span>
       <span>备注</span>
-      <span>{{ user?.nickName }}</span>
+      <span v-if="isEdit">{{ diaplayName }}</span>
+      <el-input v-else v-model="alias" @blur="aliasBlurHandle" placeholder="输入备注"></el-input>
       <span>签名</span>
       <span>description</span>
     </div>
@@ -27,11 +28,29 @@
 import { computedAsync, onClickOutside, useCurrentElement } from '@vueuse/core';
 import { useFriendStore } from '../../store/useFriendStore';
 import { UserInfo } from '../../types/Types';
+import { setAlias } from '../../api/friend';
 
 export type UserProfileProps = {
   user?: UserInfo;
   onClose: () => void;
 }
+const isEdit = ref(false)
+const alias = ref('')
+
+const aliasBlurHandle = async () => {
+  isEdit.value = false
+  if (props.user) {
+    const { succeeded } = await setAlias(props.user.id, alias.value)
+    if (succeeded) {
+      props.user.alias = alias.value
+    }
+    alias.value = ''
+  }
+}
+
+const diaplayName = computed(() => {
+  return props.user?.alias || props.user?.nickName
+})
 
 const props = defineProps<UserProfileProps>()
 const friendStore = useFriendStore()
@@ -95,9 +114,8 @@ const sendMessage = () => {
     gap: 0.5rem;
     margin-top: 1rem;
 
-    &>span {
+    &>* {
       display: flex;
-      gap: 0.5rem;
     }
   }
 

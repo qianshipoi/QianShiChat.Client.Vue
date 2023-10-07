@@ -70,6 +70,7 @@ export interface UserInfo {
   avatar: string;
   createTime: number;
   isOnline?: boolean | undefined;
+  alias?: string | undefined;
 }
 
 export interface FriendApply {

@@ -22,6 +22,10 @@ export function deleteApply(id: number): Promise<any> {
   return instance.delete(`/FriendApply/${id}`)
 }
 
-export function approval(id: number, status: ApplyStatus): Promise<any> {
+export function approval(id: number, status: ApplyStatus): Promise<GlobalResult<any>> {
   return instance.put(`/FriendApply/${id}/Approval/${status}`)
+}
+
+export function setAlias(id: number, alias: string): Promise<GlobalResult<any>> {
+  return instance.put(`/Friend/${id}/Alias`, { alias })
 }
