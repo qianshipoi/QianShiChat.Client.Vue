@@ -112,7 +112,7 @@ const onSubmit = async () => {
       return;
     }
 
-    const result = await userStore.login(baseInfo.account, baseInfo.password)
+    const result = await userStore.login({ account: baseInfo.account, password: baseInfo.password })
     if (!result) {
       return;
     }
