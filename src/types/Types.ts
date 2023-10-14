@@ -69,6 +69,7 @@ export interface UserInfo {
   nickName?: string | undefined;
   avatar: string;
   createTime: number;
+  description?: string;
   isOnline?: boolean | undefined;
   alias?: string | undefined;
 }

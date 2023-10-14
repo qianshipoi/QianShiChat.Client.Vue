@@ -15,7 +15,7 @@
       <span @click="editAlias" v-if="!isEdit">{{ diaplayName }}</span>
       <el-input v-else v-model="alias" @blur="aliasBlurHandle" placeholder="输入备注"></el-input>
       <span>签名</span>
-      <span>{{user.description}}</span>
+      <span>{{ user?.description }}</span>
     </div>
 
     <div class="actions">
@@ -55,7 +55,7 @@ const aliasBlurHandle = async () => {
 }
 
 const editAlias = () => {
-  if(props.user.id === currentUserStore.userInfo.id) return
+  if (props.user!.id === currentUserStore.userInfo.id) return
   isEdit.value = true
 }
 
