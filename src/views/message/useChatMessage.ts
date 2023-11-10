@@ -31,7 +31,7 @@ export const useChatMessage = () => {
   function fileTypeToMessageType(fileType: string): ChatMessageType {
     if (["image/png", "image/jpeg", "image/gif", "image/x-icon"].includes(fileType)) {
       return ChatMessageType.Image;
-    } else if (["video/mpeg4"].includes(fileType)) {
+    } else if (["video/mpeg4", "video/mp4"].includes(fileType)) {
       return ChatMessageType.Video;
     } else if (["audio/mpeg"].includes(fileType)) {
       return ChatMessageType.Audio;

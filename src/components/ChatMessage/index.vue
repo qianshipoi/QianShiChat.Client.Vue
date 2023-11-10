@@ -3,7 +3,7 @@
     <div class="avatar" @click="displayProfile">
       <el-image :src="message?.fromUser?.avatar" fit="cover" :lazy="true" alt="user avatar"></el-image>
     </div>
-    <div style="display: flex; align-items: end; gap: 8px;"
+    <div style="display: flex; align-items: end; gap: 8px; max-width: calc(100% - 48px * 2);"
       :style="{ flexDirection: props.isSelf ? 'row-reverse' : 'row' }">
       <div class="content">
         <component :is="content" :content="message?.content" />

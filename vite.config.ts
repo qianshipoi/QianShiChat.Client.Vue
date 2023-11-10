@@ -7,6 +7,7 @@ import IconsResolver from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 import path from 'path'
+import mkcert from 'vite-plugin-mkcert'
 
 
 const pathSrc = path.resolve(__dirname, 'src')
@@ -14,6 +15,7 @@ const pathSrc = path.resolve(__dirname, 'src')
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    mkcert(),
     vue({
       script: {
         defineModel: true
@@ -45,11 +47,10 @@ export default defineConfig({
     })
   ],
   server: {
-    https: false,
-    open: false,
+    https: true,
     port: 3000,
     hmr: true,
-    host: "127.0.0.1"
+    host: "0.0.0.0",
   },
   resolve: {
     alias: {
