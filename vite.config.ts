@@ -15,7 +15,6 @@ const pathSrc = path.resolve(__dirname, 'src')
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    mkcert(),
     vue({
       script: {
         defineModel: true
@@ -47,7 +46,7 @@ export default defineConfig({
     })
   ],
   server: {
-    https: true,
+    https: false,
     port: 3000,
     hmr: true,
     host: "0.0.0.0",
