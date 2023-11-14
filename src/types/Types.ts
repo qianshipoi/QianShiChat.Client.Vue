@@ -41,7 +41,6 @@ export interface ChatMessage {
   attachments: Attachment[];
 }
 
-
 export interface NotificationMessage {
   type: NotificationType;
   message: FriendApply | GroupApply | FileOnlineTransmission | string | number;
@@ -72,6 +71,20 @@ export interface UserInfo {
   description?: string;
   isOnline?: boolean | undefined;
   alias?: string | undefined;
+}
+
+export interface FriendInfo extends UserInfo {
+  friendGroupId: number;
+}
+
+export interface FriendGroup {
+  id: number;
+  name: string;
+  createTime: number;
+  isDefault: boolean;
+  sort: number;
+  friends: FriendInfo[];
+  totalCount: number;
 }
 
 export interface FriendApply {

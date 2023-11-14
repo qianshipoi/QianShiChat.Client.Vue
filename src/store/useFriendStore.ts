@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
-import { ApplyStatus, FriendApply, NotificationMessage, NotificationType, UserInfo } from "../types/Types";
-import { getFriends, approval as approvalApi } from "../api/friend";
+import { ApplyStatus, FriendApply, FriendGroup, FriendInfo, NotificationMessage, NotificationType, UserInfo } from "../types/Types";
+import { getFriends, approval as approvalApi, getFriendGroups } from "../api/friend";
 import { useChatStore } from "./useChatStore";
 import { ElNotification, NotificationHandle } from "element-plus";
 import ApplyNotification from "../components/Notification/ApplyNotification.vue";
@@ -16,7 +16,8 @@ interface ApplyNotificationHandle {
 }
 
 export const useFriendStore = defineStore("friend", () => {
-  const friends = reactive<UserInfo[]>([])
+  const friends = reactive<FriendInfo[]>([])
+  const friendGroups = reactive<FriendGroup[]>([])
   const chatStore = useChatStore();
   const settingsStore = useSettingsStore()
   const router = useRouter()
@@ -93,9 +94,32 @@ export const useFriendStore = defineStore("friend", () => {
   });
 
   const loadData = async () => {
-    const result = await getFriends()
-    if (!result.succeeded) return;
-    friends.push(...result.data!)
+    await Promise.all([getFriends(), getFriendGroups()]).then(([friendsResult, groupsResult]) => {
+      if (friendsResult.succeeded) {
+        friends.splice(0, friends.length, ...friendsResult.data!);
+      }
+
+      if (groupsResult.succeeded) {
+        friendGroups.splice(0, friendGroups.length, ...groupsResult.data!);
+        if (friendGroups.length === 0) {
+          friendGroups.push({
+            id: 0,
+            name: "默认分组",
+            createTime: 0,
+            isDefault: true,
+            sort: 0,
+            friends: [],
+            totalCount: 0
+          })
+        }
+        friends.forEach(friend => {
+          const group = friendGroups.find(x => x.id === friend.friendGroupId);
+          if (group) {
+            group.friends.push(friend);
+          }
+        });
+      }
+    });
   }
 
   const isFriend = (id: number): boolean => {
