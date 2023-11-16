@@ -30,6 +30,7 @@
     "recorder-core": "^1.2.23070100",
     "tus-js-client": "^3.1.1",
     "vue": "^3.3.4",
+    "vue-draggable-plus": "^0.2.6",
     "vue-i18n": "9",
     "vue-router": "^4.2.4",
     "vue3-lottie": "^3.1.0"

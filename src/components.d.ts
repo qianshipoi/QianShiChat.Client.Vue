@@ -41,6 +41,7 @@ declare module 'vue' {
     EmojiPanel: typeof import('./components/Emoji/EmojiPanel.vue')['default']
     FileListMessage: typeof import('./components/ChatMessage/FileListMessage.vue')['default']
     FileMessage: typeof import('./components/ChatMessage/FileMessage.vue')['default']
+    FriendGroupManager: typeof import('./components/FriendGroupManager.vue')['default']
     GroupBase: typeof import('./components/GroupBase.vue')['default']
     GroupItem: typeof import('./components/GroupItem.vue')['default']
     ImageMessage: typeof import('./components/ChatMessage/ImageMessage.vue')['default']

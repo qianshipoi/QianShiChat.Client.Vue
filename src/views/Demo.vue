@@ -14,9 +14,8 @@
       <ChatMessage v-model="otherFileMessage" is-self />
       <AddFriendSearch :model-value="false"></AddFriendSearch>
       <button @click="showFriendApplyNotification">show apply notification</button> -->
-
-      <Menu></Menu>
-
+      <!-- <Menu></Menu> -->
+      <FriendGroupManager />
       <UploadFileControl ref="uploadFileControlRef" v-if="showUploadFileControl" :file="dropFile!"
         style="position: absolute; bottom: 20px; width: calc(100% - 40px); left: 20px; right: 20px;"
         @cancel="cancelUploadHandle" @completed="uploadCompletedHandle" />

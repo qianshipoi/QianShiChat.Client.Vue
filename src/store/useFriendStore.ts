@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ApplyStatus, FriendApply, FriendGroup, FriendInfo, NotificationMessage, NotificationType, UserInfo } from "../types/Types";
-import { getFriends, approval as approvalApi, getFriendGroups } from "../api/friend";
+import { getFriends, approval as approvalApi, getFriendGroups, addGroup as addGroupApi, removeGroup as removeGroupApi, renameGroup as renameGroupApi, sortGroup as sortGroupApi, moveFriendToGroup as moveFriendToGroupApi } from "../api/friend";
 import { useChatStore } from "./useChatStore";
 import { ElNotification, NotificationHandle } from "element-plus";
 import ApplyNotification from "../components/Notification/ApplyNotification.vue";
@@ -146,12 +146,97 @@ export const useFriendStore = defineStore("friend", () => {
     }
   }
 
+  async function loadingData<TResult>(func: () => Promise<TResult>) {
+    loading.value = true
+    try {
+      return await func();
+    } catch (error) {
+      ElNotification.error(error as string);
+      return false;
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const addGroup = async (name: string) => {
+    return loadingData<boolean>(async () => {
+      var response = await addGroupApi(name);
+      if (response.succeeded) {
+        friendGroups.push(response.data!)
+        return true;
+      }
+      return false;
+    })
+  }
+
+  const removeGroup = async (id: number) => {
+    return loadingData<boolean>(async () => {
+      var response = await removeGroupApi(id);
+      if (response.succeeded) {
+        const index = friendGroups.findIndex(x => x.id === id);
+        friendGroups.splice(index, 1);
+        return true;
+      }
+      return false;
+    })
+  }
+
+  const renameGroup = async (id: number, name: string) => {
+    return loadingData<boolean>(async () => {
+      var response = await renameGroupApi(id, name);
+      if (response.succeeded) {
+        const group = friendGroups.find(x => x.id === id);
+        if (group) group.name = name;
+        return true;
+      }
+      return false;
+    })
+  }
+
+  const sortGroup = async (groupIds: number[]) => {
+    return loadingData<boolean>(async () => {
+      var response = await sortGroupApi(groupIds);
+      if (response.succeeded) {
+        return true;
+      }
+      return false;
+    })
+  }
+
+  const moveFriendToGroup = async (friendId: number, groupId: number) => {
+    return loadingData<boolean>(async () => {
+      var response = await moveFriendToGroupApi(friendId, groupId);
+      if (response.succeeded) {
+        const friend = friends.find(x => x.id === friendId);
+        if (friend) {
+          const oldGroup = friendGroups.find(x => x.id === friend.friendGroupId);
+          if (oldGroup) {
+            const index = oldGroup.friends.findIndex(x => x.id === friendId);
+            oldGroup.friends.splice(index, 1);
+          }
+          friend.friendGroupId = groupId;
+          const group = friendGroups.find(x => x.id === groupId);
+          if (group) {
+            group.friends.push(friend);
+          }
+        }
+        return true;
+      }
+      return false;
+    })
+  }
+
   return {
     friends: readonly(friends),
     loading: readonly(loading),
     isFriend,
     loadData,
     getFriendById,
-    approval
+    approval,
+    addGroup,
+    removeGroup,
+    renameGroup,
+    sortGroup,
+    moveFriendToGroup
   }
 })
