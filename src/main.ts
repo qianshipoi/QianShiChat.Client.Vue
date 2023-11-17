@@ -11,9 +11,14 @@ import './assets/css/global.scss'
 import './assets/css/theme.light.css'
 import './assets/css/theme.dark.css'
 import 'animate.css';
+import VueLazyload from 'vue-lazyload'
 
 const app = createApp(App)
 app.use(router)
 app.use(store)
 app.use(i18n)
+app.use(VueLazyload, {
+  preLoad: 1.3,
+  attempt: 1
+})
 app.mount('#app')

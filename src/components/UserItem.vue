@@ -1,7 +1,7 @@
 <template>
   <div :class="['user-item', isSelected ? 'selected' : '']" @click="emits('selected', user!)">
     <div class="avatar">
-      <el-image style="width: 100%;height: 100%;" :src="user?.avatar" fit="cover" :lazy="true"></el-image>
+      <img v-lazy="user?.avatar" :alt="user?.nickName">
     </div>
     <div class="content">
       <div class="up">
@@ -58,6 +58,14 @@ const user = defineModel<UserInfo>()
   width: 40px;
   border-radius: 50%;
   overflow: hidden;
+
+  &>img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
 }
 
 .content {
@@ -98,3 +106,4 @@ const user = defineModel<UserInfo>()
   white-space: nowrap;
 }
 </style>
+

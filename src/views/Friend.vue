@@ -28,12 +28,25 @@
 
       <QsTabs default-active-key="1">
         <QsTabPanel key="1" label="好友">
-          <ul>
-            <li v-for="friend in friends" :key="friend.id">
-              <UserItem :model-value="friend" @selected="contactsStore.openUserProfile(friend)"
-                :is-selected="contactsStore.selected === friend" />
-            </li>
-          </ul>
+          <button>管理分组</button>
+          <el-collapse :accordion="false">
+            <el-collapse-item v-for="group in friendStore.friendGroups" :key="group.id" style="overflow: auto;"
+              :name="group.id">
+              <template #title>
+                <div style="padding-left: 10px; display: flex; justify-content: space-between; align-items: center;">
+                  <span>{{ group.name }}</span>
+                  <span>&nbsp;({{ group.friends.length }})</span>
+                </div>
+              </template>
+              <ul>
+                <li v-for="friend in group.friends" :key="friend.id">
+                  <UserItem :model-value="friend" @selected="contactsStore.openUserProfile(friend)"
+                    :is-selected="contactsStore.selected === friend" />
+                </li>
+              </ul>
+            </el-collapse-item>
+          </el-collapse>
+
         </QsTabPanel>
         <QsTabPanel key="2" label="群组">
           <ul>
@@ -55,14 +68,12 @@
 <script setup lang='ts'>
 import { Plus, ArrowRight } from '@element-plus/icons-vue'
 import { useFriendStore } from '../store/useFriendStore';
-import { storeToRefs } from 'pinia';
 import { Group } from '../types/Types';
 import { useGroupStore } from '../store/useGroupStore';
 import { useContactsStore } from '../store/useContactsStore';
 
 const searchText = ref<string>('')
 const friendStore = useFriendStore()
-const { friends } = storeToRefs(friendStore)
 const groupStore = useGroupStore()
 const contactsStore = useContactsStore()
 </script>
@@ -111,5 +122,11 @@ const contactsStore = useContactsStore()
       background-color: var(--primary);
     }
   }
+}
+
+
+
+:deep(.el-collapse-item .el-collapse-item__content) {
+  padding-bottom: 0 !important;
 }
 </style>

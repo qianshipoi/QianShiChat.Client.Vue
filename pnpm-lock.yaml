@@ -68,6 +68,9 @@ dependencies:
   vue-i18n:
     specifier: '9'
     version: 9.2.2(vue@3.3.4)
+  vue-lazyload:
+    specifier: ^3.0.0
+    version: registry.npmmirror.com/vue-lazyload@3.0.0
   vue-router:
     specifier: ^4.2.4
     version: 4.2.4(vue@3.3.4)
@@ -2745,6 +2748,12 @@ packages:
         optional: true
     dependencies:
       '@types/sortablejs': registry.npmmirror.com/@types/sortablejs@1.15.5
+    dev: false
+
+  registry.npmmirror.com/vue-lazyload@3.0.0:
+    resolution: {integrity: sha512-h2keL/Rj550dLgesgOtXJS9qOiSMmuJNeVlfNAYV1/IYwOQYaWk5mFJlwRxmZDK9YC5gECcFLYYj7z1lKSf9ug==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/vue-lazyload/-/vue-lazyload-3.0.0.tgz}
+    name: vue-lazyload
+    version: 3.0.0
     dev: false
 
   registry.npmmirror.com/vue3-lottie@3.1.0(vue@3.3.4):

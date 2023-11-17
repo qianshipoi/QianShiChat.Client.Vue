@@ -229,6 +229,7 @@ export const useFriendStore = defineStore("friend", () => {
   return {
     friends: readonly(friends),
     loading: readonly(loading),
+    friendGroups: readonly(friendGroups),
     isFriend,
     loadData,
     getFriendById,
