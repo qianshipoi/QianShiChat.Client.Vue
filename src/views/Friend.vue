@@ -28,17 +28,16 @@
 
       <QsTabs default-active-key="1">
         <QsTabPanel key="1" label="好友">
-          <button>管理分组</button>
           <el-collapse :accordion="false">
-            <el-collapse-item v-for="group in friendStore.friendGroups" :key="group.id" style="overflow: auto;"
-              :name="group.id">
+            <el-collapse-item @click.right.native="showContextMenu($event, group as FriendGroup)"
+              v-for="group in friendStore.friendGroups" :key="group.id" style="overflow: auto;" :name="group.id">
               <template #title>
                 <div style="padding-left: 10px; display: flex; justify-content: space-between; align-items: center;">
                   <span>{{ group.name }}</span>
-                  <span>&nbsp;({{ group.friends.length }})</span>
+                  <span>&nbsp;({{ group.friends?.length }})</span>
                 </div>
               </template>
-              <ul>
+              <ul @click.right.stop="">
                 <li v-for="friend in group.friends" :key="friend.id">
                   <UserItem :model-value="friend" @selected="contactsStore.openUserProfile(friend)"
                     :is-selected="contactsStore.selected === friend" />
@@ -63,19 +62,102 @@
         v-if="contactsStore.opendComponentVisible" />
     </div>
   </div>
+
+  <el-dialog :title="isCreateGroup ? '创建群组' : '修改群组'" v-model="showCreateOrEditGroupDialog" width="30%" :before-close="() => {
+    isCreateGroup = false;
+    friendGroupForm.name = '';
+  }">
+    <el-form :model="friendGroupForm" ref="form" label-width="80px">
+      <el-form-item label="分组名称">
+        <el-input v-model="friendGroupForm.name" placeholder="填写分组" clearable></el-input>
+      </el-form-item>
+    </el-form>
+
+    <template #footer>
+      <span>
+        <el-button @click="showCreateOrEditGroupDialog = false">取消</el-button>
+        <el-button type="primary" @click="submit">确认</el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup lang='ts'>
 import { Plus, ArrowRight } from '@element-plus/icons-vue'
 import { useFriendStore } from '../store/useFriendStore';
-import { Group } from '../types/Types';
+import { FriendGroup, Group } from '../types/Types';
 import { useGroupStore } from '../store/useGroupStore';
 import { useContactsStore } from '../store/useContactsStore';
+import contextMenu from '../components/ContextMenu';
+import { MenuAction } from '../components/ContextMenu/ContextMenu.vue';
 
 const searchText = ref<string>('')
 const friendStore = useFriendStore()
 const groupStore = useGroupStore()
 const contactsStore = useContactsStore()
+
+interface DialogForm {
+  name: string
+}
+
+const currentSelectedFriendGroup = ref<FriendGroup | null>(null);
+const friendGroupForm = ref<DialogForm>({
+  name: '',
+})
+const isCreateGroup = ref<boolean>(false)
+const showCreateOrEditGroupDialog = ref<boolean>(false)
+const submit = async () => {
+  if (isCreateGroup.value) {
+    await friendStore.addGroup(friendGroupForm.value.name);
+  } else {
+    await friendStore.renameGroup(currentSelectedFriendGroup.value!.id, friendGroupForm.value.name);
+  }
+}
+
+const showContextMenu = (e: MouseEvent, group: FriendGroup) => {
+  e.preventDefault()
+  const actions = [
+    { label: '添加分组', value: 'add' },
+    { label: '重命名分组', value: 'rename' },
+  ];
+
+  if (!group.isDefault) {
+    actions.push({ label: '删除分组', value: 'delete' });
+  }
+
+  contextMenu(e, actions,
+    (action: MenuAction) => {
+      if (action.value === 'add') {
+        isCreateGroup.value = true;
+        showCreateOrEditGroupDialog.value = true;
+      } else if (action.value === 'rename') {
+        currentSelectedFriendGroup.value = group;
+        friendGroupForm.value.name = group.name;
+        isCreateGroup.value = false;
+        showCreateOrEditGroupDialog.value = true;
+      } else if (action.value === 'delete') {
+        ElMessageBox.confirm(
+          `确定是否删除组[${group.name}]？`,
+          'Warning',
+          {
+            confirmButtonText: 'OK',
+            cancelButtonText: 'Cancel',
+            type: 'warning',
+            draggable: true,
+          }
+        )
+          .then(async () => {
+            await friendStore.removeGroup(group.id);
+          })
+          .catch(() => {
+            ElMessage({
+              type: 'info',
+              message: 'Delete canceled',
+            })
+          })
+      }
+    })
+}
 </script>
 
 <style lang="scss" scoped>
