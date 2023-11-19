@@ -63,10 +63,11 @@
     </div>
   </div>
 
-  <el-dialog :title="isCreateGroup ? '创建群组' : '修改群组'" v-model="showCreateOrEditGroupDialog" width="30%" :before-close="() => {
-    isCreateGroup = false;
-    friendGroupForm.name = '';
-  }">
+  <el-dialog :title="isCreateGroup ? '创建群组' : '修改群组'" v-model="showCreateOrEditGroupDialog" :close-on-press-escape="false"
+    :close-on-click-modal="false" :show-close="false" width="30%" :before-close="() => {
+      isCreateGroup = false;
+      friendGroupForm.name = '';
+    }">
     <el-form :model="friendGroupForm" ref="form" label-width="80px">
       <el-form-item label="分组名称">
         <el-input v-model="friendGroupForm.name" placeholder="填写分组" clearable></el-input>
@@ -75,8 +76,8 @@
 
     <template #footer>
       <span>
-        <el-button @click="showCreateOrEditGroupDialog = false">取消</el-button>
-        <el-button type="primary" @click="submit">确认</el-button>
+        <el-button @click="showCreateOrEditGroupDialog = false" :loading="friendStore.loading">取消</el-button>
+        <el-button type="primary" @click="submit" :loading="friendStore.loading">确认</el-button>
       </span>
     </template>
   </el-dialog>
@@ -112,6 +113,7 @@ const submit = async () => {
   } else {
     await friendStore.renameGroup(currentSelectedFriendGroup.value!.id, friendGroupForm.value.name);
   }
+  showCreateOrEditGroupDialog.value = false;
 }
 
 const showContextMenu = (e: MouseEvent, group: FriendGroup) => {

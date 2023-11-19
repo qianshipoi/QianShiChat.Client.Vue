@@ -38,7 +38,7 @@ export function addGroup(name: string): Promise<GlobalResult<FriendGroup>> {
   return instance.post('/friend/groups', { name })
 }
 
-export function renameGroup(id: number, name: string): Promise<GlobalResult<any>> {
+export function renameGroup(id: number, name: string): Promise<GlobalResult<FriendGroup>> {
   return instance.put(`/friend/groups/${id}/rename`, { name })
 }
 

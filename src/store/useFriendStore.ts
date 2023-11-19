@@ -101,18 +101,13 @@ export const useFriendStore = defineStore("friend", () => {
 
       if (groupsResult.succeeded) {
         friendGroups.splice(0, friendGroups.length, ...groupsResult.data!);
-        if (friendGroups.length === 0) {
-          friendGroups.push({
-            id: 0,
-            name: "默认分组",
-            createTime: 0,
-            isDefault: true,
-            sort: 0,
-            friends: [],
-            totalCount: 0
-          })
-        }
+        friendGroups.map(x => x.friends = []);
+        const defaultGroup = friendGroups.find(x => x.isDefault);
         friends.forEach(friend => {
+          if (friend.friendGroupId === 0) {
+            defaultGroup?.friends.push(friend);
+            return;
+          }
           const group = friendGroups.find(x => x.id === friend.friendGroupId);
           if (group) {
             group.friends.push(friend);
@@ -162,6 +157,7 @@ export const useFriendStore = defineStore("friend", () => {
     return loadingData<boolean>(async () => {
       var response = await addGroupApi(name);
       if (response.succeeded) {
+        response.data!.friends = [];
         friendGroups.push(response.data!)
         return true;
       }
@@ -174,6 +170,13 @@ export const useFriendStore = defineStore("friend", () => {
       var response = await removeGroupApi(id);
       if (response.succeeded) {
         const index = friendGroups.findIndex(x => x.id === id);
+        friendGroups[index].friends.forEach(friend => {
+          const defaultGroup = friendGroups.find(x => x.isDefault);
+          if (defaultGroup) {
+            friend.friendGroupId = defaultGroup.id;
+            defaultGroup.friends.push(friend);
+          }
+        });
         friendGroups.splice(index, 1);
         return true;
       }
@@ -186,7 +189,13 @@ export const useFriendStore = defineStore("friend", () => {
       var response = await renameGroupApi(id, name);
       if (response.succeeded) {
         const group = friendGroups.find(x => x.id === id);
-        if (group) group.name = name;
+        if (group) {
+          group.name = name;
+          group.id = response.data!.id;
+          group.isDefault = response.data!.isDefault;
+          group.createTime = response.data!.createTime;
+          group.sort = response.data!.sort;
+        }
         return true;
       }
       return false;
