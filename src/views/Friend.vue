@@ -131,6 +131,7 @@ const showContextMenu = (e: MouseEvent, group: FriendGroup) => {
     (action: MenuAction) => {
       if (action.value === 'add') {
         isCreateGroup.value = true;
+        friendGroupForm.value.name = '';
         showCreateOrEditGroupDialog.value = true;
       } else if (action.value === 'rename') {
         currentSelectedFriendGroup.value = group;
